@@ -1,0 +1,30 @@
+{
+    "$comment": "Same host, but the two MCP servers run as separate HTTP processes (start them first: npm run academic:http and npm run utility:http).",
+    "llm": {
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "temperature": 0.2
+    },
+    "mcpServers": {
+        "academic": {
+            "url": "http://127.0.0.1:3001/mcp",
+            "protocol": "auto"
+        },
+        "utility": {
+            "url": "http://127.0.0.1:3002/mcp",
+            "protocol": "auto"
+        }
+    },
+    "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+    },
+    "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+    },
+    "elicitation": {
+        "nonInteractive": "decline"
+    },
+    "logDir": "outputs/logs"
+}

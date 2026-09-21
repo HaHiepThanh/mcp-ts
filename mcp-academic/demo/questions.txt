@@ -1,0 +1,8 @@
+# One question per line. Run: npm run chat -- --script demo/questions.txt --fresh
+What is the cumulative GPA of student 2201010, and how is it classified?
+Compare the average GPA of classes IT01 and IT02. Which class is doing better?
+What grades did Hải get in semester 2024-1?
+Which semester are we in now, and what letter grade is a total of 8.4?
+Write short encouraging feedback for student 2201010.
+Change the final score of student 2201005 in CS202 for semester 2025-1 to 8.
+Write a performance report for class IT01 and save it as a file named IT01-report.

@@ -272,25 +272,32 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
         {
             title: 'Update a grade',
             description:
-                'Insert or correct one grade row. The server ALWAYS asks the end user to confirm before changing data. ' +
+                'Insert or correct one grade row. Pass ONLY the scores the user wants to change — an omitted score keeps its ' +
+                'current value (both are required only for a brand-new grade). The server ALWAYS asks the end user to confirm. ' +
                 'Changes are kept in memory for this server run only; the CSV file is never modified.',
             inputSchema: z.object({
                 student_id: studentId,
                 course_id: z.string().describe('Course ID, e.g. "CS201"'),
                 semester,
-                process_score: score('Process score'),
-                final_score: score('Final exam score')
+                process_score: score('New process score').optional(),
+                final_score: score('New final exam score').optional()
             }),
             annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false }
         },
-        async ({ student_id, course_id, semester, process_score, final_score }, ctx): Promise<CallToolResult | InputRequiredResult> => {
+        async ({ student_id, course_id, semester, process_score: newProcess, final_score: newFinal }, ctx): Promise<CallToolResult | InputRequiredResult> => {
             const student = findStudent(student_id);
             if (!student) return notFound(student_id);
             const course = data.courses.get(course_id);
             if (!course) return fail(`Unknown course "${course_id}". Known courses: ${[...data.courses.keys()].join(', ')}.`);
+            if (newProcess === undefined && newFinal === undefined) return fail('Nothing to change: pass process_score and/or final_score.');
 
-            const next = data.grading.grade(course_id, semester, course.credits, process_score, final_score);
             const previous = data.grades.find(g => g.student_id === student.student_id && g.course_id === course_id && g.semester === semester);
+            const process_score = newProcess ?? previous?.process_score;
+            const final_score = newFinal ?? previous?.final_score;
+            if (process_score === undefined || final_score === undefined) {
+                return fail(`${student.student_id} has no ${course_id} grade in ${semester} yet, so both process_score and final_score are required.`);
+            }
+            const next = data.grading.grade(course_id, semester, course.credits, process_score, final_score);
             const before = previous ? `currently process ${previous.process_score}, final ${previous.final_score}` : 'no existing grade';
             const message =
                 `Update ${course.course_name} (${course_id}, ${semester}) for ${student.full_name} (${student.student_id})? ` +

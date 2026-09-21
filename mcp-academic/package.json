@@ -14,7 +14,10 @@
         "data:sample": "tsx scripts/generate-sample-data.ts",
         "academic": "tsx src/server/academic/main.ts",
         "academic:http": "tsx src/server/academic/main.ts --http --port 3001",
-        "examples": "tsx examples/run-all.ts"
+        "examples": "tsx examples/run-all.ts",
+        "utility": "tsx src/server/utility/main.ts",
+        "utility:http": "tsx src/server/utility/main.ts --http --port 3002",
+        "chat": "tsx src/host/main.ts"
     },
     "dependencies": {
         "@google/genai": "^2.23.0",
