@@ -1,12 +1,12 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-/** Thư mục gốc của project mcp-hocvu. */
+/** Root folder of the mcp-academic project. */
 export const PROJECT_ROOT = path.resolve(import.meta.dirname, '../..');
 
 /**
- * Nạp biến môi trường từ `.env`. Ưu tiên `mcp-hocvu/.env`, sau đó `seminar-emt/.env`.
- * Biến đã có sẵn trong môi trường (vd. export từ terminal) không bị ghi đè.
+ * Loads environment variables from `.env`: first `mcp-academic/.env`, then `seminar-emt/.env`.
+ * Variables already set in the environment (e.g. exported in the terminal) are not overwritten.
  */
 export function loadEnv(): string[] {
     const candidates = [path.join(PROJECT_ROOT, '.env'), path.join(PROJECT_ROOT, '..', '.env')];

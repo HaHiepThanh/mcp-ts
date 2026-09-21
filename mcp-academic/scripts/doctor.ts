@@ -1,7 +1,7 @@
 /**
- * Kiểm tra môi trường M0: Node, MCP SDK v2 (stdio round-trip), Gemini, Ollama.
- * Chạy: npm run doctor  → in bảng kết quả + ghi outputs/logs/doctor.json
- * Không bao giờ in ra giá trị API key.
+ * Environment check: Node, MCP SDK v2 (stdio round-trip), Gemini, Ollama.
+ * Run: npm run doctor  → prints a checklist + writes outputs/logs/doctor.json
+ * Never prints API key values.
  */
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -39,7 +39,7 @@ function checkNode(): void {
     record({
         name: 'Node.js',
         status: major >= 20 ? 'OK' : 'FAIL',
-        detail: `v${process.versions.node} (cần >= 20)`
+        detail: `v${process.versions.node} (need >= 20)`
     });
 }
 
@@ -48,7 +48,7 @@ function checkEnvFiles(): void {
     record({
         name: 'File .env',
         status: files.length > 0 ? 'OK' : 'WARN',
-        detail: files.length > 0 ? `đã nạp: ${files.map(f => path.relative(path.join(PROJECT_ROOT, '..'), f)).join(', ')}` : 'không tìm thấy'
+        detail: files.length > 0 ? `loaded: ${files.map(f => path.relative(path.join(PROJECT_ROOT, '..'), f)).join(', ')}` : 'not found'
     });
 }
 
@@ -62,7 +62,7 @@ async function checkMcp(): Promise<void> {
     try {
         const { ms: connectMs } = await timed(() => client.connect(transport));
         const tools = await client.listTools();
-        const { value: result, ms: callMs } = await timed(() => client.callTool({ name: 'xin_chao', arguments: { ten: 'Nhóm MCP' } }));
+        const { value: result, ms: callMs } = await timed(() => client.callTool({ name: 'greet', arguments: { name: 'MCP team' } }));
         const text = result.content.find(block => block.type === 'text');
         const server = client.getServerVersion();
         record({
@@ -78,7 +78,7 @@ async function checkMcp(): Promise<void> {
     }
 }
 
-/** Các bản Flash ổn định, phiên bản cao nhất trước (bỏ lite/preview/exp/tts/image/live/...). */
+/** Stable Flash models, newest first (skips lite/preview/exp/tts/image/live/...). */
 function flashCandidates(names: string[]): string[] {
     const excluded = /lite|preview|exp|tts|image|live|audio|thinking|embedding|native|latest/;
     const version = (n: string): number => Number(/gemini-(\d+(?:\.\d+)?)/.exec(n)?.[1] ?? 0);
@@ -87,7 +87,7 @@ function flashCandidates(names: string[]): string[] {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-/** Lỗi tạm thời phía Google (quá tải / vượt hạn mức) — đáng thử lại. */
+/** Transient Google-side errors (overloaded / rate limited) — worth retrying. */
 function isTransient(error: unknown): boolean {
     return /"code":\s*(429|500|503)|UNAVAILABLE|RESOURCE_EXHAUSTED/.test(String(error));
 }
@@ -95,7 +95,7 @@ function isTransient(error: unknown): boolean {
 async function checkGemini(): Promise<void> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        record({ name: 'Gemini', status: 'FAIL', detail: 'chưa có GEMINI_API_KEY trong .env' });
+        record({ name: 'Gemini', status: 'FAIL', detail: 'GEMINI_API_KEY missing from .env' });
         return;
     }
     try {
@@ -109,21 +109,21 @@ async function checkGemini(): Promise<void> {
         const candidates = process.env.GEMINI_MODEL ? [process.env.GEMINI_MODEL] : flashCandidates(names);
         const data = { candidates, flashModels: names.filter(n => n.includes('flash')), attempts: [] as string[] };
         if (candidates.length === 0) {
-            record({ name: 'Gemini', status: 'WARN', detail: 'key hợp lệ nhưng không tìm thấy model Flash', data: { models: names } });
+            record({ name: 'Gemini', status: 'WARN', detail: 'key is valid but no Flash model was found', data: { models: names } });
             return;
         }
-        // Mỗi model thử tối đa 3 lần (chờ 2s, 4s); lỗi tạm thời thì chuyển sang model kế tiếp.
+        // Up to 3 attempts per model (wait 2s, 4s); on persistent transient errors move to the next model.
         for (const model of candidates) {
             for (let attempt = 1; attempt <= 3; attempt++) {
                 try {
                     const { value: reply, ms } = await timed(() =>
-                        ai.models.generateContent({ model, contents: 'Chỉ trả lời đúng một từ: OK' })
+                        ai.models.generateContent({ model, contents: 'Reply with exactly one word: OK' })
                     );
                     data.attempts.push(`${model}#${attempt}: OK ${ms}ms`);
                     record({
                         name: 'Gemini',
                         status: 'OK',
-                        detail: `key hợp lệ, model "${model}" trả lời "${reply.text?.trim()}" trong ${ms}ms (lần thử ${data.attempts.length})`,
+                        detail: `key valid, model "${model}" replied "${reply.text?.trim()}" in ${ms}ms (attempt ${data.attempts.length})`,
                         data: { chosen: model, ...data }
                     });
                     return;
@@ -134,7 +134,7 @@ async function checkGemini(): Promise<void> {
                 }
             }
         }
-        record({ name: 'Gemini', status: 'WARN', detail: 'key hợp lệ nhưng mọi model Flash đang quá tải — thử lại sau', data });
+        record({ name: 'Gemini', status: 'WARN', detail: 'key is valid but every Flash model is overloaded — try again later', data });
     } catch (error) {
         record({ name: 'Gemini', status: 'FAIL', detail: String(error).slice(0, 300) });
     }
@@ -150,15 +150,15 @@ async function checkOllama(): Promise<void> {
         record({
             name: 'Ollama',
             status: has ? 'OK' : 'WARN',
-            detail: has ? `đang chạy, đã có model "${wanted}"` : `đang chạy nhưng chưa có "${wanted}" (ollama pull ${wanted})`,
+            detail: has ? `running, model "${wanted}" installed` : `running but "${wanted}" is missing (ollama pull ${wanted})`,
             data: { models: models.map(m => ({ name: m.name, sizeGB: +(m.size / 1e9).toFixed(2) })) }
         });
     } catch {
-        record({ name: 'Ollama', status: 'WARN', detail: `không kết nối được ${baseUrl} — chưa cài hoặc chưa mở Ollama` });
+        record({ name: 'Ollama', status: 'WARN', detail: `cannot reach ${baseUrl} — Ollama not installed or not running` });
     }
 }
 
-console.log('== Kiểm tra môi trường mcp-hocvu ==\n');
+console.log('== mcp-academic environment check ==\n');
 checkNode();
 checkEnvFiles();
 await checkMcp();
@@ -167,5 +167,5 @@ await checkOllama();
 
 const report = path.join(PROJECT_ROOT, 'outputs', 'logs', 'doctor.json');
 writeFileSync(report, JSON.stringify({ at: new Date().toISOString(), checks }, null, 2));
-console.log(`\nĐã ghi báo cáo: ${path.relative(PROJECT_ROOT, report)}`);
+console.log(`\nReport written: ${path.relative(PROJECT_ROOT, report)}`);
 process.exitCode = checks.some(c => c.status === 'FAIL') ? 1 : 0;

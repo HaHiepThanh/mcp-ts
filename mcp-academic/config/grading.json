@@ -1,0 +1,22 @@
+{
+    "$comment": "University grading rules (4-point scale, letters A/B/C/D/F without '+'). Edit here — no code change needed.",
+    "weights": { "process": 0.4, "final": 0.6 },
+    "totalDecimals": 1,
+    "letterScale": [
+        { "letter": "A", "min": 8.5, "point": 4 },
+        { "letter": "B", "min": 7.0, "point": 3 },
+        { "letter": "C", "min": 5.5, "point": 2 },
+        { "letter": "D", "min": 4.0, "point": 1 },
+        { "letter": "F", "min": 0, "point": 0 }
+    ],
+    "failingLetters": ["F"],
+    "classification": [
+        { "label": "Excellent", "min": 3.6 },
+        { "label": "Very good", "min": 3.2 },
+        { "label": "Good", "min": 2.5 },
+        { "label": "Average", "min": 2.0 },
+        { "label": "Weak", "min": 0 }
+    ],
+    "gpaDecimals": 2,
+    "retakePolicy": "highest"
+}

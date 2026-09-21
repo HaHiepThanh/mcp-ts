@@ -1,0 +1,11 @@
+course_id,course_name,credits,faculty
+GE101,English 1,2,General Education
+GE102,Calculus,3,General Education
+CS101,Introduction to Programming,3,Information Technology
+CS102,Data Structures,3,Information Technology
+CS201,Databases,4,Information Technology
+CS202,Computer Networks,3,Information Technology
+BA101,Principles of Management,3,Business Administration
+BA102,Microeconomics,3,Business Administration
+BA201,Marketing,4,Business Administration
+BA202,Business Statistics,3,Business Administration

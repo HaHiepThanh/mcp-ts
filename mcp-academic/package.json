@@ -1,8 +1,8 @@
 {
-    "name": "mcp-hocvu",
+    "name": "mcp-academic",
     "version": "0.1.0",
     "private": true,
-    "description": "Seminar MCP.2502 — MCP TypeScript SDK v2: server học vụ + server tiện ích + host chat 2 LLM",
+    "description": "Seminar MCP.2502 — MCP TypeScript SDK v2: academic server + utility server + chat host with 2 LLMs",
     "type": "module",
     "engines": {
         "node": ">=20.12"
@@ -10,7 +10,11 @@
     "scripts": {
         "doctor": "tsx scripts/doctor.ts",
         "typecheck": "tsc --noEmit",
-        "sync": "bash ../sync-drive.sh"
+        "sync": "bash ../sync-drive.sh",
+        "data:sample": "tsx scripts/generate-sample-data.ts",
+        "academic": "tsx src/server/academic/main.ts",
+        "academic:http": "tsx src/server/academic/main.ts --http --port 3001",
+        "examples": "tsx examples/run-all.ts"
     },
     "dependencies": {
         "@google/genai": "^2.23.0",

@@ -1,0 +1,10 @@
+{
+    "$comment": "Academic server config. dataDir is relative to mcp-academic/. Override with env ACADEMIC_DATA_DIR. Switch to the team's real data by pointing dataDir at data/real.",
+    "dataDir": "data/sample",
+    "gradingConfig": "config/grading.json",
+    "tables": {
+        "students": "students.csv",
+        "courses": "courses.csv",
+        "grades": "grades.csv"
+    }
+}
