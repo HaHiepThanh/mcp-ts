@@ -1,0 +1,29 @@
+{
+    "name": "mcp-hocvu",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Seminar MCP.2502 — MCP TypeScript SDK v2: server học vụ + server tiện ích + host chat 2 LLM",
+    "type": "module",
+    "engines": {
+        "node": ">=20.12"
+    },
+    "scripts": {
+        "doctor": "tsx scripts/doctor.ts",
+        "typecheck": "tsc --noEmit",
+        "sync": "bash ../sync-drive.sh"
+    },
+    "dependencies": {
+        "@google/genai": "^2.23.0",
+        "@modelcontextprotocol/client": "^2.0.0",
+        "@modelcontextprotocol/node": "^2.0.0",
+        "@modelcontextprotocol/server": "^2.0.0",
+        "hono": "^4.11.4",
+        "openai": "^7.20.0",
+        "zod": "^4.2.0"
+    },
+    "devDependencies": {
+        "@types/node": "^24.0.0",
+        "tsx": "^4.23.0",
+        "typescript": "^5.9.3"
+    }
+}
