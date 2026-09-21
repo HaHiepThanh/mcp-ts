@@ -1,32 +1,13 @@
-# Giao việc — từ giờ đến hết Lần 2
-
-> **Lần 1 đã đóng băng** (git tag `phase1-freeze`). Code/tài liệu Lần 1 **không sửa nữa**; gói nộp Lần 1 luôn lấy từ tag này.
-> Từ đây **4 bạn làm hết**, **nhóm trưởng + Claude chỉ duyệt** (review Pull Request, trả lời câu hỏi).
-> Repo: <https://github.com/HaHiepThanh/mcp-ts> · Cài đặt: [`mcp-academic/docs/setup-guide.md`](mcp-academic/docs/setup-guide.md)
-
-| Thành viên | Vai trò chính |
-| --- | --- |
-| **Tiến** | Tech lead Lần 2 · server mới `finance` (khó nhất) |
-| **Hoàng** | Slide kỹ thuật Lần 1 · tool điểm danh / rèn luyện / cảnh báo học vụ · thí nghiệm cấu hình |
-| **Phú** | Slide lý thuyết Lần 1 · dữ liệu + tool giảng viên / lớp học phần |
-| **Khoa** | Trắc nghiệm + kiểm thử Lần 1 · câu hỏi kiểm thử, chạy đo, ghép slide + trắc nghiệm Lần 2 |
-
----
-
-## Giai đoạn 1 — hoàn thiện Lần 1 (làm TRƯỚC, không cần code)
+## Giai đoạn 1 — hoàn thiện Phase1
 
 | Ai | Việc | Đầu vào | Nộp (Drive `MCP-TS-Seminar/team/`) | Xong khi |
 | --- | --- | --- | --- | --- |
-| **Phú** | Slide phần A (slide 1–16, 32–34): bài toán, kiến trúc, giao thức, giải thuật, lưu đồ | `phase1/slides-content.md`, `mcp-academic/docs/architecture.md` (sơ đồ Mermaid → <https://mermaid.live> → PNG) | `slides/part-A-theory.pptx` | Đủ 19 slide, mọi số liệu lấy từ tài liệu, tiếng Anh |
-| **Hoàng** | Slide phần B (slide 17–31): SDK API, ví dụ từng method + bộ tham số, kết quả 2 LLM · **ghép A + B** | `phase1/slides-content.md`, `docs/method-reference.md`, `phase1/frozen/examples-output/*.log` (chụp màn hình) | `slides/part-B-technical.pptx` → bản ghép **`slides/MCP-TS-SDK-phase1.pptx`** | ≥ 30 slide tổng, cùng 1 template |
+| **Phú** | Slide phần A: bài toán, kiến trúc, giao thức, giải thuật, lưu đồ | `phase1/slides-content.md`, `mcp-academic/docs/architecture.md` (sơ đồ Mermaid → <https://mermaid.live> → PNG) | `slides/part-A-theory.pptx` | Đủ 19 slide, mọi số liệu lấy từ tài liệu, tiếng Anh |
+| **Hoàng** | Slide phần B: SDK API, ví dụ từng method + bộ tham số, kết quả 2 LLM · **ghép A + B** | `phase1/slides-content.md`, `docs/method-reference.md`, `phase1/frozen/examples-output/*.log` (chụp màn hình) | `slides/part-B-technical.pptx` → bản ghép **`slides/MCP-TS-SDK-phase1.pptx`** | ≥ 30 slide tổng, cùng 1 template |
 | **Khoa** | Trắc nghiệm Lần 1: duyệt 20 câu nháp (đúng đáp án? trả lời được từ slide?), sửa/thay câu khó hiểu | `phase1/quiz-draft.txt`, `docs/quiz-facts.md` | `quiz/questions-phase1.txt` | 10–20 câu, định dạng như bản nháp |
 | **Khoa** | Kiểm thử "như nhóm khác": cài đặt theo `setup-guide.md` trên máy mình từ đầu, chạy `npm run examples` + `npm run chat` | `setup-guide.md` | `quiz/test-report.md` (bước nào vướng, ảnh chụp lỗi) | Chạy được hoặc có báo cáo lỗi cụ thể |
 | **Khoa** | Video demo dự phòng Lần 1 (~8 phút, thuyết minh tiếng Anh) | `docs/demo-script.md` | `video/demo-phase1.mp4` | Theo đúng kịch bản Part A + B |
 | **Tiến** | Duyệt độ chính xác kỹ thuật của slide phần B trước khi Hoàng ghép | slide của Hoàng | góp ý trong nhóm chat | — |
-
-Nhóm trưởng: tập demo; chạy `bash build-submission.sh` khi pptx + quiz đã có → `phase1/submission.zip`.
-
----
 
 ## Giai đoạn 2 — xây Lần 2 (code)
 
@@ -88,14 +69,7 @@ Khoa: test-cases sau khi có CSV ──▶ benchmark ──▶ chạy đo ──
 
 ---
 
-## Quy trình làm việc (bắt buộc)
-
-1. Nhóm trưởng thêm các bạn làm **Collaborator** của repo (GitHub → Settings → Collaborators).
-2. Mỗi việc = **1 nhánh** `feat/<tên>-<việc>` (vd `feat/phu-teachers`), tạo **Pull Request** vào `main`. **Không push thẳng `main`.**
-3. PR nhỏ (1 tính năng/PR). Mô tả PR ghi: làm gì, chạy thử thế nào, ảnh/log kết quả.
-4. Duyệt: Tiến duyệt kỹ thuật (PR của Hoàng, Phú) → **nhóm trưởng + Claude duyệt cuối** → merge.
-
-### Checklist trước khi tạo PR (người duyệt sẽ kiểm)
+### Checklist trước khi tạo PullRequest
 
 - [ ] `npm run typecheck` sạch · `npm run examples` tất cả ✔
 - [ ] Tên tool, tham số, cột CSV, mô tả: **tiếng Anh**, `snake_case`, mỗi tham số có `.describe(...)`
@@ -108,7 +82,7 @@ Khoa: test-cases sau khi có CSV ──▶ benchmark ──▶ chạy đo ──
 - [ ] Không sửa `phase1/`, tag `phase1-freeze` (Lần 1 đã khóa)
 - [ ] Dùng AI hỗ trợ code thì được, nhưng **phải tự chạy checklist này** và hiểu code mình nộp
 
-### Log (yêu cầu của đề Lần 2)
+### Log (yêu cầu của đề Phase2)
 
 `outputs/` không lên git. Sau mỗi lần chạy đo, chép log cần nộp vào **`phase2/runs/<tên>/`** (có commit):
 - `outputs/benchmarks/compare-*.json` (benchmark), `outputs/logs/chat-*.jsonl` (chat)
