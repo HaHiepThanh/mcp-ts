@@ -1,0 +1,89 @@
+
+══════════════════════════════════════════════════════════════════════════════
+S6 · Progress, logging and cancellation (ctx.mcpReq)
+SDK: ctx.mcpReq.notify (progress), ctx.mcpReq.log, ctx.mcpReq.signal, client.callTool({ onprogress, signal }), client.setLoggingLevel
+══════════════════════════════════════════════════════════════════════════════
+
+── Progress — rank_students reports every 10 students ────────────────────────
+
+▶ With onprogress → server sends notifications/progress
+  callTool({"name":"rank_students","arguments":{"scope":"all","top":3},"options":{"onprogress":"fn"}})
+  ✔ 9ms → 
+    {
+      "progressUpdates": [
+        {
+          "progress": 10,
+          "total": 40,
+          "message": "Scored 10/40 students"
+        },
+        {
+          "progress": 20,
+          "total": 40,
+          "message": "Scored 20/40 students"
+        },
+        {
+          "progress": 30,
+          "total": 40,
+          "message": "Scored 30/40 students"
+        },
+        {
+          "progress": 40,
+          "total": 40,
+          "message": "Scored 40/40 students"
+        }
+      ],
+      "top3": [
+        "Võ Hoàng Bình 4",
+        "Hoàng Thu Trang 4",
+        "Phạm Thị Lan 4"
+      ]
+    }
+
+▶ Without onprogress → no progressToken, no notifications
+  callTool({"name":"rank_students","arguments":{"scope":"all","top":3}})
+  ✔ 3ms → 
+    {
+      "newProgressUpdates": 0
+    }
+
+── Logging — client.setLoggingLevel filters ctx.mcpReq.log (2025-era session) 
+   ℹ MCP logging is deprecated in protocol 2026-07-28 (SEP-2577); on 2026 connections the level is sent per request.
+
+▶ setLoggingLevel("debug") then callTool
+  setLoggingLevel + callTool({"level":"debug","name":"query_table","arguments":{"table":"students","filters":[{"column":"class_id","operator":"eq","value":"IT01"}],"limit":1}})
+  ✔ 2ms → 
+    {
+      "logMessagesReceived": [
+        "info: \"query_table students: 11 of 41 rows match\""
+      ]
+    }
+
+▶ setLoggingLevel("info") then callTool
+  setLoggingLevel + callTool({"level":"info","name":"query_table","arguments":{"table":"students","filters":[{"column":"class_id","operator":"eq","value":"IT01"}],"limit":1}})
+  ✔ 0ms → 
+    {
+      "logMessagesReceived": [
+        "info: \"query_table students: 11 of 41 rows match\""
+      ]
+    }
+
+▶ setLoggingLevel("error") then callTool
+  setLoggingLevel + callTool({"level":"error","name":"query_table","arguments":{"table":"students","filters":[{"column":"class_id","operator":"eq","value":"IT01"}],"limit":1}})
+  ✔ 0ms → 
+    {
+      "logMessagesReceived": []
+    }
+
+── Cancellation — the client aborts; the handler sees ctx.mcpReq.signal ──────
+
+▶ legacy era: abort after 350 ms
+  callTool({"name":"recalculate_all_gpas","arguments":{"students":20},"options":{"signal":"AbortSignal"}})
+  ✖ 352ms → SdkError (code REQUEST_TIMEOUT): user pressed Stop
+   ℹ server side: stopped after 4/20: user pressed Stop
+
+▶ modern era: abort after 350 ms
+  callTool({"name":"recalculate_all_gpas","arguments":{"students":20},"options":{"signal":"AbortSignal"}})
+  ✖ 352ms → SdkError (code REQUEST_TIMEOUT): user pressed Stop
+   ℹ server side: stopped after 4/20: SdkError: Connection closed
+
+✔ 7 steps (2 expected/unexpected errors) — saved outputs/examples/s6-logging-progress-cancel.json

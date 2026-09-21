@@ -1,0 +1,99 @@
+
+══════════════════════════════════════════════════════════════════════════════
+S8 · Transports: stdio vs Streamable HTTP × 2025 vs 2026-07-28
+SDK: serveStdio, createMcpHandler, StdioClientTransport, StreamableHTTPClientTransport, Client versionNegotiation
+══════════════════════════════════════════════════════════════════════════════
+
+── stdio — the client spawns `node --import tsx src/server/academic/main.ts` ─
+
+▶ stdio, negotiation=legacy
+  new StdioClientTransport({ command, args })({"command":"node","args":["--import","tsx","src/server/academic/main.ts"]})
+  ✔ 196ms → 
+    {
+      "transport": "stdio",
+      "negotiation": "legacy",
+      "era": "legacy",
+      "tools": 10,
+      "connectMs": 181.2,
+      "firstCallMs": 2.9,
+      "avgOf20CallsMs": 0.2
+    }
+
+▶ stdio, negotiation=auto
+  new StdioClientTransport({ command, args })({"command":"node","args":["--import","tsx","src/server/academic/main.ts"]})
+  ✔ 376ms → 
+    {
+      "transport": "stdio",
+      "negotiation": "auto",
+      "era": "modern",
+      "tools": 10,
+      "connectMs": 184.2,
+      "firstCallMs": 180.8,
+      "avgOf20CallsMs": 0.3
+    }
+
+── Streamable HTTP — server started separately with --http --port 3911 ───────
+
+▶ HTTP, negotiation=legacy
+  new StreamableHTTPClientTransport(url)({"url":"http://127.0.0.1:3911/mcp"})
+  ✔ 81ms → 
+    {
+      "transport": "http",
+      "negotiation": "legacy",
+      "era": "legacy",
+      "tools": 10,
+      "connectMs": 32.2,
+      "firstCallMs": 5.6,
+      "avgOf20CallsMs": 2
+    }
+
+▶ HTTP, negotiation=auto
+  new StreamableHTTPClientTransport(url)({"url":"http://127.0.0.1:3911/mcp"})
+  ✔ 45ms → 
+    {
+      "transport": "http",
+      "negotiation": "auto",
+      "era": "modern",
+      "tools": 10,
+      "connectMs": 6.4,
+      "firstCallMs": 2.4,
+      "avgOf20CallsMs": 1.7
+    }
+
+── HTTP endpoint hardening (localhost Host/Origin validation) ────────────────
+
+▶ Wrong path
+  POST /other({})
+  ✔ 2ms → 
+    {
+      "status": 404,
+      "body": "MCP endpoint is /mcp"
+    }
+
+▶ Foreign Host header (DNS-rebinding attempt)
+  POST /mcp({"Host":"evil.example"})
+  ✔ 2ms → 
+    {
+      "status": 403,
+      "body": "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32000,\"message\":\"Invalid Host: evil.example\"},\"id\":null}"
+    }
+
+▶ Foreign Origin header (browser page on another site)
+  POST /mcp({"Origin":"https://evil.example"})
+  ✔ 0ms → 
+    {
+      "status": 403,
+      "body": "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32000,\"message\":\"Invalid Origin: evil.example\"},\"id\":null}"
+    }
+
+── Comparison ────────────────────────────────────────────────────────────────
+┌─────────┬───────────┬─────────────┬──────────┬───────┬───────────┬─────────────┬────────────────┐
+│ (index) │ transport │ negotiation │ era      │ tools │ connectMs │ firstCallMs │ avgOf20CallsMs │
+├─────────┼───────────┼─────────────┼──────────┼───────┼───────────┼─────────────┼────────────────┤
+│ 0       │ 'stdio'   │ 'legacy'    │ 'legacy' │ 10    │ 181.2     │ 2.9         │ 0.2            │
+│ 1       │ 'stdio'   │ 'auto'      │ 'modern' │ 10    │ 184.2     │ 180.8       │ 0.3            │
+│ 2       │ 'http'    │ 'legacy'    │ 'legacy' │ 10    │ 32.2      │ 5.6         │ 2              │
+│ 3       │ 'http'    │ 'auto'      │ 'modern' │ 10    │ 6.4       │ 2.4         │ 1.7            │
+└─────────┴───────────┴─────────────┴──────────┴───────┴───────────┴─────────────┴────────────────┘
+
+✔ 7 steps (0 expected/unexpected errors) — saved outputs/examples/s8-transports.json

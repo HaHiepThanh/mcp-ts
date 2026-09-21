@@ -1,0 +1,132 @@
+{
+  "example": "s3-tool-lifecycle",
+  "title": "S3 · Tool lifecycle: RegisteredTool.disable/enable/update/remove",
+  "sdkMethods": [
+    "RegisteredTool.disable",
+    "RegisteredTool.enable",
+    "RegisteredTool.update",
+    "RegisteredTool.remove",
+    "registerTool (after connect)",
+    "notifications/tools/list_changed"
+  ],
+  "ranAt": "2026-09-21T07:07:08.651Z",
+  "listChangedNotifications": 5,
+  "steps": [
+    {
+      "step": "1. Initial tools",
+      "method": "listTools",
+      "ok": true,
+      "ms": 1,
+      "result": [
+        "calculate_gpa — GPA of a student",
+        "ping — Health check"
+      ]
+    },
+    {
+      "step": "2. After gpaTool.disable() — hidden from tools/list",
+      "method": "listTools",
+      "ok": true,
+      "ms": 0,
+      "result": [
+        "ping — Health check"
+      ]
+    },
+    {
+      "step": "3. Calling a disabled tool",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201001"
+        }
+      },
+      "ok": false,
+      "ms": 1,
+      "error": {
+        "name": "ProtocolError",
+        "code": -32602,
+        "message": "Tool calculate_gpa disabled"
+      }
+    },
+    {
+      "step": "4. After gpaTool.enable() — callable again",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201001"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": false,
+        "text": "GPA of 2201001: 3.25"
+      }
+    },
+    {
+      "step": "5. Description changed",
+      "method": "listTools",
+      "ok": true,
+      "ms": 0,
+      "result": [
+        "calculate_gpa — GPA of a student on the 4-point scale (v2)",
+        "ping — Health check"
+      ]
+    },
+    {
+      "step": "6. New callback answers",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201001"
+        }
+      },
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "isError": false,
+        "text": "[v2] GPA of 2201001: 3.25 / 4.00"
+      }
+    },
+    {
+      "step": "7. New tool appears without reconnecting",
+      "method": "listTools",
+      "ok": true,
+      "ms": 0,
+      "result": [
+        "calculate_gpa — GPA of a student on the 4-point scale (v2)",
+        "ping — Health check",
+        "get_current_time — Current time"
+      ]
+    },
+    {
+      "step": "8. After gpaTool.remove()",
+      "method": "listTools",
+      "ok": true,
+      "ms": 0,
+      "result": [
+        "ping — Health check",
+        "get_current_time — Current time"
+      ]
+    },
+    {
+      "step": "9. Calling a removed tool",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201001"
+        }
+      },
+      "ok": false,
+      "ms": 0,
+      "error": {
+        "name": "ProtocolError",
+        "code": -32602,
+        "message": "Tool calculate_gpa not found"
+      }
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "example": "c1-client-connect",
+  "title": "C1 · Connecting: new Client(info, options) + connect(transport, options)",
+  "sdkMethods": [
+    "new Client()",
+    "client.connect()",
+    "client.getProtocolEra()",
+    "client.getDiscoverResult()",
+    "client.ping()",
+    "client.close()"
+  ],
+  "ranAt": "2026-09-21T07:07:12.321Z",
+  "legacyConnect": {
+    "era": "legacy",
+    "server": "academic",
+    "connectMs": 40,
+    "requestsDuringConnect": {
+      "initialize": 1,
+      "notifications/initialized": 1
+    }
+  },
+  "autoConnect": {
+    "era": "modern",
+    "server": "academic",
+    "discoverResult": {
+      "supportedVersions": [
+        "2026-07-28"
+      ],
+      "keys": [
+        "_meta",
+        "ttlMs",
+        "cacheScope",
+        "supportedVersions",
+        "capabilities",
+        "instructions",
+        "resultType"
+      ]
+    },
+    "connectMs": 8,
+    "requestsDuringConnect": {
+      "server/discover": 1
+    }
+  },
+  "steps": [
+    {
+      "step": "A. default options → 2025 \"initialize\" handshake",
+      "method": "new Client(info, options) → connect(transport, connectOptions)",
+      "params": {
+        "options": {}
+      },
+      "ok": true,
+      "ms": 40,
+      "result": {
+        "era": "legacy",
+        "server": "academic",
+        "connectMs": 40,
+        "requestsDuringConnect": {
+          "initialize": 1,
+          "notifications/initialized": 1
+        }
+      }
+    },
+    {
+      "step": "B. versionNegotiation: { mode: \"auto\" } → probes server/discover",
+      "method": "new Client(info, options) → connect(transport, connectOptions)",
+      "params": {
+        "options": {
+          "versionNegotiation": {
+            "mode": "auto"
+          }
+        }
+      },
+      "ok": true,
+      "ms": 8,
+      "result": {
+        "era": "modern",
+        "server": "academic",
+        "discoverResult": {
+          "supportedVersions": [
+            "2026-07-28"
+          ],
+          "keys": [
+            "_meta",
+            "ttlMs",
+            "cacheScope",
+            "supportedVersions",
+            "capabilities",
+            "instructions",
+            "resultType"
+          ]
+        },
+        "connectMs": 8,
+        "requestsDuringConnect": {
+          "server/discover": 1
+        }
+      }
+    },
+    {
+      "step": "C. versionNegotiation: { mode: { pin: \"2026-07-28\" } }",
+      "method": "new Client(info, options) → connect(transport, connectOptions)",
+      "params": {
+        "options": {
+          "versionNegotiation": {
+            "mode": {
+              "pin": "2026-07-28"
+            }
+          }
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "era": "modern",
+        "server": "academic",
+        "discoverResult": {
+          "supportedVersions": [
+            "2026-07-28"
+          ],
+          "keys": [
+            "_meta",
+            "ttlMs",
+            "cacheScope",
+            "supportedVersions",
+            "capabilities",
+            "instructions",
+            "resultType"
+          ]
+        },
+        "connectMs": 2,
+        "requestsDuringConnect": {
+          "server/discover": 1
+        }
+      }
+    },
+    {
+      "step": "D. prior: { kind: \"modern\", discover } → zero-round-trip connect",
+      "method": "new Client(info, options) → connect(transport, connectOptions)",
+      "params": {
+        "options": {
+          "versionNegotiation": {
+            "mode": "auto"
+          }
+        },
+        "connectOptions": {
+          "prior": {
+            "kind": "modern",
+            "discover": {
+              "_meta": {
+                "io.modelcontextprotocol/serverInfo": {
+                  "name": "academic",
+                  "title": "Academic Records",
+                  "version": "1.0.0"
+                }
+              },
+              "ttlMs": 0,
+              "cacheScope": "private",
+              "supportedVersions": [
+                "2026-07-28"
+              ],
+              "capabilities": {
+                "logging": {},
+                "completions": {},
+                "prompts": {
+                  "listChanged": true
+                },
+                "resources": {
+                  "subscribe": true,
+                  "listChanged": true
+                },
+                "tools": {
+                  "listChanged": true
+                }
+              },
+              "instructions": "Academic records server. Scores are on the 10-point scale; letter grades are A/B/C/D/F; GPA is on the 4-point scale. When the user gives a name instead of a student ID, call search_students first. Semesters look like \"2024-1\". Read academic://rules/grading for the exact grading rules.",
+              "resultType": "complete"
+            }
+          }
+        }
+      },
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "era": "modern",
+        "server": "academic",
+        "discoverResult": {
+          "supportedVersions": [
+            "2026-07-28"
+          ],
+          "keys": [
+            "_meta",
+            "ttlMs",
+            "cacheScope",
+            "supportedVersions",
+            "capabilities",
+            "instructions",
+            "resultType"
+          ]
+        },
+        "connectMs": 0,
+        "requestsDuringConnect": {}
+      }
+    },
+    {
+      "step": "ping on a 2025 connection",
+      "method": "ping",
+      "params": {
+        "timeout": 2000
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {}
+    },
+    {
+      "step": "ping on a 2026-07-28 connection (ping is a 2025-era method)",
+      "method": "ping",
+      "params": {
+        "timeout": 2000
+      },
+      "ok": false,
+      "ms": 0,
+      "error": {
+        "name": "SdkError",
+        "code": "METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION",
+        "message": "Method 'ping' is not supported by the negotiated protocol version (wire era 2026-07-28)"
+      }
+    },
+    {
+      "step": "E. pin 2026-07-28 against a 2025-only server → no fallback",
+      "method": "connect",
+      "params": {
+        "versionNegotiation": {
+          "mode": {
+            "pin": "2026-07-28"
+          },
+          "probe": {
+            "timeoutMs": 1500
+          }
+        }
+      },
+      "ok": false,
+      "ms": 2,
+      "error": {
+        "name": "SdkError",
+        "code": "ERA_NEGOTIATION_FAILED",
+        "message": "Version negotiation failed: the server did not offer pinned protocol version 2026-07-28 via server/discover (no fallback in pin mode)"
+      }
+    },
+    {
+      "step": "F. default (2025) client against a 2026-only endpoint (legacy: \"reject\")",
+      "method": "connect",
+      "params": {
+        "serverOptions": {
+          "legacy": "reject"
+        }
+      },
+      "ok": false,
+      "ms": 1,
+      "error": {
+        "name": "SdkHttpError",
+        "code": "CLIENT_HTTP_NOT_IMPLEMENTED",
+        "message": "Error POSTing to endpoint: {\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32022,\"message\":\"Unsupported protocol version: 2025-11-25\",\"data\":{\"supported\":[\"2026-07-28\"],\"requested\":\"2025-11-25\"}},\"id\":0}"
+      }
+    },
+    {
+      "step": "close() then call a tool → rejected locally",
+      "method": "close + callTool",
+      "params": {
+        "name": "list_tables"
+      },
+      "ok": false,
+      "ms": 0,
+      "error": {
+        "name": "Error",
+        "message": "Not connected"
+      }
+    }
+  ]
+}

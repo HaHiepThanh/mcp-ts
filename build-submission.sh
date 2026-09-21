@@ -4,7 +4,9 @@
 #   phase2/submission/  + phase2/submission.zip
 # Team files on Google Drive (team/slides/*.pptx, team/quiz/questions*.txt, team/data/*.csv) are picked up
 # automatically when they exist; otherwise the drafts in phase1/ and phase2/ are used and flagged.
-# Run from anywhere: bash build-submission.sh   (run `npm run examples && npm run results` first for fresh outputs)
+# Run from anywhere: bash build-submission.sh
+# Phase 1 is FROZEN: its code, docs and data come from git tag `phase1-freeze` and its example outputs from
+# phase1/frozen/, so phase-2 work never changes the phase-1 package. Only team files (slides, quiz) are refreshed.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
@@ -32,25 +34,30 @@ pick_team_file() { # $1 = glob inside team/, $2 = destination dir, $3 = fallback
     fi
 }
 
-# ── Phase 1 ──────────────────────────────────────────────────────────
+# ── Phase 1 (frozen) ─────────────────────────────────────────────────
 P1="$ROOT/phase1/submission"
 rm -rf "$P1" "$ROOT/phase1/submission.zip"
 mkdir -p "$P1"
 : > "$P1/STATUS.txt"
+FROZEN=$(mktemp -d)
+git -C "$ROOT" archive phase1-freeze mcp-academic | tar -x -C "$FROZEN"
+note "🧊 Code, docs and data from git tag phase1-freeze ($(git -C "$ROOT" rev-list -n1 --abbrev-commit phase1-freeze))" "$P1"
 
 pick_team_file 'slides/*phase1*.pptx' "$P1/01-slides" "" "$P1" "Slides (pptx, 30+ slides)"
 cp "$ROOT/phase1/slides-content.md" "$P1/01-slides/"
-copy_code "$P1/02-code"
+mkdir -p "$P1/02-code"
+rsync -a --exclude 'node_modules/' --exclude 'outputs/' "$FROZEN/mcp-academic/" "$P1/02-code/mcp-academic/"
 note "✅ Code: 02-code/mcp-academic (TypeScript project, see its README)" "$P1"
 mkdir -p "$P1/03-data"
-rsync -a "$APP/data/" "$P1/03-data/"
-if [[ -n "$TEAM" ]] && ls "$TEAM"/data/*.csv >/dev/null 2>&1; then mkdir -p "$P1/03-data/team-real" && cp "$TEAM"/data/* "$P1/03-data/team-real/"; note "✅ Data: sample + team real data" "$P1"; else note "⚠️  Data: sample dataset only (team real data not on Drive yet)" "$P1"; fi
+rsync -a "$FROZEN/mcp-academic/data/" "$P1/03-data/"
+note "✅ Data: sample dataset (40 students, 10 courses, 7 injected invalid rows)" "$P1"
 mkdir -p "$P1/04-examples-per-method"
-cp "$APP"/outputs/examples/*.json "$APP"/outputs/examples/*.log "$P1/04-examples-per-method/" 2>/dev/null || true
-note "✅ Examples per method and parameter set: $(ls "$P1/04-examples-per-method" | grep -c '\.json$') JSON + logs" "$P1"
+cp "$ROOT"/phase1/frozen/examples-output/* "$P1/04-examples-per-method/"
+note "✅ Examples per method and parameter set: $(ls "$P1/04-examples-per-method" | grep -c '\.json$') JSON + logs (snapshot at freeze)" "$P1"
 mkdir -p "$P1/05-docs"
-for f in architecture method-reference results demo-script vscode-guide; do cp "$APP/docs/$f.md" "$P1/05-docs/"; done
+for f in architecture method-reference results demo-script vscode-guide; do cp "$FROZEN/mcp-academic/docs/$f.md" "$P1/05-docs/"; done
 note "✅ Docs: problem, algorithm, flowcharts (architecture.md), library + input/output (method-reference.md)" "$P1"
+rm -rf "$FROZEN"
 pick_team_file 'quiz/questions*phase1*.txt' "$P1/06-quiz" "$ROOT/phase1/quiz-draft.txt" "$P1" "Multiple-choice quiz (10–20 questions)"
 cp "$ROOT/phase1/README.md" "$P1/README.md"
 (cd "$ROOT/phase1" && zip -qr submission.zip submission)
@@ -78,6 +85,7 @@ note "✅ Results and comparisons: model-comparison.md, results.md, transport/co
 mkdir -p "$P2/06-logs"
 cp "$APP"/outputs/logs/chat-*.jsonl "$P2/06-logs/" 2>/dev/null || true
 cp "$APP"/outputs/benchmarks/*.json "$P2/06-logs/" 2>/dev/null || true
+rsync -a --exclude 'README.md' "$ROOT/phase2/runs/" "$P2/06-logs/team-runs/" 2>/dev/null || true
 note "✅ Logs: $(ls "$P2/06-logs" | wc -l | tr -d ' ') files (chat turns + benchmark runs)" "$P2"
 mkdir -p "$P2/07-observations-improvements"
 cp "$ROOT/phase2/improvements.md" "$APP/docs/model-observations.md" "$P2/07-observations-improvements/"

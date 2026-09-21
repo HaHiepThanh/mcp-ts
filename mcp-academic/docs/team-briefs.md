@@ -1,5 +1,7 @@
 # Phân công Lần 1 — đề bài cho từng thành viên
 
+> ⚠️ **Phân công theo tên (Tiến, Hoàng, Phú, Khoa) nay nằm ở [`TASKS.md`](../../TASKS.md)** ở thư mục gốc. File này giữ lại dàn ý slide và hướng dẫn chi tiết từng phần (TV2→Phú/Hoàng/Tiến dữ liệu, TV3→Phú, TV4→Hoàng, TV5→Khoa).
+
 > Tài liệu nội bộ (tiếng Việt). **Slide, trắc nghiệm, demo đều làm bằng tiếng Anh.**
 > Code chỉ do nhóm trưởng + Claude làm — các bạn **không cần cài hay sửa code** (trừ TV5 chạy thử theo README).
 > Mọi file nộp vào Google Drive: `My Drive/MCP-TS-Seminar/team/…`. Thư mục `code/` chỉ để **xem**, không sửa (bị ghi đè khi đồng bộ).

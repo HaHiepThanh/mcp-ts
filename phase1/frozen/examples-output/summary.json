@@ -1,0 +1,83 @@
+{
+  "ranAt": "2026-09-21T07:07:18.632Z",
+  "summary": [
+    {
+      "group": "server",
+      "example": "s1-mcp-server",
+      "ok": true,
+      "seconds": 0.3
+    },
+    {
+      "group": "server",
+      "example": "s2-register-tool",
+      "ok": true,
+      "seconds": 0.3
+    },
+    {
+      "group": "server",
+      "example": "s3-tool-lifecycle",
+      "ok": true,
+      "seconds": 0.3
+    },
+    {
+      "group": "server",
+      "example": "s4-resources",
+      "ok": true,
+      "seconds": 0.3
+    },
+    {
+      "group": "server",
+      "example": "s5-prompts",
+      "ok": true,
+      "seconds": 0.2
+    },
+    {
+      "group": "server",
+      "example": "s6-logging-progress-cancel",
+      "ok": true,
+      "seconds": 1.5
+    },
+    {
+      "group": "server",
+      "example": "s7-elicitation-sampling",
+      "ok": true,
+      "seconds": 0.3
+    },
+    {
+      "group": "server",
+      "example": "s8-transports",
+      "ok": true,
+      "seconds": 1.1
+    },
+    {
+      "group": "client",
+      "example": "c1-client-connect",
+      "ok": true,
+      "seconds": 0.2
+    },
+    {
+      "group": "client",
+      "example": "c2-request-options-errors",
+      "ok": true,
+      "seconds": 4.1
+    },
+    {
+      "group": "client",
+      "example": "c3-subscriptions",
+      "ok": true,
+      "seconds": 1.6
+    },
+    {
+      "group": "client",
+      "example": "c4-caching",
+      "ok": true,
+      "seconds": 0.3
+    },
+    {
+      "group": "client",
+      "example": "c5-wire-trace",
+      "ok": true,
+      "seconds": 0.3
+    }
+  ]
+}

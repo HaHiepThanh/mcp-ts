@@ -1,0 +1,259 @@
+{
+  "example": "s5-prompts",
+  "title": "S5 · Prompts: server.registerPrompt + completable()",
+  "sdkMethods": [
+    "registerPrompt",
+    "completable",
+    "client.listPrompts",
+    "client.getPrompt",
+    "client.complete (ref/prompt)"
+  ],
+  "ranAt": "2026-09-21T07:07:09.225Z",
+  "steps": [
+    {
+      "step": "Prompts and their arguments",
+      "method": "listPrompts",
+      "ok": true,
+      "ms": 4,
+      "result": [
+        {
+          "name": "class_report",
+          "title": "Class performance report",
+          "arguments": [
+            {
+              "name": "class_id",
+              "description": "Class ID, e.g. \"IT01\"",
+              "required": true
+            },
+            {
+              "name": "semester",
+              "description": "Semester, e.g. \"2024-1\"; empty = all semesters",
+              "required": false
+            }
+          ]
+        },
+        {
+          "name": "study_advice",
+          "title": "Study advice for a student",
+          "arguments": [
+            {
+              "name": "student_id",
+              "description": "Student ID, e.g. \"2201005\"",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "step": "class_report · required argument only",
+      "method": "getPrompt",
+      "params": {
+        "name": "class_report",
+        "arguments": {
+          "class_id": "IT01"
+        }
+      },
+      "ok": true,
+      "ms": 3,
+      "result": [
+        {
+          "role": "user",
+          "type": "text",
+          "text": "Write a performance report for class IT01 (all semesters).\nUse the tools class_statistics and rank_students (and calculate_gpa when needed). The report must include:\n1. Overview: number of students, average course total, pass rate, average GPA\n2. Letter-grade distribution (A/B/C/D/F)\n3. Top 3 students with GPA\n4. Students at risk (cumulative GPA below 2.0)\n5. Two concrete recommendations\nFormat it as Markdown. If a save_report tool is available, save the report as well."
+        }
+      ]
+    },
+    {
+      "step": "class_report · with optional semester",
+      "method": "getPrompt",
+      "params": {
+        "name": "class_report",
+        "arguments": {
+          "class_id": "BA02",
+          "semester": "2024-2"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": [
+        {
+          "role": "user",
+          "type": "text",
+          "text": "Write a performance report for class BA02 (semester 2024-2).\nUse the tools class_statistics and rank_students (and calculate_gpa when needed). The report must include:\n1. Overview: number of students, average course total, pass rate, average GPA\n2. Letter-grade distribution (A/B/C/D/F)\n3. Top 3 students with GPA\n4. Students at risk (cumulative GPA below 2.0)\n5. Two concrete recommendations\nFormat it as Markdown. If a save_report tool is available, save the report as well."
+        }
+      ]
+    },
+    {
+      "step": "class_report · missing class_id → ProtocolError -32602",
+      "method": "getPrompt",
+      "params": {
+        "name": "class_report",
+        "arguments": {}
+      },
+      "ok": false,
+      "ms": 2,
+      "error": {
+        "name": "ProtocolError",
+        "code": -32602,
+        "message": "Invalid arguments for prompt class_report: class_id: Invalid input: expected string, received undefined"
+      }
+    },
+    {
+      "step": "study_advice · embeds a resource in the message",
+      "method": "getPrompt",
+      "params": {
+        "name": "study_advice",
+        "arguments": {
+          "student_id": "2201010"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": [
+        {
+          "role": "user",
+          "type": "resource",
+          "text": "[embedded academic://students/2201010]"
+        },
+        {
+          "role": "user",
+          "type": "text",
+          "text": "You are an academic advisor. Using the profile above and the get_transcript tool, give this student 3 specific pieces of study advice: which courses to prioritise, whether any course should be retaken, and a realistic GPA target for next semester."
+        }
+      ]
+    },
+    {
+      "step": "unknown prompt name",
+      "method": "getPrompt",
+      "params": {
+        "name": "does_not_exist",
+        "arguments": {}
+      },
+      "ok": false,
+      "ms": 1,
+      "error": {
+        "name": "ProtocolError",
+        "code": -32602,
+        "message": "Prompt does_not_exist not found"
+      }
+    },
+    {
+      "step": "class_report.class_id = \"\"",
+      "method": "complete",
+      "params": {
+        "ref": {
+          "type": "ref/prompt",
+          "name": "class_report"
+        },
+        "argument": {
+          "name": "class_id",
+          "value": ""
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "values": [
+          "BA01",
+          "BA02",
+          "IT01",
+          "IT02"
+        ],
+        "total": 4,
+        "hasMore": false
+      }
+    },
+    {
+      "step": "class_report.class_id = \"B\"",
+      "method": "complete",
+      "params": {
+        "ref": {
+          "type": "ref/prompt",
+          "name": "class_report"
+        },
+        "argument": {
+          "name": "class_id",
+          "value": "B"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "values": [
+          "BA01",
+          "BA02"
+        ],
+        "total": 2,
+        "hasMore": false
+      }
+    },
+    {
+      "step": "class_report.semester = \"2024\"",
+      "method": "complete",
+      "params": {
+        "ref": {
+          "type": "ref/prompt",
+          "name": "class_report"
+        },
+        "argument": {
+          "name": "semester",
+          "value": "2024"
+        },
+        "context": {
+          "arguments": {
+            "class_id": "IT01"
+          }
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "values": [],
+        "hasMore": false
+      }
+    },
+    {
+      "step": "study_advice.student_id = \"22020\"",
+      "method": "complete",
+      "params": {
+        "ref": {
+          "type": "ref/prompt",
+          "name": "study_advice"
+        },
+        "argument": {
+          "name": "student_id",
+          "value": "22020"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "values": [
+          "2202001",
+          "2202002",
+          "2202003",
+          "2202004",
+          "2202005",
+          "2202006",
+          "2202007",
+          "2202008",
+          "2202009",
+          "2202010",
+          "2202011",
+          "2202012",
+          "2202013",
+          "2202014",
+          "2202015",
+          "2202016",
+          "2202017",
+          "2202018",
+          "2202019",
+          "2202020"
+        ],
+        "total": 20,
+        "hasMore": false
+      }
+    }
+  ]
+}

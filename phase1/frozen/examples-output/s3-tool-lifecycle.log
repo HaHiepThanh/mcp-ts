@@ -1,0 +1,84 @@
+
+══════════════════════════════════════════════════════════════════════════════
+S3 · Tool lifecycle: RegisteredTool.disable/enable/update/remove
+SDK: RegisteredTool.disable, RegisteredTool.enable, RegisteredTool.update, RegisteredTool.remove, registerTool (after connect), notifications/tools/list_changed
+══════════════════════════════════════════════════════════════════════════════
+
+▶ 1. Initial tools
+  listTools()
+  ✔ 1ms → 
+    [
+      "calculate_gpa — GPA of a student",
+      "ping — Health check"
+    ]
+
+── disable() ─────────────────────────────────────────────────────────────────
+
+▶ 2. After gpaTool.disable() — hidden from tools/list
+  listTools()
+  ✔ 0ms → 
+    [
+      "ping — Health check"
+    ]
+
+▶ 3. Calling a disabled tool
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201001"}})
+  ✖ 1ms → ProtocolError (code -32602): Tool calculate_gpa disabled
+
+── enable() ──────────────────────────────────────────────────────────────────
+
+▶ 4. After gpaTool.enable() — callable again
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201001"}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "text": "GPA of 2201001: 3.25"
+    }
+
+── update({ description, callback }) ─────────────────────────────────────────
+
+▶ 5. Description changed
+  listTools()
+  ✔ 0ms → 
+    [
+      "calculate_gpa — GPA of a student on the 4-point scale (v2)",
+      "ping — Health check"
+    ]
+
+▶ 6. New callback answers
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201001"}})
+  ✔ 0ms → 
+    {
+      "isError": false,
+      "text": "[v2] GPA of 2201001: 3.25 / 4.00"
+    }
+
+── registerTool() after the client connected ─────────────────────────────────
+
+▶ 7. New tool appears without reconnecting
+  listTools()
+  ✔ 0ms → 
+    [
+      "calculate_gpa — GPA of a student on the 4-point scale (v2)",
+      "ping — Health check",
+      "get_current_time — Current time"
+    ]
+
+── remove() ──────────────────────────────────────────────────────────────────
+
+▶ 8. After gpaTool.remove()
+  listTools()
+  ✔ 0ms → 
+    [
+      "ping — Health check",
+      "get_current_time — Current time"
+    ]
+
+▶ 9. Calling a removed tool
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201001"}})
+  ✖ 0ms → ProtocolError (code -32602): Tool calculate_gpa not found
+
+── Notifications received by the client ──────────────────────────────────────
+   ℹ notifications/tools/list_changed received 5 times
+
+✔ 9 steps (2 expected/unexpected errors) — saved outputs/examples/s3-tool-lifecycle.json

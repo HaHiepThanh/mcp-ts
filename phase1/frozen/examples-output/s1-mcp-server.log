@@ -1,0 +1,101 @@
+
+══════════════════════════════════════════════════════════════════════════════
+S1 · Creating a server: new McpServer(serverInfo, options)
+SDK: new McpServer(), client.getServerVersion(), client.getInstructions(), client.getServerCapabilities()
+══════════════════════════════════════════════════════════════════════════════
+
+── A. serverInfo only (name + version) ───────────────────────────────────────
+   ℹ parameters: {"serverInfo":{"name":"demo-a","version":"1.0.0"}}
+
+▶ What the client sees after connecting
+  getServerVersion / getInstructions / getServerCapabilities()
+  ✔ 0ms → 
+    {
+      "serverVersion": {
+        "name": "demo-a",
+        "version": "1.0.0"
+      },
+      "instructions": null,
+      "capabilities": {},
+      "protocolEra": "modern"
+    }
+
+── B. + title + instructions ─────────────────────────────────────────────────
+   ℹ parameters: {"serverInfo":{"name":"demo-b","title":"Demo B","version":"1.1.0"},"options":{"instructions":"Call search_students before any other tool."}}
+
+▶ What the client sees after connecting
+  getServerVersion / getInstructions / getServerCapabilities()
+  ✔ 0ms → 
+    {
+      "serverVersion": {
+        "name": "demo-b",
+        "title": "Demo B",
+        "version": "1.1.0"
+      },
+      "instructions": "Call search_students before any other tool.",
+      "capabilities": {},
+      "protocolEra": "modern"
+    }
+
+── C. + capabilities.logging + one tool ──────────────────────────────────────
+   ℹ parameters: {"serverInfo":{"name":"demo-c","version":"1.0.0"},"options":{"capabilities":{"logging":{}}},"tools":["echo"]}
+
+▶ What the client sees after connecting
+  getServerVersion / getInstructions / getServerCapabilities()
+  ✔ 0ms → 
+    {
+      "serverVersion": {
+        "name": "demo-c",
+        "version": "1.0.0"
+      },
+      "instructions": null,
+      "capabilities": {
+        "logging": {},
+        "tools": {
+          "listChanged": true
+        }
+      },
+      "protocolEra": "modern"
+    }
+
+── D. the real academic server (tools + resources + prompts + logging) ───────
+   ℹ parameters: {"factory":"createAcademicServer"}
+
+▶ What the client sees after connecting
+  getServerVersion / getInstructions / getServerCapabilities()
+  ✔ 0ms → 
+    {
+      "serverVersion": {
+        "name": "academic",
+        "title": "Academic Records",
+        "version": "1.0.0"
+      },
+      "instructions": "Academic records server. Scores are on the 10-point scale; letter grades are A/B/C/D/F; GPA is on the 4-point scale. When the user gives a name instead of a student ID, call search_students first. Semesters look like \"2024-1\". Read academic://rules/grading for the exact grading rules.",
+      "capabilities": {
+        "logging": {},
+        "completions": {},
+        "prompts": {
+          "listChanged": true
+        },
+        "resources": {
+          "subscribe": true,
+          "listChanged": true
+        },
+        "tools": {
+          "listChanged": true
+        }
+      },
+      "protocolEra": "modern"
+    }
+
+── Summary — capabilities are derived from what you register ─────────────────
+┌─────────┬────────────────────────────────────────────┬───────────────────────────────────────────────────┐
+│ (index) │ variant                                    │ capabilities                                      │
+├─────────┼────────────────────────────────────────────┼───────────────────────────────────────────────────┤
+│ 0       │ 'A. serverInfo only (name + version)'      │ '(none)'                                          │
+│ 1       │ 'B. + title + instructions'                │ '(none)'                                          │
+│ 2       │ 'C. + capabilities.logging + one tool'     │ 'logging, tools'                                  │
+│ 3       │ 'D. the real academic server (tools + res' │ 'logging, completions, prompts, resources, tools' │
+└─────────┴────────────────────────────────────────────┴───────────────────────────────────────────────────┘
+
+✔ 4 steps (0 expected/unexpected errors) — saved outputs/examples/s1-mcp-server.json

@@ -1,0 +1,120 @@
+{
+  "example": "s1-mcp-server",
+  "title": "S1 · Creating a server: new McpServer(serverInfo, options)",
+  "sdkMethods": [
+    "new McpServer()",
+    "client.getServerVersion()",
+    "client.getInstructions()",
+    "client.getServerCapabilities()"
+  ],
+  "ranAt": "2026-09-21T07:07:08.131Z",
+  "summary": [
+    {
+      "variant": "A. serverInfo only (name + version)",
+      "capabilities": []
+    },
+    {
+      "variant": "B. + title + instructions",
+      "capabilities": []
+    },
+    {
+      "variant": "C. + capabilities.logging + one tool",
+      "capabilities": [
+        "logging",
+        "tools"
+      ]
+    },
+    {
+      "variant": "D. the real academic server (tools + resources + prompts + logging)",
+      "capabilities": [
+        "logging",
+        "completions",
+        "prompts",
+        "resources",
+        "tools"
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "step": "What the client sees after connecting",
+      "method": "getServerVersion / getInstructions / getServerCapabilities",
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "serverVersion": {
+          "name": "demo-a",
+          "version": "1.0.0"
+        },
+        "instructions": null,
+        "capabilities": {},
+        "protocolEra": "modern"
+      }
+    },
+    {
+      "step": "What the client sees after connecting",
+      "method": "getServerVersion / getInstructions / getServerCapabilities",
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "serverVersion": {
+          "name": "demo-b",
+          "title": "Demo B",
+          "version": "1.1.0"
+        },
+        "instructions": "Call search_students before any other tool.",
+        "capabilities": {},
+        "protocolEra": "modern"
+      }
+    },
+    {
+      "step": "What the client sees after connecting",
+      "method": "getServerVersion / getInstructions / getServerCapabilities",
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "serverVersion": {
+          "name": "demo-c",
+          "version": "1.0.0"
+        },
+        "instructions": null,
+        "capabilities": {
+          "logging": {},
+          "tools": {
+            "listChanged": true
+          }
+        },
+        "protocolEra": "modern"
+      }
+    },
+    {
+      "step": "What the client sees after connecting",
+      "method": "getServerVersion / getInstructions / getServerCapabilities",
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "serverVersion": {
+          "name": "academic",
+          "title": "Academic Records",
+          "version": "1.0.0"
+        },
+        "instructions": "Academic records server. Scores are on the 10-point scale; letter grades are A/B/C/D/F; GPA is on the 4-point scale. When the user gives a name instead of a student ID, call search_students first. Semesters look like \"2024-1\". Read academic://rules/grading for the exact grading rules.",
+        "capabilities": {
+          "logging": {},
+          "completions": {},
+          "prompts": {
+            "listChanged": true
+          },
+          "resources": {
+            "subscribe": true,
+            "listChanged": true
+          },
+          "tools": {
+            "listChanged": true
+          }
+        },
+        "protocolEra": "modern"
+      }
+    }
+  ]
+}

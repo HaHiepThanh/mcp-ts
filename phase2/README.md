@@ -18,16 +18,16 @@ Tạo gói nộp: `bash build-submission.sh` (cùng lệnh với Lần 1) → **
 | pptx 20+ slide | `01-slides/` — pptx tên có chữ `phase2` trên Drive `team/slides/` | ⏳ chưa làm |
 | txt 10–20 câu trắc nghiệm | `08-quiz/` — bản nháp 12 câu `quiz-draft.txt` | ⚠️ bản nháp |
 
-## Việc còn lại cho Lần 2 (đề xuất — chờ nhóm trưởng duyệt)
+## Việc còn lại cho Lần 2 (đã duyệt — người làm trong `TASKS.md`)
 
-1. **Mở rộng dataset + tool mới** (xem đề xuất trong cuộc trao đổi với Claude; sau khi duyệt sẽ ghi lại tại đây).
+1. **Mở rộng dataset + tool mới** — phân công chi tiết trong [`TASKS.md`](../TASKS.md) (Phú: giảng viên/lớp học phần · Hoàng: điểm danh/rèn luyện/cảnh báo · Tiến: server `finance`).
 2. **Thí nghiệm cấu hình** — mỗi cái là 1 "bộ tham số" với kết quả so sánh:
    - Mô tả tool rõ ràng vs sơ sài → độ chính xác của LLM thay đổi thế nào
    - `maxToolRounds` 2 / 4 / 8 → câu hỏi nhiều bước có bị cắt không
    - `temperature` 0 / 0.2 / 1.0 → độ ổn định câu trả lời
    - stdio vs HTTP, giao thức 2025 vs 2026 → thời gian end-to-end
    - Bật/tắt từng server (least privilege) → LLM còn trả lời được gì
-3. **Benchmark khó hơn** + `test_cases.csv` của TV2 để các model thật sự khác nhau về độ chính xác.
+3. **Benchmark khó hơn** + `phase2/test-cases.csv` (Khoa) để các model thật sự khác nhau về độ chính xác.
 
 ## File trong thư mục này
 
@@ -36,4 +36,5 @@ Tạo gói nộp: `bash build-submission.sh` (cùng lệnh với Lần 1) → **
 | `requirement.md` | Đề bài Lần 2 |
 | `improvements.md` | Cải tiến đã làm (có bằng chứng) + dự kiến |
 | `quiz-draft.txt` | 12 câu trắc nghiệm nháp về kết quả so sánh |
+| `runs/<tên>/` | Log benchmark/chat của từng bạn (được gom vào gói nộp) |
 | `submission/`, `submission.zip` | Gói nộp — **tự sinh** |

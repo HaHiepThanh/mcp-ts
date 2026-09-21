@@ -1,0 +1,172 @@
+{
+  "example": "s8-transports",
+  "title": "S8 · Transports: stdio vs Streamable HTTP × 2025 vs 2026-07-28",
+  "sdkMethods": [
+    "serveStdio",
+    "createMcpHandler",
+    "StdioClientTransport",
+    "StreamableHTTPClientTransport",
+    "Client versionNegotiation"
+  ],
+  "ranAt": "2026-09-21T07:07:11.257Z",
+  "comparison": [
+    {
+      "transport": "stdio",
+      "negotiation": "legacy",
+      "era": "legacy",
+      "tools": 10,
+      "connectMs": 181.2,
+      "firstCallMs": 2.9,
+      "avgOf20CallsMs": 0.2
+    },
+    {
+      "transport": "stdio",
+      "negotiation": "auto",
+      "era": "modern",
+      "tools": 10,
+      "connectMs": 184.2,
+      "firstCallMs": 180.8,
+      "avgOf20CallsMs": 0.3
+    },
+    {
+      "transport": "http",
+      "negotiation": "legacy",
+      "era": "legacy",
+      "tools": 10,
+      "connectMs": 32.2,
+      "firstCallMs": 5.6,
+      "avgOf20CallsMs": 2
+    },
+    {
+      "transport": "http",
+      "negotiation": "auto",
+      "era": "modern",
+      "tools": 10,
+      "connectMs": 6.4,
+      "firstCallMs": 2.4,
+      "avgOf20CallsMs": 1.7
+    }
+  ],
+  "note": "Timings from one run on the presenter's machine; 20 sequential calculate_gpa calls per row.",
+  "steps": [
+    {
+      "step": "stdio, negotiation=legacy",
+      "method": "new StdioClientTransport({ command, args })",
+      "params": {
+        "command": "node",
+        "args": [
+          "--import",
+          "tsx",
+          "src/server/academic/main.ts"
+        ]
+      },
+      "ok": true,
+      "ms": 196,
+      "result": {
+        "transport": "stdio",
+        "negotiation": "legacy",
+        "era": "legacy",
+        "tools": 10,
+        "connectMs": 181.2,
+        "firstCallMs": 2.9,
+        "avgOf20CallsMs": 0.2
+      }
+    },
+    {
+      "step": "stdio, negotiation=auto",
+      "method": "new StdioClientTransport({ command, args })",
+      "params": {
+        "command": "node",
+        "args": [
+          "--import",
+          "tsx",
+          "src/server/academic/main.ts"
+        ]
+      },
+      "ok": true,
+      "ms": 376,
+      "result": {
+        "transport": "stdio",
+        "negotiation": "auto",
+        "era": "modern",
+        "tools": 10,
+        "connectMs": 184.2,
+        "firstCallMs": 180.8,
+        "avgOf20CallsMs": 0.3
+      }
+    },
+    {
+      "step": "HTTP, negotiation=legacy",
+      "method": "new StreamableHTTPClientTransport(url)",
+      "params": {
+        "url": "http://127.0.0.1:3911/mcp"
+      },
+      "ok": true,
+      "ms": 81,
+      "result": {
+        "transport": "http",
+        "negotiation": "legacy",
+        "era": "legacy",
+        "tools": 10,
+        "connectMs": 32.2,
+        "firstCallMs": 5.6,
+        "avgOf20CallsMs": 2
+      }
+    },
+    {
+      "step": "HTTP, negotiation=auto",
+      "method": "new StreamableHTTPClientTransport(url)",
+      "params": {
+        "url": "http://127.0.0.1:3911/mcp"
+      },
+      "ok": true,
+      "ms": 45,
+      "result": {
+        "transport": "http",
+        "negotiation": "auto",
+        "era": "modern",
+        "tools": 10,
+        "connectMs": 6.4,
+        "firstCallMs": 2.4,
+        "avgOf20CallsMs": 1.7
+      }
+    },
+    {
+      "step": "Wrong path",
+      "method": "POST /other",
+      "params": {},
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "status": 404,
+        "body": "MCP endpoint is /mcp"
+      }
+    },
+    {
+      "step": "Foreign Host header (DNS-rebinding attempt)",
+      "method": "POST /mcp",
+      "params": {
+        "Host": "evil.example"
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "status": 403,
+        "body": "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32000,\"message\":\"Invalid Host: evil.example\"},\"id\":null}"
+      }
+    },
+    {
+      "step": "Foreign Origin header (browser page on another site)",
+      "method": "POST /mcp",
+      "params": {
+        "Origin": "https://evil.example"
+      },
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "status": 403,
+        "body": "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32000,\"message\":\"Invalid Origin: evil.example\"},\"id\":null}"
+      }
+    }
+  ]
+}

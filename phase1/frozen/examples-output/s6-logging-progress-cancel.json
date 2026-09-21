@@ -1,0 +1,191 @@
+{
+  "example": "s6-logging-progress-cancel",
+  "title": "S6 · Progress, logging and cancellation (ctx.mcpReq)",
+  "sdkMethods": [
+    "ctx.mcpReq.notify (progress)",
+    "ctx.mcpReq.log",
+    "ctx.mcpReq.signal",
+    "client.callTool({ onprogress, signal })",
+    "client.setLoggingLevel"
+  ],
+  "ranAt": "2026-09-21T07:07:09.474Z",
+  "steps": [
+    {
+      "step": "With onprogress → server sends notifications/progress",
+      "method": "callTool",
+      "params": {
+        "name": "rank_students",
+        "arguments": {
+          "scope": "all",
+          "top": 3
+        },
+        "options": {
+          "onprogress": "fn"
+        }
+      },
+      "ok": true,
+      "ms": 9,
+      "result": {
+        "progressUpdates": [
+          {
+            "progress": 10,
+            "total": 40,
+            "message": "Scored 10/40 students"
+          },
+          {
+            "progress": 20,
+            "total": 40,
+            "message": "Scored 20/40 students"
+          },
+          {
+            "progress": 30,
+            "total": 40,
+            "message": "Scored 30/40 students"
+          },
+          {
+            "progress": 40,
+            "total": 40,
+            "message": "Scored 40/40 students"
+          }
+        ],
+        "top3": [
+          "Võ Hoàng Bình 4",
+          "Hoàng Thu Trang 4",
+          "Phạm Thị Lan 4"
+        ]
+      }
+    },
+    {
+      "step": "Without onprogress → no progressToken, no notifications",
+      "method": "callTool",
+      "params": {
+        "name": "rank_students",
+        "arguments": {
+          "scope": "all",
+          "top": 3
+        }
+      },
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "newProgressUpdates": 0
+      }
+    },
+    {
+      "step": "setLoggingLevel(\"debug\") then callTool",
+      "method": "setLoggingLevel + callTool",
+      "params": {
+        "level": "debug",
+        "name": "query_table",
+        "arguments": {
+          "table": "students",
+          "filters": [
+            {
+              "column": "class_id",
+              "operator": "eq",
+              "value": "IT01"
+            }
+          ],
+          "limit": 1
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "logMessagesReceived": [
+          "info: \"query_table students: 11 of 41 rows match\""
+        ]
+      }
+    },
+    {
+      "step": "setLoggingLevel(\"info\") then callTool",
+      "method": "setLoggingLevel + callTool",
+      "params": {
+        "level": "info",
+        "name": "query_table",
+        "arguments": {
+          "table": "students",
+          "filters": [
+            {
+              "column": "class_id",
+              "operator": "eq",
+              "value": "IT01"
+            }
+          ],
+          "limit": 1
+        }
+      },
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "logMessagesReceived": [
+          "info: \"query_table students: 11 of 41 rows match\""
+        ]
+      }
+    },
+    {
+      "step": "setLoggingLevel(\"error\") then callTool",
+      "method": "setLoggingLevel + callTool",
+      "params": {
+        "level": "error",
+        "name": "query_table",
+        "arguments": {
+          "table": "students",
+          "filters": [
+            {
+              "column": "class_id",
+              "operator": "eq",
+              "value": "IT01"
+            }
+          ],
+          "limit": 1
+        }
+      },
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "logMessagesReceived": []
+      }
+    },
+    {
+      "step": "legacy era: abort after 350 ms",
+      "method": "callTool",
+      "params": {
+        "name": "recalculate_all_gpas",
+        "arguments": {
+          "students": 20
+        },
+        "options": {
+          "signal": "AbortSignal"
+        }
+      },
+      "ok": false,
+      "ms": 352,
+      "error": {
+        "name": "SdkError",
+        "code": "REQUEST_TIMEOUT",
+        "message": "user pressed Stop"
+      }
+    },
+    {
+      "step": "modern era: abort after 350 ms",
+      "method": "callTool",
+      "params": {
+        "name": "recalculate_all_gpas",
+        "arguments": {
+          "students": 20
+        },
+        "options": {
+          "signal": "AbortSignal"
+        }
+      },
+      "ok": false,
+      "ms": 352,
+      "error": {
+        "name": "SdkError",
+        "code": "REQUEST_TIMEOUT",
+        "message": "user pressed Stop"
+      }
+    }
+  ]
+}

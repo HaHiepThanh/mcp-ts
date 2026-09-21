@@ -1,0 +1,126 @@
+
+══════════════════════════════════════════════════════════════════════════════
+C1 · Connecting: new Client(info, options) + connect(transport, options)
+SDK: new Client(), client.connect(), client.getProtocolEra(), client.getDiscoverResult(), client.ping(), client.close()
+══════════════════════════════════════════════════════════════════════════════
+
+── versionNegotiation parameter sets ─────────────────────────────────────────
+
+▶ A. default options → 2025 "initialize" handshake
+  new Client(info, options) → connect(transport, connectOptions)({"options":{}})
+  ✔ 40ms → 
+    {
+      "era": "legacy",
+      "server": "academic",
+      "connectMs": 40,
+      "requestsDuringConnect": {
+        "initialize": 1,
+        "notifications/initialized": 1
+      }
+    }
+
+▶ B. versionNegotiation: { mode: "auto" } → probes server/discover
+  new Client(info, options) → connect(transport, connectOptions)({"options":{"versionNegotiation":{"mode":"auto"}}})
+  ✔ 8ms → 
+    {
+      "era": "modern",
+      "server": "academic",
+      "discoverResult": {
+        "supportedVersions": [
+          "2026-07-28"
+        ],
+        "keys": [
+          "_meta",
+          "ttlMs",
+          "cacheScope",
+          "supportedVersions",
+          "capabilities",
+          "instructions",
+          "resultType"
+        ]
+      },
+      "connectMs": 8,
+      "requestsDuringConnect": {
+        "server/discover": 1
+      }
+    }
+
+▶ C. versionNegotiation: { mode: { pin: "2026-07-28" } }
+  new Client(info, options) → connect(transport, connectOptions)({"options":{"versionNegotiation":{"mode":{"pin":"2026-07-28"}}}})
+  ✔ 2ms → 
+    {
+      "era": "modern",
+      "server": "academic",
+      "discoverResult": {
+        "supportedVersions": [
+          "2026-07-28"
+        ],
+        "keys": [
+          "_meta",
+          "ttlMs",
+          "cacheScope",
+          "supportedVersions",
+          "capabilities",
+          "instructions",
+          "resultType"
+        ]
+      },
+      "connectMs": 2,
+      "requestsDuringConnect": {
+        "server/discover": 1
+      }
+    }
+
+── Cached verdict: connect(transport, { prior }) ─────────────────────────────
+
+▶ D. prior: { kind: "modern", discover } → zero-round-trip connect
+  new Client(info, options) → connect(transport, connectOptions)({"options":{"versionNegotiation":{"mode":"auto"}},"connectOptions":{"prior":{"kind":"modern","discover":{"_meta":{"io.modelcontextprotocol/serverInfo":{"name...)
+  ✔ 0ms → 
+    {
+      "era": "modern",
+      "server": "academic",
+      "discoverResult": {
+        "supportedVersions": [
+          "2026-07-28"
+        ],
+        "keys": [
+          "_meta",
+          "ttlMs",
+          "cacheScope",
+          "supportedVersions",
+          "capabilities",
+          "instructions",
+          "resultType"
+        ]
+      },
+      "connectMs": 0,
+      "requestsDuringConnect": {}
+    }
+
+── ping() on each era ────────────────────────────────────────────────────────
+
+▶ ping on a 2025 connection
+  ping({"timeout":2000})
+  ✔ 2ms → {}
+
+▶ ping on a 2026-07-28 connection (ping is a 2025-era method)
+  ping({"timeout":2000})
+  ✖ 0ms → SdkError (code METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION): Method 'ping' is not supported by the negotiated protocol version (wire era 2026-07-28)
+
+── Era mismatches ────────────────────────────────────────────────────────────
+
+▶ E. pin 2026-07-28 against a 2025-only server → no fallback
+  connect({"versionNegotiation":{"mode":{"pin":"2026-07-28"},"probe":{"timeoutMs":1500}}})
+  ✖ 2ms → SdkError (code ERA_NEGOTIATION_FAILED): Version negotiation failed: the server did not offer pinned protocol version 2026-07-28 via server/discover (no fallback in pin mode)
+
+▶ F. default (2025) client against a 2026-only endpoint (legacy: "reject")
+  connect({"serverOptions":{"legacy":"reject"}})
+  ✖ 1ms → SdkHttpError (code CLIENT_HTTP_NOT_IMPLEMENTED): Error POSTing to endpoint: {"jsonrpc":"2.0","error":{"code":-32022,"message":"Unsupported protocol version: 2025-11-25","data":{"supported":["2026-07-28"],"requested":"2025-11-25"}},"id":0}
+
+── close() ───────────────────────────────────────────────────────────────────
+
+▶ close() then call a tool → rejected locally
+  close + callTool({"name":"list_tables"})
+  ✖ 0ms → Error: Not connected
+
+✔ 9 steps (4 expected/unexpected errors) — saved outputs/examples/c1-client-connect.json

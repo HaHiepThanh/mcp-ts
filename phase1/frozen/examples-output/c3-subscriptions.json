@@ -1,0 +1,147 @@
+{
+  "example": "c3-subscriptions",
+  "title": "C3 · Resource change notifications: listen() (2026) vs subscribeResource() (2025)",
+  "sdkMethods": [
+    "client.listen",
+    "McpSubscription.honoredFilter / close / closed",
+    "client.subscribeResource",
+    "client.unsubscribeResource",
+    "client.setNotificationHandler('notifications/resources/updated')",
+    "handler.notify.resourceUpdated",
+    "server.sendResourceUpdated"
+  ],
+  "ranAt": "2026-09-21T07:07:16.676Z",
+  "steps": [
+    {
+      "step": "Open a subscription stream for one student profile",
+      "method": "listen",
+      "params": {
+        "resourceSubscriptions": [
+          "academic://students/2201005"
+        ]
+      },
+      "ok": true,
+      "ms": 6,
+      "result": {
+        "honoredFilter": {
+          "resourceSubscriptions": [
+            "academic://students/2201005"
+          ]
+        }
+      }
+    },
+    {
+      "step": "Another client changes a grade",
+      "method": "callTool update_grade",
+      "params": {
+        "student_id": "2201005"
+      },
+      "ok": true,
+      "ms": 212,
+      "result": {
+        "toolResult": "Grade inserted: CS202 2032-1 → total 9 (A). Cumulative GPA 1 → 1.67.",
+        "notificationsReceived": [
+          {
+            "uri": "academic://students/2201005",
+            "gpaAfterReRead": 1.67
+          }
+        ]
+      }
+    },
+    {
+      "step": "subscription.close(), then change again → no notification",
+      "method": "close + callTool",
+      "ok": true,
+      "ms": 237,
+      "result": {
+        "toolResult": "Grade inserted: CS202 2032-2 → total 9 (A). Cumulative GPA 1.67 → 1.67.",
+        "closedReason": "local",
+        "newNotifications": 0
+      }
+    },
+    {
+      "step": "Change a grade BEFORE subscribing → nothing arrives",
+      "method": "callTool update_grade",
+      "ok": true,
+      "ms": 209,
+      "result": {
+        "toolResult": "Grade inserted: CS202 2032-3 → total 9 (A). Cumulative GPA 1 → 1.67.",
+        "notificationsReceived": 0
+      }
+    },
+    {
+      "step": "subscribeResource",
+      "method": "subscribeResource",
+      "params": {
+        "uri": "academic://students/2201005"
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {}
+    },
+    {
+      "step": "Change a grade AFTER subscribing",
+      "method": "callTool update_grade",
+      "ok": true,
+      "ms": 214,
+      "result": {
+        "toolResult": "Grade inserted: CS202 2032-4 → total 9 (A). Cumulative GPA 1.67 → 1.67.",
+        "notificationsReceived": [
+          {
+            "uri": "academic://students/2201005",
+            "gpaAfterReRead": 1.67
+          }
+        ]
+      }
+    },
+    {
+      "step": "unsubscribeResource",
+      "method": "unsubscribeResource",
+      "params": {
+        "uri": "academic://students/2201005"
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {}
+    },
+    {
+      "step": "Change a grade after unsubscribing → nothing new",
+      "method": "callTool update_grade",
+      "ok": true,
+      "ms": 213,
+      "result": {
+        "newNotifications": 0
+      }
+    },
+    {
+      "step": "listen() on a 2025 connection",
+      "method": "listen",
+      "params": {
+        "resourceSubscriptions": [
+          "academic://students/2201005"
+        ]
+      },
+      "ok": false,
+      "ms": 1,
+      "error": {
+        "name": "SdkError",
+        "code": "METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION",
+        "message": "subscriptions/listen requires a 2026-07-28-era connection (negotiated: 2025-11-25). On a 2025-era connection, change notifications are delivered unsolicited: use ClientOptions.listChanged and resources/subscribe instead."
+      }
+    },
+    {
+      "step": "subscribeResource() on a 2026 connection",
+      "method": "subscribeResource",
+      "params": {
+        "uri": "academic://students/2201005"
+      },
+      "ok": false,
+      "ms": 0,
+      "error": {
+        "name": "SdkError",
+        "code": "METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION",
+        "message": "Method 'resources/subscribe' is not supported by the negotiated protocol version (wire era 2026-07-28)"
+      }
+    }
+  ]
+}

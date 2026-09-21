@@ -1,0 +1,612 @@
+{
+  "example": "c5-wire-trace",
+  "title": "C5 · JSON-RPC messages on the wire (2025 vs 2026-07-28)",
+  "sdkMethods": [
+    "JSON-RPC 2.0",
+    "initialize",
+    "server/discover",
+    "tools/list",
+    "tools/call",
+    "input_required"
+  ],
+  "ranAt": "2026-09-21T07:07:18.537Z",
+  "legacy": [
+    {
+      "n": 1,
+      "direction": "client → server",
+      "message": {
+        "method": "initialize",
+        "params": {
+          "protocolVersion": "2025-11-25",
+          "capabilities": {
+            "elicitation": {
+              "form": {}
+            }
+          },
+          "clientInfo": {
+            "name": "trace-client",
+            "version": "1.0.0"
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 0
+      }
+    },
+    {
+      "n": 2,
+      "direction": "server → client",
+      "message": {
+        "result": {
+          "protocolVersion": "2025-11-25",
+          "capabilities": {
+            "logging": {},
+            "resources": {
+              "subscribe": true,
+              "listChanged": true
+            },
+            "tools": {
+              "listChanged": true
+            },
+            "completions": {},
+            "prompts": {
+              "listChanged": true
+            }
+          },
+          "serverInfo": {
+            "name": "academic",
+            "title": "Academic Records",
+            "version": "1.0.0"
+          },
+          "instructions": "Academic records server. Scores are on the 10-point scale; letter grades are A/B/C/D/F; GPA is on the 4-point scale. When the user gives a name instead of a ..."
+        },
+        "jsonrpc": "2.0",
+        "id": 0
+      }
+    },
+    {
+      "n": 3,
+      "direction": "client → server",
+      "message": {
+        "jsonrpc": "2.0",
+        "method": "notifications/initialized"
+      }
+    },
+    {
+      "n": 4,
+      "direction": "client → server",
+      "message": "──── tools/list ────"
+    },
+    {
+      "n": 5,
+      "direction": "client → server",
+      "message": {
+        "method": "tools/list",
+        "jsonrpc": "2.0",
+        "id": 1
+      }
+    },
+    {
+      "n": 6,
+      "direction": "server → client",
+      "message": {
+        "result": {
+          "tools": [
+            {
+              "name": "search_students",
+              "title": "Search students",
+              "description": "Find students by name or ID (case- and accent-insensitive), optionally filtered by class or faculty. Use this first when the user gives a name instead of a s...",
+              "inputSchema": "{…JSON Schema…}",
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false,
+                "openWorldHint": false
+              },
+              "outputSchema": "{…JSON Schema…}"
+            },
+            {
+              "name": "get_transcript",
+              "title": "Get transcript",
+              "description": "List every graded course of one student with process/final scores, course total, letter grade (A–F) and 4-point value.",
+              "inputSchema": "{…JSON Schema…}",
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false,
+                "openWorldHint": false
+              },
+              "outputSchema": "{…JSON Schema…}"
+            },
+            "... 8 more"
+          ]
+        },
+        "jsonrpc": "2.0",
+        "id": 1
+      }
+    },
+    {
+      "n": 7,
+      "direction": "client → server",
+      "message": "──── tools/call calculate_gpa ────"
+    },
+    {
+      "n": 8,
+      "direction": "client → server",
+      "message": {
+        "method": "tools/call",
+        "params": {
+          "name": "calculate_gpa",
+          "arguments": {
+            "student_id": "2201001",
+            "semester": "2024-1"
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 2
+      }
+    },
+    {
+      "n": 9,
+      "direction": "server → client",
+      "message": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"student_id\": \"2201001\",\n  \"full_name\": \"Bùi Quốc Hải\",\n  \"scope\": \"semester\",\n  \"semester\": \"2024-1\",\n  \"gpa\": 3.25,\n  \"classification\": \"Very good\",\n  ..."
+            }
+          ],
+          "structuredContent": {
+            "student_id": "2201001",
+            "full_name": "Bùi Quốc Hải",
+            "scope": "semester",
+            "semester": "2024-1",
+            "gpa": 3.25,
+            "classification": "Very good",
+            "credits_attempted": 8,
+            "credits_earned": 8,
+            "courses_counted": 3
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 2
+      }
+    },
+    {
+      "n": 10,
+      "direction": "client → server",
+      "message": "──── tools/call update_grade (needs user confirmation) ────"
+    },
+    {
+      "n": 11,
+      "direction": "client → server",
+      "message": {
+        "method": "tools/call",
+        "params": {
+          "name": "update_grade",
+          "arguments": {
+            "student_id": "2201001",
+            "course_id": "GE101",
+            "semester": "2024-1",
+            "final_score": 9
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 3
+      }
+    },
+    {
+      "n": 12,
+      "direction": "server → client",
+      "message": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "Update English 1 (GE101, 2024-1) for Bùi Quốc Hải (2201001)? New: process 8.5, final 9 → total 8.8 (A). Before: currently process 8.5, final 8.6.",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "confirm": {
+                "type": "boolean",
+                "title": "Confirm",
+                "description": "Tick to proceed"
+              }
+            },
+            "required": [
+              "confirm"
+            ]
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 0
+      }
+    },
+    {
+      "n": 13,
+      "direction": "client → server",
+      "message": {
+        "result": {
+          "action": "accept",
+          "content": {
+            "confirm": true
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 0
+      }
+    },
+    {
+      "n": 14,
+      "direction": "server → client",
+      "message": {
+        "result": {
+          "content": [
+            {
+              "type": "text",
+              "text": "Grade updated: GE101 2024-1 → total 8.8 (A). Cumulative GPA 3.28 → 3.28."
+            }
+          ]
+        },
+        "jsonrpc": "2.0",
+        "id": 3
+      }
+    }
+  ],
+  "modern": [
+    {
+      "n": 1,
+      "direction": "client → server",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": "server-discover-probe-1",
+        "method": "server/discover",
+        "params": {
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientInfo": {
+              "name": "trace-client",
+              "version": "1.0.0"
+            },
+            "io.modelcontextprotocol/clientCapabilities": {
+              "elicitation": {
+                "form": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "n": 2,
+      "direction": "server → client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": "server-discover-probe-1",
+        "result": {
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "academic",
+              "title": "Academic Records",
+              "version": "1.0.0"
+            }
+          },
+          "supportedVersions": [
+            "2026-07-28"
+          ],
+          "capabilities": {
+            "logging": {},
+            "resources": {
+              "subscribe": true,
+              "listChanged": true
+            },
+            "tools": {
+              "listChanged": true
+            },
+            "completions": {},
+            "prompts": {
+              "listChanged": true
+            }
+          },
+          "instructions": "Academic records server. Scores are on the 10-point scale; letter grades are A/B/C/D/F; GPA is on the 4-point scale. When the user gives a name instead of a ...",
+          "resultType": "complete",
+          "ttlMs": 0,
+          "cacheScope": "private"
+        }
+      }
+    },
+    {
+      "n": 3,
+      "direction": "client → server",
+      "message": "──── tools/list ────"
+    },
+    {
+      "n": 4,
+      "direction": "client → server",
+      "message": {
+        "method": "tools/list",
+        "jsonrpc": "2.0",
+        "id": 0,
+        "params": {
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientInfo": {
+              "name": "trace-client",
+              "version": "1.0.0"
+            },
+            "io.modelcontextprotocol/clientCapabilities": {
+              "elicitation": {
+                "form": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "n": 5,
+      "direction": "server → client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 0,
+        "result": {
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "academic",
+              "title": "Academic Records",
+              "version": "1.0.0"
+            }
+          },
+          "tools": [
+            {
+              "name": "search_students",
+              "title": "Search students",
+              "description": "Find students by name or ID (case- and accent-insensitive), optionally filtered by class or faculty. Use this first when the user gives a name instead of a s...",
+              "inputSchema": "{…JSON Schema…}",
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false,
+                "openWorldHint": false
+              },
+              "outputSchema": "{…JSON Schema…}"
+            },
+            {
+              "name": "get_transcript",
+              "title": "Get transcript",
+              "description": "List every graded course of one student with process/final scores, course total, letter grade (A–F) and 4-point value.",
+              "inputSchema": "{…JSON Schema…}",
+              "annotations": {
+                "readOnlyHint": true,
+                "destructiveHint": false,
+                "openWorldHint": false
+              },
+              "outputSchema": "{…JSON Schema…}"
+            },
+            "... 8 more"
+          ],
+          "resultType": "complete",
+          "ttlMs": 60000,
+          "cacheScope": "public"
+        }
+      }
+    },
+    {
+      "n": 6,
+      "direction": "client → server",
+      "message": "──── tools/call calculate_gpa ────"
+    },
+    {
+      "n": 7,
+      "direction": "client → server",
+      "message": {
+        "method": "tools/call",
+        "params": {
+          "name": "calculate_gpa",
+          "arguments": {
+            "student_id": "2201001",
+            "semester": "2024-1"
+          },
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientInfo": {
+              "name": "trace-client",
+              "version": "1.0.0"
+            },
+            "io.modelcontextprotocol/clientCapabilities": {
+              "elicitation": {
+                "form": {}
+              }
+            }
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 1
+      }
+    },
+    {
+      "n": 8,
+      "direction": "server → client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "academic",
+              "title": "Academic Records",
+              "version": "1.0.0"
+            }
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"student_id\": \"2201001\",\n  \"full_name\": \"Bùi Quốc Hải\",\n  \"scope\": \"semester\",\n  \"semester\": \"2024-1\",\n  \"gpa\": 3.25,\n  \"classification\": \"Very good\",\n  ..."
+            }
+          ],
+          "structuredContent": {
+            "student_id": "2201001",
+            "full_name": "Bùi Quốc Hải",
+            "scope": "semester",
+            "semester": "2024-1",
+            "gpa": 3.25,
+            "classification": "Very good",
+            "credits_attempted": 8,
+            "credits_earned": 8,
+            "courses_counted": 3
+          },
+          "resultType": "complete"
+        }
+      }
+    },
+    {
+      "n": 9,
+      "direction": "client → server",
+      "message": "──── tools/call update_grade (needs user confirmation) ────"
+    },
+    {
+      "n": 10,
+      "direction": "client → server",
+      "message": {
+        "method": "tools/call",
+        "params": {
+          "name": "update_grade",
+          "arguments": {
+            "student_id": "2201001",
+            "course_id": "GE101",
+            "semester": "2024-1",
+            "final_score": 9
+          },
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientInfo": {
+              "name": "trace-client",
+              "version": "1.0.0"
+            },
+            "io.modelcontextprotocol/clientCapabilities": {
+              "elicitation": {
+                "form": {}
+              }
+            }
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 2
+      }
+    },
+    {
+      "n": 11,
+      "direction": "server → client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "result": {
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "academic",
+              "title": "Academic Records",
+              "version": "1.0.0"
+            }
+          },
+          "resultType": "input_required",
+          "inputRequests": {
+            "confirm_update": {
+              "method": "elicitation/create",
+              "params": {
+                "message": "Update English 1 (GE101, 2024-1) for Bùi Quốc Hải (2201001)? New: process 8.5, final 9 → total 8.8 (A). Before: currently process 8.5, final 9.",
+                "requestedSchema": {
+                  "type": "object",
+                  "properties": {
+                    "confirm": {
+                      "type": "boolean",
+                      "title": "Confirm",
+                      "description": "Tick to proceed"
+                    }
+                  },
+                  "required": [
+                    "confirm"
+                  ]
+                },
+                "mode": "form"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "n": 12,
+      "direction": "client → server",
+      "message": {
+        "method": "tools/call",
+        "params": {
+          "name": "update_grade",
+          "arguments": {
+            "student_id": "2201001",
+            "course_id": "GE101",
+            "semester": "2024-1",
+            "final_score": 9
+          },
+          "inputResponses": {
+            "confirm_update": {
+              "action": "accept",
+              "content": {
+                "confirm": true
+              }
+            }
+          },
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientInfo": {
+              "name": "trace-client",
+              "version": "1.0.0"
+            },
+            "io.modelcontextprotocol/clientCapabilities": {
+              "elicitation": {
+                "form": {}
+              }
+            }
+          }
+        },
+        "jsonrpc": "2.0",
+        "id": 3
+      }
+    },
+    {
+      "n": 13,
+      "direction": "server → client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 3,
+        "result": {
+          "_meta": {
+            "io.modelcontextprotocol/serverInfo": {
+              "name": "academic",
+              "title": "Academic Records",
+              "version": "1.0.0"
+            }
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Grade updated: GE101 2024-1 → total 8.8 (A). Cumulative GPA 3.28 → 3.28."
+            }
+          ],
+          "resultType": "complete"
+        }
+      }
+    }
+  ],
+  "steps": [
+    {
+      "step": "2025 era: initialize handshake, server pushes elicitation/create mid-call",
+      "method": "trace",
+      "ok": true,
+      "ms": 37,
+      "result": "14 frames"
+    },
+    {
+      "step": "2026-07-28 era: server/discover, tool returns input_required and the client retries",
+      "method": "trace",
+      "ok": true,
+      "ms": 45,
+      "result": "13 frames"
+    }
+  ]
+}

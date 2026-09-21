@@ -1,0 +1,170 @@
+
+══════════════════════════════════════════════════════════════════════════════
+S4 · Resources: server.registerResource + ResourceTemplate
+SDK: registerResource, ResourceTemplate, client.listResources, client.listResourceTemplates, client.readResource, client.complete (ref/resource)
+══════════════════════════════════════════════════════════════════════════════
+
+── Discovery ─────────────────────────────────────────────────────────────────
+
+▶ Static resources + instances listed by templates
+  listResources()
+  ✔ 4ms → 
+    [
+      {
+        "uri": "academic://rules/grading",
+        "name": "grading-rules",
+        "mimeType": "text/markdown"
+      },
+      {
+        "uri": "academic://reports/data-quality",
+        "name": "data-quality",
+        "mimeType": "application/json"
+      },
+      {
+        "uri": "academic://tables/courses",
+        "name": "courses.csv",
+        "mimeType": "text/csv"
+      },
+      {
+        "uri": "academic://tables/grades",
+        "name": "grades.csv",
+        "mimeType": "text/csv"
+      },
+      {
+        "uri": "academic://tables/students",
+        "name": "students.csv",
+        "mimeType": "text/csv"
+      }
+    ]
+
+▶ URI templates (students/{student_id} is readable but not listed)
+  listResourceTemplates()
+  ✔ 2ms → 
+    [
+      {
+        "uriTemplate": "academic://tables/{table}",
+        "name": "table",
+        "mimeType": "text/csv"
+      },
+      {
+        "uriTemplate": "academic://students/{student_id}",
+        "name": "student-profile",
+        "mimeType": "application/json"
+      }
+    ]
+
+── Static resources ──────────────────────────────────────────────────────────
+
+▶ Grading rules (markdown generated from config/grading.json)
+  readResource({"uri":"academic://rules/grading"})
+  ✔ 2ms → 
+    [
+      {
+        "uri": "academic://rules/grading",
+        "mimeType": "text/markdown",
+        "text": "# Grading rules\n\nCourse total = 40% process score + 60% final score (10-point scale, rounded to 1 decimal).\n\n| Total (10-point) | Letter | 4-point |\n| --- | --- | --- |\n| 8.5 – 10 | A | 4 |\n| 7.0 – < 8.5 | B | 3 |\n| 5.5 – < 7.0 | C | 2 |\n| 4.0 – < 5.5 | D | 1 |\n| 0.0 – < 4.0 | F | 0 |\n\n... (12 more lines)"
+      }
+    ]
+
+▶ Data-quality report (rows skipped while loading)
+  readResource({"uri":"academic://reports/data-quality"})
+  ✔ 1ms → 
+    [
+      {
+        "uri": "academic://reports/data-quality",
+        "mimeType": "application/json",
+        "text": "{\n  \"loaded\": {\n    \"students\": 40,\n    \"courses\": 10,\n    \"grades\": 261\n  },\n  \"skipped\": 7,\n  \"issues\": [\n    {\n      \"table\": \"students\",\n      \"line\": 42,\n      \"problem\": \"duplicate student_id 2201001\",\n... (85 more lines)"
+      }
+    ]
+
+── Template with list callback: academic://tables/{table} ────────────────────
+
+▶ table = courses
+  readResource({"uri":"academic://tables/courses"})
+  ✔ 1ms → 
+    [
+      {
+        "uri": "academic://tables/courses",
+        "mimeType": "text/csv",
+        "text": "course_id,course_name,credits,faculty\nGE101,English 1,2,General Education\nGE102,Calculus,3,General Education\nCS101,Introduction to Programming,3,Information Technology\nCS102,Data Structures,3,Information Technology\nCS201,Databases,4,Information Technology\nCS202,Computer Networks,3,Information Technology\nBA101,Principles of Management,3,Business Administration\nBA102,Microeconomics,3,Business Administration\nBA201,Marketing,4,Business Administration\nBA202,Business Statistics,3,Business Administration\n"
+      }
+    ]
+
+▶ table = nope → ResourceNotFoundError
+  readResource({"uri":"academic://tables/nope"})
+  ✖ 1ms → ProtocolError (code -32602): Unknown table "nope"
+
+── Template without list callback: academic://students/{student_id} ──────────
+
+▶ student_id = 2201010 (weak student with retakes)
+  readResource({"uri":"academic://students/2201010"})
+  ✔ 2ms → 
+    [
+      {
+        "uri": "academic://students/2201010",
+        "mimeType": "application/json",
+        "text": "{\n  \"student_id\": \"2201010\",\n  \"full_name\": \"Trần Đức Phúc\",\n  \"gender\": \"Male\",\n  \"date_of_birth\": \"2004-07-02\",\n  \"class_id\": \"IT01\",\n  \"faculty\": \"Information Technology\",\n  \"enrollment_year\": \"2022\",\n  \"email\": \"phuc.2201010@example.edu.vn\",\n  \"cumulative\": {\n    \"gpa\": 2.06,\n    \"classification\": \"Average\",\n... (28 more lines)"
+      }
+    ]
+
+▶ student_id = 9999999 → ResourceNotFoundError
+  readResource({"uri":"academic://students/9999999"})
+  ✖ 1ms → ProtocolError (code -32602): Unknown student "9999999"
+
+▶ URI matching no resource at all
+  readResource({"uri":"academic://unknown/thing"})
+  ✖ 1ms → ProtocolError (code -32602): Resource not found: academic://unknown/thing
+
+── Completion of template variables ──────────────────────────────────────────
+
+▶ complete student_id="22020"
+  complete({"ref":{"type":"ref/resource","uri":"academic://students/{student_id}"},"argument":{"name":"student_id","value":"22020"}})
+  ✔ 2ms → 
+    {
+      "values": [
+        "2202001",
+        "2202002",
+        "2202003",
+        "2202004",
+        "2202005",
+        "2202006",
+        "2202007",
+        "2202008",
+        "2202009",
+        "2202010",
+        "2202011",
+        "2202012",
+        "2202013",
+        "2202014",
+        "2202015",
+        "2202016",
+        "2202017",
+        "2202018",
+        "2202019",
+        "2202020"
+      ],
+      "total": 20,
+      "hasMore": false
+    }
+
+▶ complete student_id="99"
+  complete({"ref":{"type":"ref/resource","uri":"academic://students/{student_id}"},"argument":{"name":"student_id","value":"99"}})
+  ✔ 1ms → 
+    {
+      "values": [],
+      "total": 0,
+      "hasMore": false
+    }
+
+▶ complete table="gr"
+  complete({"ref":{"type":"ref/resource","uri":"academic://tables/{table}"},"argument":{"name":"table","value":"gr"}})
+  ✔ 1ms → 
+    {
+      "values": [
+        "grades"
+      ],
+      "total": 1,
+      "hasMore": false
+    }
+
+✔ 12 steps (3 expected/unexpected errors) — saved outputs/examples/s4-resources.json

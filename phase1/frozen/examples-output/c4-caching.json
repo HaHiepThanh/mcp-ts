@@ -1,0 +1,175 @@
+{
+  "example": "c4-caching",
+  "title": "C4 · Response cache: server cacheHints + client cacheMode",
+  "sdkMethods": [
+    "ServerOptions.cacheHints",
+    "listTools(params, { cacheMode })",
+    "readResource(params, { cacheMode })",
+    "ClientOptions.defaultCacheTtlMs"
+  ],
+  "ranAt": "2026-09-21T07:07:18.254Z",
+  "cacheHints": {
+    "tools/list": {
+      "ttlMs": 60000,
+      "cacheScope": "public"
+    },
+    "prompts/list": {
+      "ttlMs": 60000,
+      "cacheScope": "public"
+    },
+    "resources/list": {
+      "ttlMs": 60000,
+      "cacheScope": "public"
+    },
+    "resources/templates/list": {
+      "ttlMs": 60000,
+      "cacheScope": "public"
+    },
+    "resources/read": {
+      "ttlMs": 30000,
+      "cacheScope": "private"
+    }
+  },
+  "summary": [
+    {
+      "scenario": "A. listTools × 3 (default cacheMode \"use\")",
+      "era": "modern",
+      "calls": 3,
+      "requestsReachingServer": 1
+    },
+    {
+      "scenario": "B. listTools, then cacheMode \"refresh\"",
+      "era": "modern",
+      "calls": 3,
+      "requestsReachingServer": 2
+    },
+    {
+      "scenario": "C. readResource × 3",
+      "era": "modern",
+      "calls": 3,
+      "requestsReachingServer": 1
+    },
+    {
+      "scenario": "D. readResource with cacheMode \"bypass\"",
+      "era": "modern",
+      "calls": 3,
+      "requestsReachingServer": 3
+    },
+    {
+      "scenario": "E. listTools × 3",
+      "era": "legacy",
+      "calls": 3,
+      "requestsReachingServer": 3
+    },
+    {
+      "scenario": "F. listTools × 3 with defaultCacheTtlMs: 60000 (client opts in)",
+      "era": "legacy",
+      "calls": 3,
+      "requestsReachingServer": 1
+    }
+  ],
+  "steps": [
+    {
+      "step": "A. listTools × 3 (default cacheMode \"use\")",
+      "method": "listTools → listTools → listTools",
+      "params": {
+        "versionNegotiation": {
+          "mode": "auto"
+        }
+      },
+      "ok": true,
+      "ms": 6,
+      "result": {
+        "era": "modern",
+        "callsMade": 3,
+        "requestsReachingServer": {
+          "tools/list": 1
+        }
+      }
+    },
+    {
+      "step": "B. listTools, then cacheMode \"refresh\"",
+      "method": "listTools → listTools(refresh) → listTools",
+      "params": {
+        "versionNegotiation": {
+          "mode": "auto"
+        }
+      },
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "era": "modern",
+        "callsMade": 3,
+        "requestsReachingServer": {
+          "tools/list": 2
+        }
+      }
+    },
+    {
+      "step": "C. readResource × 3",
+      "method": "readResource(rules) → readResource(rules) → readResource(rules)",
+      "params": {
+        "versionNegotiation": {
+          "mode": "auto"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "era": "modern",
+        "callsMade": 3,
+        "requestsReachingServer": {
+          "resources/read": 1
+        }
+      }
+    },
+    {
+      "step": "D. readResource with cacheMode \"bypass\"",
+      "method": "readResource(rules) → readResource(rules, bypass) → readResource(rules, bypass)",
+      "params": {
+        "versionNegotiation": {
+          "mode": "auto"
+        }
+      },
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "era": "modern",
+        "callsMade": 3,
+        "requestsReachingServer": {
+          "resources/read": 3
+        }
+      }
+    },
+    {
+      "step": "E. listTools × 3",
+      "method": "listTools → listTools → listTools",
+      "params": {},
+      "ok": true,
+      "ms": 6,
+      "result": {
+        "era": "legacy",
+        "callsMade": 3,
+        "requestsReachingServer": {
+          "tools/list": 3
+        }
+      }
+    },
+    {
+      "step": "F. listTools × 3 with defaultCacheTtlMs: 60000 (client opts in)",
+      "method": "listTools → listTools → listTools",
+      "params": {
+        "defaultCacheTtlMs": 60000
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "era": "legacy",
+        "callsMade": 3,
+        "requestsReachingServer": {
+          "tools/list": 1
+        }
+      }
+    }
+  ]
+}

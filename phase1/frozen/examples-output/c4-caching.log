@@ -1,0 +1,92 @@
+
+══════════════════════════════════════════════════════════════════════════════
+C4 · Response cache: server cacheHints + client cacheMode
+SDK: ServerOptions.cacheHints, listTools(params, { cacheMode }), readResource(params, { cacheMode }), ClientOptions.defaultCacheTtlMs
+══════════════════════════════════════════════════════════════════════════════
+
+── Server configuration ──────────────────────────────────────────────────────
+   ℹ config/academic.json → cacheHints = {"tools/list":{"ttlMs":60000,"cacheScope":"public"},"prompts/list":{"ttlMs":60000,"cacheScope":"public"},"resources/list":{"ttlMs":60000,"cacheScope":"public"},"resources/templates/list":{"ttlMs":60000,"cacheScope":"public"},"resources/read":{"ttlMs":30000,"cacheScope":"private"}}
+
+── 2026-07-28 connection — the server sends ttlMs/cacheScope with each cacheable result 
+
+▶ A. listTools × 3 (default cacheMode "use")
+  listTools → listTools → listTools({"versionNegotiation":{"mode":"auto"}})
+  ✔ 6ms → 
+    {
+      "era": "modern",
+      "callsMade": 3,
+      "requestsReachingServer": {
+        "tools/list": 1
+      }
+    }
+
+▶ B. listTools, then cacheMode "refresh"
+  listTools → listTools(refresh) → listTools({"versionNegotiation":{"mode":"auto"}})
+  ✔ 4ms → 
+    {
+      "era": "modern",
+      "callsMade": 3,
+      "requestsReachingServer": {
+        "tools/list": 2
+      }
+    }
+
+▶ C. readResource × 3
+  readResource(rules) → readResource(rules) → readResource(rules)({"versionNegotiation":{"mode":"auto"}})
+  ✔ 2ms → 
+    {
+      "era": "modern",
+      "callsMade": 3,
+      "requestsReachingServer": {
+        "resources/read": 1
+      }
+    }
+
+▶ D. readResource with cacheMode "bypass"
+  readResource(rules) → readResource(rules, bypass) → readResource(rules, bypass)({"versionNegotiation":{"mode":"auto"}})
+  ✔ 4ms → 
+    {
+      "era": "modern",
+      "callsMade": 3,
+      "requestsReachingServer": {
+        "resources/read": 3
+      }
+    }
+
+── 2025 connection — no cache hints on the wire ──────────────────────────────
+
+▶ E. listTools × 3
+  listTools → listTools → listTools({})
+  ✔ 6ms → 
+    {
+      "era": "legacy",
+      "callsMade": 3,
+      "requestsReachingServer": {
+        "tools/list": 3
+      }
+    }
+
+▶ F. listTools × 3 with defaultCacheTtlMs: 60000 (client opts in)
+  listTools → listTools → listTools({"defaultCacheTtlMs":60000})
+  ✔ 2ms → 
+    {
+      "era": "legacy",
+      "callsMade": 3,
+      "requestsReachingServer": {
+        "tools/list": 1
+      }
+    }
+
+── Summary ───────────────────────────────────────────────────────────────────
+┌─────────┬───────────────────────────────────────────────────────────────────┬──────────┬───────┬────────────────────────┐
+│ (index) │ scenario                                                          │ era      │ calls │ requestsReachingServer │
+├─────────┼───────────────────────────────────────────────────────────────────┼──────────┼───────┼────────────────────────┤
+│ 0       │ 'A. listTools × 3 (default cacheMode "use")'                      │ 'modern' │ 3     │ 1                      │
+│ 1       │ 'B. listTools, then cacheMode "refresh"'                          │ 'modern' │ 3     │ 2                      │
+│ 2       │ 'C. readResource × 3'                                             │ 'modern' │ 3     │ 1                      │
+│ 3       │ 'D. readResource with cacheMode "bypass"'                         │ 'modern' │ 3     │ 3                      │
+│ 4       │ 'E. listTools × 3'                                                │ 'legacy' │ 3     │ 3                      │
+│ 5       │ 'F. listTools × 3 with defaultCacheTtlMs: 60000 (client opts in)' │ 'legacy' │ 3     │ 1                      │
+└─────────┴───────────────────────────────────────────────────────────────────┴──────────┴───────┴────────────────────────┘
+
+✔ 6 steps (0 expected/unexpected errors) — saved outputs/examples/c4-caching.json

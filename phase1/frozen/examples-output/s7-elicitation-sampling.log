@@ -1,0 +1,141 @@
+
+══════════════════════════════════════════════════════════════════════════════
+S7 · Server → client requests: elicitation & sampling (both eras)
+SDK: ctx.mcpReq.elicitInput (2025), ctx.mcpReq.requestSampling (2025), inputRequired / inputResponse (2026), client.setRequestHandler('elicitation/create'), client.setRequestHandler('sampling/createMessage')
+══════════════════════════════════════════════════════════════════════════════
+
+── 2025 era (push) — elicitation ─────────────────────────────────────────────
+
+▶ update_grade · user answers "accept + confirm=true"
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-1","process_score":8,"final_score":7.5}})
+  ✔ 8ms → 
+    {
+      "questionShownToUser": "Update Computer Networks (CS202, 2030-1) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
+      "isError": false,
+      "text": "Grade inserted: CS202 2030-1 → total 7.7 (B). Cumulative GPA 1 → 1.5."
+    }
+
+▶ update_grade · user answers "accept + confirm=false"
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-2","process_score":8,"final_score":7.5}})
+  ✔ 0ms → 
+    {
+      "questionShownToUser": "Update Computer Networks (CS202, 2030-2) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
+      "isError": false,
+      "text": "The user did not tick confirm — the grade was NOT changed."
+    }
+
+▶ update_grade · user answers "decline"
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-3","process_score":8,"final_score":7.5}})
+  ✔ 0ms → 
+    {
+      "questionShownToUser": "Update Computer Networks (CS202, 2030-3) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
+      "isError": false,
+      "text": "The user declined — the grade was NOT changed."
+    }
+
+▶ update_grade · user answers "cancel (closed the dialog)"
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-4","process_score":8,"final_score":7.5}})
+  ✔ 0ms → 
+    {
+      "questionShownToUser": "Update Computer Networks (CS202, 2030-4) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
+      "isError": false,
+      "text": "The user cancelled the dialog — the grade was NOT changed."
+    }
+
+── legacy — sampling ─────────────────────────────────────────────────────────
+
+▶ generate_student_feedback · tone=encouraging
+  callTool({"name":"generate_student_feedback","arguments":{"student_id":"2201010","tone":"encouraging"}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "text": "Feedback for Trần Đức Phúc (written by mock-llm (replaced by Gemini in M3)):\n\n[mock] Received a 560-character prompt; system: \"You are a supportive academic advisor.\"."
+    }
+
+▶ generate_student_feedback · tone=formal
+  callTool({"name":"generate_student_feedback","arguments":{"student_id":"2201010","tone":"formal"}})
+  ✔ 0ms → 
+    {
+      "isError": false,
+      "text": "Feedback for Trần Đức Phúc (written by mock-llm (replaced by Gemini in M3)):\n\n[mock] Received a 555-character prompt; system: \"You are a supportive academic advisor.\"."
+    }
+
+── 2026-07-28 era (inputRequired + retry) — elicitation ──────────────────────
+
+▶ update_grade · user answers "accept + confirm=true"
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-5","process_score":8,"final_score":7.5}})
+  ✔ 6ms → 
+    {
+      "questionShownToUser": "Update Computer Networks (CS202, 2030-5) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
+      "isError": false,
+      "text": "Grade inserted: CS202 2030-5 → total 7.7 (B). Cumulative GPA 1.5 → 1.5."
+    }
+
+▶ update_grade · user answers "accept + confirm=false"
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-6","process_score":8,"final_score":7.5}})
+  ✔ 4ms → 
+    {
+      "questionShownToUser": "Update Computer Networks (CS202, 2030-6) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
+      "isError": false,
+      "text": "The user did not tick confirm — the grade was NOT changed."
+    }
+
+▶ update_grade · user answers "decline"
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-7","process_score":8,"final_score":7.5}})
+  ✔ 3ms → 
+    {
+      "questionShownToUser": "Update Computer Networks (CS202, 2030-7) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
+      "isError": false,
+      "text": "The user declined — the grade was NOT changed."
+    }
+
+▶ update_grade · user answers "cancel (closed the dialog)"
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-8","process_score":8,"final_score":7.5}})
+  ✔ 3ms → 
+    {
+      "questionShownToUser": "Update Computer Networks (CS202, 2030-8) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
+      "isError": false,
+      "text": "The user cancelled the dialog — the grade was NOT changed."
+    }
+
+── modern — sampling ─────────────────────────────────────────────────────────
+
+▶ generate_student_feedback · tone=encouraging
+  callTool({"name":"generate_student_feedback","arguments":{"student_id":"2201010","tone":"encouraging"}})
+  ✔ 6ms → 
+    {
+      "isError": false,
+      "text": "Feedback for Trần Đức Phúc (written by mock-llm (replaced by Gemini in M3)):\n\n[mock] Received a 560-character prompt; system: \"You are a supportive academic advisor.\"."
+    }
+
+▶ generate_student_feedback · tone=formal
+  callTool({"name":"generate_student_feedback","arguments":{"student_id":"2201010","tone":"formal"}})
+  ✔ 2ms → 
+    {
+      "isError": false,
+      "text": "Feedback for Trần Đức Phúc (written by mock-llm (replaced by Gemini in M3)):\n\n[mock] Received a 555-character prompt; system: \"You are a supportive academic advisor.\"."
+    }
+
+── Client WITHOUT elicitation / sampling capabilities ────────────────────────
+
+▶ update_grade → cannot ask for confirmation, nothing changes
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-9","process_score":8,"final_score":7.5}})
+  ✔ 0ms → 
+    {
+      "isError": true,
+      "text": "Cannot ask the user for confirmation (SdkError: Client does not support form elicitation.). The grade was NOT changed."
+    }
+
+▶ generate_student_feedback → no LLM to borrow
+  callTool({"name":"generate_student_feedback","arguments":{"student_id":"2201010"}})
+  ✔ 0ms → 
+    {
+      "isError": true,
+      "text": "The host did not provide an LLM for sampling (ProtocolError: Method not found)."
+    }
+
+▶ 2026 era: missing capability is rejected by the SDK (-32021)
+  callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2031-1","process_score":8,"final_score":7.5}})
+  ✖ 1ms → ProtocolError (code -32021): Cannot request input 'confirm_update' (elicitation/create): the request's client capabilities do not declare the required capability
+
+✔ 15 steps (1 expected/unexpected errors) — saved outputs/examples/s7-elicitation-sampling.json

@@ -1,0 +1,134 @@
+
+══════════════════════════════════════════════════════════════════════════════
+C2 · Request options (timeout, progress) and the client-side error taxonomy
+SDK: RequestOptions.timeout, RequestOptions.onprogress, RequestOptions.resetTimeoutOnProgress, RequestOptions.maxTotalTimeout, ProtocolError, SdkError
+══════════════════════════════════════════════════════════════════════════════
+
+── Timeouts — job = 8 batches × 150 ms ≈ 1.2 s ───────────────────────────────
+
+▶ A. timeout 400 ms → times out
+  callTool(params, options)({"name":"export_transcripts","arguments":{"batches":8,"delayMs":150},"options":{"timeout":400}})
+  ✖ 410ms → SdkError (code REQUEST_TIMEOUT): Request timed out
+
+▶ B. timeout 400 ms + resetTimeoutOnProgress → each update restarts the clock
+  callTool(params, options)({"name":"export_transcripts","arguments":{"batches":8,"delayMs":150},"options":{"timeout":400,"resetTimeoutOnProgress":true}})
+  ✔ 1226ms → 
+    {
+      "text": "Exported 8 batches",
+      "progressUpdates": 8
+    }
+
+▶ C. same + maxTotalTimeout 700 ms → hard cap wins
+  callTool(params, options)({"name":"export_transcripts","arguments":{"batches":8,"delayMs":150},"options":{"timeout":400,"resetTimeoutOnProgress":true,"maxTotalTimeout":700}})
+  ✖ 763ms → SdkError (code REQUEST_TIMEOUT): Maximum total timeout exceeded
+
+▶ D. default timeout (60 s) → completes
+  callTool(params, options)({"name":"export_transcripts","arguments":{"batches":8,"delayMs":150},"options":{}})
+  ✔ 1219ms → 
+    {
+      "text": "Exported 8 batches",
+      "progressUpdates": 8
+    }
+
+── Failure taxonomy — where does each failure show up? ───────────────────────
+
+▶ Handler reports a business error (unknown student)
+  classify()
+  ✔ 4ms → 
+    {
+      "failure": "Handler reports a business error (unknown student)",
+      "surfacesAs": "result.isError = true",
+      "detail": "No student with student_id \"9999999\". Use search_students to find the right ID."
+    }
+
+▶ Arguments fail the tool inputSchema
+  classify()
+  ✔ 3ms → 
+    {
+      "failure": "Arguments fail the tool inputSchema",
+      "surfacesAs": "result.isError = true",
+      "detail": "Input validation error: Invalid arguments for tool calculate_gpa: student_id: Invalid input: expected string, "
+    }
+
+▶ Tool name does not exist
+  classify()
+  ✔ 3ms → 
+    {
+      "failure": "Tool name does not exist",
+      "surfacesAs": "throws ProtocolError (-32602)",
+      "detail": "Tool delete_everything not found"
+    }
+
+▶ Prompt arguments fail argsSchema
+  classify()
+  ✔ 3ms → 
+    {
+      "failure": "Prompt arguments fail argsSchema",
+      "surfacesAs": "throws ProtocolError (-32602)",
+      "detail": "Invalid arguments for prompt class_report: class_id: Invalid input: expected string, received undefined"
+    }
+
+▶ Resource URI not found
+  classify()
+  ✔ 3ms → 
+    {
+      "failure": "Resource URI not found",
+      "surfacesAs": "throws ProtocolError (-32602)",
+      "detail": "Unknown student \"0000000\""
+    }
+
+▶ Method not available in this protocol era (ping on 2026)
+  classify()
+  ✔ 0ms → 
+    {
+      "failure": "Method not available in this protocol era (ping on 2026)",
+      "surfacesAs": "throws SdkError (METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION)",
+      "detail": "Method 'ping' is not supported by the negotiated protocol version (wire era 2026-07-28)"
+    }
+
+▶ Connection already closed
+  classify()
+  ✔ 4ms → 
+    {
+      "failure": "Connection already closed",
+      "surfacesAs": "throws Error",
+      "detail": "Not connected"
+    }
+
+▶ Request timeout
+  classify()
+  ✔ 101ms → 
+    {
+      "failure": "Request timeout",
+      "surfacesAs": "throws SdkError (REQUEST_TIMEOUT)",
+      "detail": "Request timed out"
+    }
+
+▶ Capability the server never advertised (prompts on a tools-only server)
+  classify()
+Client.listPrompts() called but server does not advertise prompts capability - returning empty list
+  ✔ 0ms → 
+    {
+      "failure": "Capability the server never advertised (prompts on a tools-only server)",
+      "surfacesAs": "normal result",
+      "detail": "{\"prompts\":[]}"
+    }
+
+── Summary ───────────────────────────────────────────────────────────────────
+┌─────────┬──────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┐
+│ (index) │ failure                                                      │ surfacesAs                                                   │
+├─────────┼──────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────┤
+│ 0       │ 'Handler reports a business error (unknown student)'         │ 'result.isError = true'                                      │
+│ 1       │ 'Arguments fail the tool inputSchema'                        │ 'result.isError = true'                                      │
+│ 2       │ 'Tool name does not exist'                                   │ 'throws ProtocolError (-32602)'                              │
+│ 3       │ 'Prompt arguments fail argsSchema'                           │ 'throws ProtocolError (-32602)'                              │
+│ 4       │ 'Resource URI not found'                                     │ 'throws ProtocolError (-32602)'                              │
+│ 5       │ 'Method not available in this protocol era (ping on 2026)'   │ 'throws SdkError (METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION)' │
+│ 6       │ 'Connection already closed'                                  │ 'throws Error'                                               │
+│ 7       │ 'Request timeout'                                            │ 'throws SdkError (REQUEST_TIMEOUT)'                          │
+│ 8       │ 'Capability the server never advertised (prompts on a tools' │ 'normal result'                                              │
+└─────────┴──────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────┘
+   ℹ Rule of thumb: tool-level problems come back as a RESULT (isError) so the LLM can read and recover;
+   ℹ protocol problems THROW ProtocolError (JSON-RPC code from the server); local problems THROW SdkError.
+
+✔ 13 steps (2 expected/unexpected errors) — saved outputs/examples/c2-request-options-errors.json

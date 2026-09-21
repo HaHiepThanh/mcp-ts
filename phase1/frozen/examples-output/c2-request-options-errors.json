@@ -1,0 +1,244 @@
+{
+  "example": "c2-request-options-errors",
+  "title": "C2 · Request options (timeout, progress) and the client-side error taxonomy",
+  "sdkMethods": [
+    "RequestOptions.timeout",
+    "RequestOptions.onprogress",
+    "RequestOptions.resetTimeoutOnProgress",
+    "RequestOptions.maxTotalTimeout",
+    "ProtocolError",
+    "SdkError"
+  ],
+  "ranAt": "2026-09-21T07:07:12.564Z",
+  "taxonomy": [
+    {
+      "failure": "Handler reports a business error (unknown student)",
+      "surfacesAs": "result.isError = true",
+      "detail": "No student with student_id \"9999999\". Use search_students to find the right ID."
+    },
+    {
+      "failure": "Arguments fail the tool inputSchema",
+      "surfacesAs": "result.isError = true",
+      "detail": "Input validation error: Invalid arguments for tool calculate_gpa: student_id: Invalid input: expected string, "
+    },
+    {
+      "failure": "Tool name does not exist",
+      "surfacesAs": "throws ProtocolError (-32602)",
+      "detail": "Tool delete_everything not found"
+    },
+    {
+      "failure": "Prompt arguments fail argsSchema",
+      "surfacesAs": "throws ProtocolError (-32602)",
+      "detail": "Invalid arguments for prompt class_report: class_id: Invalid input: expected string, received undefined"
+    },
+    {
+      "failure": "Resource URI not found",
+      "surfacesAs": "throws ProtocolError (-32602)",
+      "detail": "Unknown student \"0000000\""
+    },
+    {
+      "failure": "Method not available in this protocol era (ping on 2026)",
+      "surfacesAs": "throws SdkError (METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION)",
+      "detail": "Method 'ping' is not supported by the negotiated protocol version (wire era 2026-07-28)"
+    },
+    {
+      "failure": "Connection already closed",
+      "surfacesAs": "throws Error",
+      "detail": "Not connected"
+    },
+    {
+      "failure": "Request timeout",
+      "surfacesAs": "throws SdkError (REQUEST_TIMEOUT)",
+      "detail": "Request timed out"
+    },
+    {
+      "failure": "Capability the server never advertised (prompts on a tools-only server)",
+      "surfacesAs": "normal result",
+      "detail": "{\"prompts\":[]}"
+    }
+  ],
+  "steps": [
+    {
+      "step": "A. timeout 400 ms → times out",
+      "method": "callTool(params, options)",
+      "params": {
+        "name": "export_transcripts",
+        "arguments": {
+          "batches": 8,
+          "delayMs": 150
+        },
+        "options": {
+          "timeout": 400
+        }
+      },
+      "ok": false,
+      "ms": 410,
+      "error": {
+        "name": "SdkError",
+        "code": "REQUEST_TIMEOUT",
+        "message": "Request timed out"
+      }
+    },
+    {
+      "step": "B. timeout 400 ms + resetTimeoutOnProgress → each update restarts the clock",
+      "method": "callTool(params, options)",
+      "params": {
+        "name": "export_transcripts",
+        "arguments": {
+          "batches": 8,
+          "delayMs": 150
+        },
+        "options": {
+          "timeout": 400,
+          "resetTimeoutOnProgress": true
+        }
+      },
+      "ok": true,
+      "ms": 1226,
+      "result": {
+        "text": "Exported 8 batches",
+        "progressUpdates": 8
+      }
+    },
+    {
+      "step": "C. same + maxTotalTimeout 700 ms → hard cap wins",
+      "method": "callTool(params, options)",
+      "params": {
+        "name": "export_transcripts",
+        "arguments": {
+          "batches": 8,
+          "delayMs": 150
+        },
+        "options": {
+          "timeout": 400,
+          "resetTimeoutOnProgress": true,
+          "maxTotalTimeout": 700
+        }
+      },
+      "ok": false,
+      "ms": 763,
+      "error": {
+        "name": "SdkError",
+        "code": "REQUEST_TIMEOUT",
+        "message": "Maximum total timeout exceeded"
+      }
+    },
+    {
+      "step": "D. default timeout (60 s) → completes",
+      "method": "callTool(params, options)",
+      "params": {
+        "name": "export_transcripts",
+        "arguments": {
+          "batches": 8,
+          "delayMs": 150
+        },
+        "options": {}
+      },
+      "ok": true,
+      "ms": 1219,
+      "result": {
+        "text": "Exported 8 batches",
+        "progressUpdates": 8
+      }
+    },
+    {
+      "step": "Handler reports a business error (unknown student)",
+      "method": "classify",
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "failure": "Handler reports a business error (unknown student)",
+        "surfacesAs": "result.isError = true",
+        "detail": "No student with student_id \"9999999\". Use search_students to find the right ID."
+      }
+    },
+    {
+      "step": "Arguments fail the tool inputSchema",
+      "method": "classify",
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "failure": "Arguments fail the tool inputSchema",
+        "surfacesAs": "result.isError = true",
+        "detail": "Input validation error: Invalid arguments for tool calculate_gpa: student_id: Invalid input: expected string, "
+      }
+    },
+    {
+      "step": "Tool name does not exist",
+      "method": "classify",
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "failure": "Tool name does not exist",
+        "surfacesAs": "throws ProtocolError (-32602)",
+        "detail": "Tool delete_everything not found"
+      }
+    },
+    {
+      "step": "Prompt arguments fail argsSchema",
+      "method": "classify",
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "failure": "Prompt arguments fail argsSchema",
+        "surfacesAs": "throws ProtocolError (-32602)",
+        "detail": "Invalid arguments for prompt class_report: class_id: Invalid input: expected string, received undefined"
+      }
+    },
+    {
+      "step": "Resource URI not found",
+      "method": "classify",
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "failure": "Resource URI not found",
+        "surfacesAs": "throws ProtocolError (-32602)",
+        "detail": "Unknown student \"0000000\""
+      }
+    },
+    {
+      "step": "Method not available in this protocol era (ping on 2026)",
+      "method": "classify",
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "failure": "Method not available in this protocol era (ping on 2026)",
+        "surfacesAs": "throws SdkError (METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION)",
+        "detail": "Method 'ping' is not supported by the negotiated protocol version (wire era 2026-07-28)"
+      }
+    },
+    {
+      "step": "Connection already closed",
+      "method": "classify",
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "failure": "Connection already closed",
+        "surfacesAs": "throws Error",
+        "detail": "Not connected"
+      }
+    },
+    {
+      "step": "Request timeout",
+      "method": "classify",
+      "ok": true,
+      "ms": 101,
+      "result": {
+        "failure": "Request timeout",
+        "surfacesAs": "throws SdkError (REQUEST_TIMEOUT)",
+        "detail": "Request timed out"
+      }
+    },
+    {
+      "step": "Capability the server never advertised (prompts on a tools-only server)",
+      "method": "classify",
+      "ok": true,
+      "ms": 0,
+      "result": {
+        "failure": "Capability the server never advertised (prompts on a tools-only server)",
+        "surfacesAs": "normal result",
+        "detail": "{\"prompts\":[]}"
+      }
+    }
+  ]
+}

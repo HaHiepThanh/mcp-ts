@@ -1,9 +1,11 @@
 # Lần 1 — nộp gì cho thầy
 
-Tạo gói nộp (chạy lại mỗi khi có thay đổi):
+> 🧊 **Đã đóng băng** tại git tag `phase1-freeze`: code, tài liệu, dữ liệu Lần 1 luôn lấy từ tag này; kết quả ví dụ lấy từ `frozen/examples-output/`. Chỉ slide và trắc nghiệm (từ Drive `team/`) còn được cập nhật. Phân công: [`TASKS.md`](../TASKS.md).
+
+Tạo gói nộp (chạy lại khi có slide/trắc nghiệm mới trên Drive):
 
 ```bash
-cd mcp-academic && npm run examples && npm run results && cd .. && bash build-submission.sh
+bash build-submission.sh
 ```
 
 → thư mục **`phase1/submission/`** và file **`phase1/submission.zip`**. File `submission/STATUS.txt` cho biết mục nào đã là bản của nhóm (✅), mục nào vẫn là bản nháp (⚠️).
@@ -20,8 +22,8 @@ cd mcp-academic && npm run examples && npm run results && cd .. && bash build-su
 | Code ví dụ từng function cho nhóm khác làm theo | `02-code/mcp-academic/examples/` — S1–S8, C1–C5 (13 file) · chạy: `npm run examples` | ✅ |
 | Ví dụ từng method với từng bộ tham số (ipynb/data) | `04-examples-per-method/*.json` + `*.log` (kết quả chạy thật của từng bộ tham số) · `03-data/` | ✅ — thầy cho phép nộp code thay notebook |
 | ~~Bộ câu hỏi tình huống~~ | — | ❌ thầy đã bỏ |
-| pptx 30+ slide | `01-slides/` — **file pptx do TV3 + TV4 làm**, đặt trên Drive `team/slides/` tên có chữ `phase1`; nội dung nháp từng slide: `01-slides/slides-content.md` | ⏳ nhóm đang làm |
-| txt 10–20 câu trắc nghiệm | `06-quiz/` — bản nháp 20 câu `quiz-draft.txt`; TV5 duyệt/sửa rồi đặt `team/quiz/questions-phase1.txt` | ⚠️ đang là bản nháp |
+| pptx 30+ slide | `01-slides/` — **file pptx do Phú + Hoàng làm**, đặt trên Drive `team/slides/` tên có chữ `phase1`; nội dung nháp từng slide: `01-slides/slides-content.md` | ⏳ nhóm đang làm |
+| txt 10–20 câu trắc nghiệm | `06-quiz/` — bản nháp 20 câu `quiz-draft.txt`; Khoa duyệt/sửa rồi đặt `team/quiz/questions-phase1.txt` | ⚠️ đang là bản nháp |
 
 ## Thêm (không bắt buộc nhưng nên nộp kèm)
 
@@ -42,6 +44,7 @@ cd mcp-academic && npm run examples && npm run results && cd .. && bash build-su
 | File | Là gì |
 | --- | --- |
 | `requirement.md` | Đề bài Lần 1 |
-| `slides-content.md` | Nội dung nháp 34 slide (tiêu đề, ý chính, hình, nguồn số liệu) cho TV3/TV4 |
-| `quiz-draft.txt` | 20 câu trắc nghiệm nháp (tiếng Anh, có đáp án) cho TV5 duyệt |
+| `slides-content.md` | Nội dung nháp 34 slide (tiêu đề, ý chính, hình, nguồn số liệu) cho Phú/Hoàng |
+| `quiz-draft.txt` | 20 câu trắc nghiệm nháp (tiếng Anh, có đáp án) cho Khoa duyệt |
+| `frozen/examples-output/` | Kết quả chạy 13 ví dụ tại thời điểm đóng băng |
 | `submission/`, `submission.zip` | Gói nộp — **tự sinh**, không sửa tay |

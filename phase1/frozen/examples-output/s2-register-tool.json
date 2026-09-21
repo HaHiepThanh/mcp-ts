@@ -1,0 +1,793 @@
+{
+  "example": "s2-register-tool",
+  "title": "S2 · Tools: server.registerTool(name, config, handler)",
+  "sdkMethods": [
+    "registerTool",
+    "client.listTools",
+    "client.callTool"
+  ],
+  "ranAt": "2026-09-21T07:07:08.364Z",
+  "steps": [
+    {
+      "step": "tools/list shows how each config is advertised",
+      "method": "listTools",
+      "ok": true,
+      "ms": 4,
+      "result": [
+        {
+          "name": "add",
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "number"
+              },
+              "b": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "a",
+              "b"
+            ]
+          }
+        },
+        {
+          "name": "server_time",
+          "inputSchema": {
+            "type": "object",
+            "properties": {}
+          }
+        },
+        {
+          "name": "letter_of",
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              }
+            },
+            "required": [
+              "total"
+            ]
+          },
+          "outputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "number"
+              },
+              "letter": {
+                "type": "string",
+                "enum": [
+                  "A",
+                  "B",
+                  "C",
+                  "D",
+                  "F"
+                ]
+              }
+            },
+            "required": [
+              "total",
+              "letter"
+            ],
+            "additionalProperties": false
+          }
+        },
+        {
+          "name": "reset_demo_data",
+          "title": "Reset demo data",
+          "inputSchema": {
+            "type": "object",
+            "properties": {}
+          },
+          "annotations": {
+            "readOnlyHint": false,
+            "destructiveHint": true,
+            "idempotentHint": true
+          }
+        },
+        {
+          "name": "broken_output",
+          "inputSchema": {
+            "type": "object",
+            "properties": {}
+          },
+          "outputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "gpa": {
+                "type": "number",
+                "maximum": 4
+              }
+            },
+            "required": [
+              "gpa"
+            ],
+            "additionalProperties": false
+          }
+        }
+      ]
+    },
+    {
+      "step": "A. inputSchema only",
+      "method": "callTool",
+      "params": {
+        "name": "add",
+        "arguments": {
+          "a": 2,
+          "b": 3
+        }
+      },
+      "ok": true,
+      "ms": 7,
+      "result": {
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "tool-variants",
+            "version": "1.0.0"
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "5"
+          }
+        ]
+      }
+    },
+    {
+      "step": "B. no inputSchema (no arguments)",
+      "method": "callTool",
+      "params": {
+        "name": "server_time"
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "tool-variants",
+            "version": "1.0.0"
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "2026-09-21T07:07:08.410Z"
+          }
+        ]
+      }
+    },
+    {
+      "step": "C. outputSchema → structuredContent",
+      "method": "callTool",
+      "params": {
+        "name": "letter_of",
+        "arguments": {
+          "total": 7.4
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "tool-variants",
+            "version": "1.0.0"
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "B"
+          }
+        ],
+        "structuredContent": {
+          "total": 7.4,
+          "letter": "B"
+        }
+      }
+    },
+    {
+      "step": "D. annotations are hints only — execution is unchanged",
+      "method": "callTool",
+      "params": {
+        "name": "reset_demo_data"
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "tool-variants",
+            "version": "1.0.0"
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "Nothing was actually deleted."
+          }
+        ]
+      }
+    },
+    {
+      "step": "E. structuredContent violating outputSchema is caught by the SDK",
+      "method": "callTool",
+      "params": {
+        "name": "broken_output"
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "tool-variants",
+            "version": "1.0.0"
+          }
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "Output validation error: Invalid structured content for tool broken_output: gpa: Too big: expected number to be <=4"
+          }
+        ],
+        "isError": true
+      }
+    },
+    {
+      "step": "calculate_gpa · cumulative GPA",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201001"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201001",
+          "full_name": "Bùi Quốc Hải",
+          "scope": "cumulative",
+          "semester": null,
+          "gpa": 3.28,
+          "classification": "Very good",
+          "credits_attempted": 18,
+          "credits_earned": 18,
+          "courses_counted": 6
+        }
+      }
+    },
+    {
+      "step": "calculate_gpa · one semester",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201001",
+          "semester": "2024-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201001",
+          "full_name": "Bùi Quốc Hải",
+          "scope": "semester",
+          "semester": "2024-1",
+          "gpa": 3.25,
+          "classification": "Very good",
+          "credits_attempted": 8,
+          "credits_earned": 8,
+          "courses_counted": 3
+        }
+      }
+    },
+    {
+      "step": "calculate_gpa · weak student with retakes (best attempt kept)",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201010"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201010",
+          "full_name": "Trần Đức Phúc",
+          "scope": "cumulative",
+          "semester": null,
+          "gpa": 2.06,
+          "classification": "Average",
+          "credits_attempted": 18,
+          "credits_earned": 18,
+          "courses_counted": 6
+        }
+      }
+    },
+    {
+      "step": "calculate_gpa · same student, semester 2024-1 only (F counted)",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201010",
+          "semester": "2024-1"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201010",
+          "full_name": "Trần Đức Phúc",
+          "scope": "semester",
+          "semester": "2024-1",
+          "gpa": 0.38,
+          "classification": "Weak",
+          "credits_attempted": 8,
+          "credits_earned": 3,
+          "courses_counted": 3
+        }
+      }
+    },
+    {
+      "step": "calculate_gpa · unknown student → handler returns isError",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "9999999"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "No student with student_id \"9999999\". Use search_students to find the right ID."
+      }
+    },
+    {
+      "step": "calculate_gpa · bad semester format → rejected by inputSchema",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": "2201001",
+          "semester": "HK1"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "Input validation error: Invalid arguments for tool calculate_gpa: semester: Semester must look like 2024-1"
+      }
+    },
+    {
+      "step": "calculate_gpa · wrong type (number) → rejected by inputSchema",
+      "method": "callTool",
+      "params": {
+        "name": "calculate_gpa",
+        "arguments": {
+          "student_id": 2201001
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "Input validation error: Invalid arguments for tool calculate_gpa: student_id: Invalid input: expected string, received number"
+      }
+    },
+    {
+      "step": "search_students · accent-insensitive keyword",
+      "method": "callTool",
+      "params": {
+        "name": "search_students",
+        "arguments": {
+          "keyword": "hai"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "total_matches": 1,
+          "returned": 1,
+          "students": [
+            {
+              "student_id": "2201001",
+              "full_name": "Bùi Quốc Hải",
+              "class_id": "IT01",
+              "faculty": "Information Technology"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "search_students · class filter + limit",
+      "method": "callTool",
+      "params": {
+        "name": "search_students",
+        "arguments": {
+          "class_id": "IT02",
+          "limit": 3
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "total_matches": 10,
+          "returned": 3,
+          "students": [
+            {
+              "student_id": "2201011",
+              "full_name": "Trần Hoàng Tuấn",
+              "class_id": "IT02",
+              "faculty": "Information Technology"
+            },
+            {
+              "student_id": "2201012",
+              "full_name": "Bùi Đức Bình",
+              "class_id": "IT02",
+              "faculty": "Information Technology"
+            },
+            {
+              "student_id": "2201013",
+              "full_name": "Nguyễn Văn An",
+              "class_id": "IT02",
+              "faculty": "Information Technology"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "search_students · limit above max (50) → rejected",
+      "method": "callTool",
+      "params": {
+        "name": "search_students",
+        "arguments": {
+          "limit": 999
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "Input validation error: Invalid arguments for tool search_students: limit: Too big: expected number to be <=50"
+      }
+    },
+    {
+      "step": "get_transcript · one semester",
+      "method": "callTool",
+      "params": {
+        "name": "get_transcript",
+        "arguments": {
+          "student_id": "2201010",
+          "semester": "2024-1"
+        }
+      },
+      "ok": true,
+      "ms": 6,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201010",
+          "full_name": "Trần Đức Phúc",
+          "class_id": "IT01",
+          "semester": "2024-1",
+          "courses": [
+            {
+              "course_id": "CS101",
+              "course_name": "Introduction to Programming",
+              "semester": "2024-1",
+              "credits": 3,
+              "process_score": 4,
+              "final_score": 4.2,
+              "total": 4.1,
+              "letter": "D",
+              "point": 1,
+              "passed": true
+            },
+            {
+              "course_id": "GE101",
+              "course_name": "English 1",
+              "semester": "2024-1",
+              "credits": 2,
+              "process_score": 4.3,
+              "final_score": 2.9,
+              "total": 3.5,
+              "letter": "F",
+              "point": 0,
+              "passed": false
+            },
+            {
+              "course_id": "GE102",
+              "course_name": "Calculus",
+              "semester": "2024-1",
+              "credits": 3,
+              "process_score": 4.4,
+              "final_score": 2.6,
+              "total": 3.3,
+              "letter": "F",
+              "point": 0,
+              "passed": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "class_statistics · whole class",
+      "method": "callTool",
+      "params": {
+        "name": "class_statistics",
+        "arguments": {
+          "class_id": "IT01"
+        }
+      },
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "class_id": "IT01",
+          "course_id": null,
+          "semester": null,
+          "students": 10,
+          "grade_records": 65,
+          "average_total": 7.24,
+          "highest_total": 10,
+          "lowest_total": 3.3,
+          "pass_rate": 0.91,
+          "letter_distribution": {
+            "A": 16,
+            "B": 32,
+            "C": 5,
+            "D": 6,
+            "F": 6
+          },
+          "average_gpa": 2.92
+        }
+      }
+    },
+    {
+      "step": "class_statistics · class + course",
+      "method": "callTool",
+      "params": {
+        "name": "class_statistics",
+        "arguments": {
+          "class_id": "IT01",
+          "course_id": "CS201"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "class_id": "IT01",
+          "course_id": "CS201",
+          "semester": null,
+          "students": 10,
+          "grade_records": 11,
+          "average_total": 7.14,
+          "highest_total": 9.6,
+          "lowest_total": 3.3,
+          "pass_rate": 0.91,
+          "letter_distribution": {
+            "A": 1,
+            "B": 7,
+            "C": 1,
+            "D": 1,
+            "F": 1
+          },
+          "average_gpa": 2.92
+        }
+      }
+    },
+    {
+      "step": "class_statistics · unknown class",
+      "method": "callTool",
+      "params": {
+        "name": "class_statistics",
+        "arguments": {
+          "class_id": "XX99"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "Unknown class \"XX99\". Known classes: BA01, BA02, IT01, IT02."
+      }
+    },
+    {
+      "step": "rank_students · top 3 of faculty",
+      "method": "callTool",
+      "params": {
+        "name": "rank_students",
+        "arguments": {
+          "scope": "faculty",
+          "value": "Business",
+          "top": 3
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "scope": "faculty",
+          "value": "Business",
+          "semester": null,
+          "ranked": 20,
+          "ranking": [
+            {
+              "rank": 1,
+              "student_id": "2202002",
+              "full_name": "Phạm Thị Lan",
+              "class_id": "BA01",
+              "gpa": 4,
+              "classification": "Excellent",
+              "credits_attempted": 18,
+              "credits_earned": 18,
+              "courses_counted": 6
+            },
+            {
+              "rank": 2,
+              "student_id": "2202006",
+              "full_name": "Trần Thu Linh",
+              "class_id": "BA01",
+              "gpa": 3.83,
+              "classification": "Excellent",
+              "credits_attempted": 18,
+              "credits_earned": 18,
+              "courses_counted": 6
+            },
+            {
+              "rank": 3,
+              "student_id": "2202011",
+              "full_name": "Đặng Văn Nam",
+              "class_id": "BA02",
+              "gpa": 3.56,
+              "classification": "Very good",
+              "credits_attempted": 18,
+              "credits_earned": 18,
+              "courses_counted": 6
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "rank_students · missing value for scope=class",
+      "method": "callTool",
+      "params": {
+        "name": "rank_students",
+        "arguments": {
+          "scope": "class"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "\"value\" is required when scope is \"class\"."
+      }
+    },
+    {
+      "step": "query_table · generic filter (final_score < 4)",
+      "method": "callTool",
+      "params": {
+        "name": "query_table",
+        "arguments": {
+          "table": "grades",
+          "filters": [
+            {
+              "column": "final_score",
+              "operator": "lt",
+              "value": "4"
+            }
+          ],
+          "limit": 5
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "table": "grades",
+          "total_matches": 22,
+          "returned": 5,
+          "rows": [
+            {
+              "student_id": "2201005",
+              "course_id": "GE102",
+              "semester": "2024-1",
+              "process_score": "4.2",
+              "final_score": "3.8"
+            },
+            {
+              "student_id": "2201005",
+              "course_id": "CS202",
+              "semester": "2025-1",
+              "process_score": "4.1",
+              "final_score": "3.7"
+            },
+            {
+              "student_id": "2201010",
+              "course_id": "GE101",
+              "semester": "2024-1",
+              "process_score": "4.3",
+              "final_score": "2.9"
+            },
+            {
+              "student_id": "2201010",
+              "course_id": "GE102",
+              "semester": "2024-1",
+              "process_score": "4.4",
+              "final_score": "2.6"
+            },
+            {
+              "student_id": "2201010",
+              "course_id": "CS102",
+              "semester": "2024-2",
+              "process_score": "3.1",
+              "final_score": "3.9"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "query_table · unknown column",
+      "method": "callTool",
+      "params": {
+        "name": "query_table",
+        "arguments": {
+          "table": "grades",
+          "filters": [
+            {
+              "column": "gpa",
+              "operator": "gt",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "Unknown column(s) gpa in \"grades\". Columns: student_id, course_id, semester, process_score, final_score."
+      }
+    }
+  ]
+}

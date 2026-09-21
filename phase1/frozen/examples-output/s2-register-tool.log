@@ -1,0 +1,591 @@
+
+══════════════════════════════════════════════════════════════════════════════
+S2 · Tools: server.registerTool(name, config, handler)
+SDK: registerTool, client.listTools, client.callTool
+══════════════════════════════════════════════════════════════════════════════
+
+── Part 1 — registerTool config variants ─────────────────────────────────────
+
+▶ tools/list shows how each config is advertised
+  listTools()
+  ✔ 4ms → 
+    [
+      {
+        "name": "add",
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "a": {
+              "type": "number"
+            },
+            "b": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "a",
+            "b"
+          ]
+        }
+      },
+      {
+        "name": "server_time",
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      {
+        "name": "letter_of",
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "total"
+          ]
+        },
+        "outputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "total": {
+              "type": "number"
+            },
+            "letter": {
+              "type": "string",
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "F"
+              ]
+            }
+          },
+          "required": [
+            "total",
+            "letter"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "name": "reset_demo_data",
+        "title": "Reset demo data",
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": true
+        }
+      },
+      {
+        "name": "broken_output",
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "gpa": {
+              "type": "number",
+              "maximum": 4
+            }
+          },
+          "required": [
+            "gpa"
+          ],
+          "additionalProperties": false
+        }
+      }
+    ]
+
+▶ A. inputSchema only
+  callTool({"name":"add","arguments":{"a":2,"b":3}})
+  ✔ 7ms → 
+    {
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "tool-variants",
+          "version": "1.0.0"
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "5"
+        }
+      ]
+    }
+
+▶ B. no inputSchema (no arguments)
+  callTool({"name":"server_time"})
+  ✔ 2ms → 
+    {
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "tool-variants",
+          "version": "1.0.0"
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "2026-09-21T07:07:08.410Z"
+        }
+      ]
+    }
+
+▶ C. outputSchema → structuredContent
+  callTool({"name":"letter_of","arguments":{"total":7.4}})
+  ✔ 1ms → 
+    {
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "tool-variants",
+          "version": "1.0.0"
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "B"
+        }
+      ],
+      "structuredContent": {
+        "total": 7.4,
+        "letter": "B"
+      }
+    }
+
+▶ D. annotations are hints only — execution is unchanged
+  callTool({"name":"reset_demo_data"})
+  ✔ 1ms → 
+    {
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "tool-variants",
+          "version": "1.0.0"
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Nothing was actually deleted."
+        }
+      ]
+    }
+
+▶ E. structuredContent violating outputSchema is caught by the SDK
+  callTool({"name":"broken_output"})
+  ✔ 1ms → 
+    {
+      "_meta": {
+        "io.modelcontextprotocol/serverInfo": {
+          "name": "tool-variants",
+          "version": "1.0.0"
+        }
+      },
+      "content": [
+        {
+          "type": "text",
+          "text": "Output validation error: Invalid structured content for tool broken_output: gpa: Too big: expected number to be <=4"
+        }
+      ],
+      "isError": true
+    }
+
+── Part 2 — academic tools, parameter sets ───────────────────────────────────
+
+▶ calculate_gpa · cumulative GPA
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201001"}})
+  ✔ 2ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201001",
+        "full_name": "Bùi Quốc Hải",
+        "scope": "cumulative",
+        "semester": null,
+        "gpa": 3.28,
+        "classification": "Very good",
+        "credits_attempted": 18,
+        "credits_earned": 18,
+        "courses_counted": 6
+      }
+    }
+
+▶ calculate_gpa · one semester
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201001","semester":"2024-1"}})
+  ✔ 2ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201001",
+        "full_name": "Bùi Quốc Hải",
+        "scope": "semester",
+        "semester": "2024-1",
+        "gpa": 3.25,
+        "classification": "Very good",
+        "credits_attempted": 8,
+        "credits_earned": 8,
+        "courses_counted": 3
+      }
+    }
+
+▶ calculate_gpa · weak student with retakes (best attempt kept)
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201010"}})
+  ✔ 2ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201010",
+        "full_name": "Trần Đức Phúc",
+        "scope": "cumulative",
+        "semester": null,
+        "gpa": 2.06,
+        "classification": "Average",
+        "credits_attempted": 18,
+        "credits_earned": 18,
+        "courses_counted": 6
+      }
+    }
+
+▶ calculate_gpa · same student, semester 2024-1 only (F counted)
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201010","semester":"2024-1"}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201010",
+        "full_name": "Trần Đức Phúc",
+        "scope": "semester",
+        "semester": "2024-1",
+        "gpa": 0.38,
+        "classification": "Weak",
+        "credits_attempted": 8,
+        "credits_earned": 3,
+        "courses_counted": 3
+      }
+    }
+
+▶ calculate_gpa · unknown student → handler returns isError
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"9999999"}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "No student with student_id \"9999999\". Use search_students to find the right ID."
+    }
+
+▶ calculate_gpa · bad semester format → rejected by inputSchema
+  callTool({"name":"calculate_gpa","arguments":{"student_id":"2201001","semester":"HK1"}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "Input validation error: Invalid arguments for tool calculate_gpa: semester: Semester must look like 2024-1"
+    }
+
+▶ calculate_gpa · wrong type (number) → rejected by inputSchema
+  callTool({"name":"calculate_gpa","arguments":{"student_id":2201001}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "Input validation error: Invalid arguments for tool calculate_gpa: student_id: Invalid input: expected string, received number"
+    }
+
+▶ search_students · accent-insensitive keyword
+  callTool({"name":"search_students","arguments":{"keyword":"hai"}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "total_matches": 1,
+        "returned": 1,
+        "students": [
+          {
+            "student_id": "2201001",
+            "full_name": "Bùi Quốc Hải",
+            "class_id": "IT01",
+            "faculty": "Information Technology"
+          }
+        ]
+      }
+    }
+
+▶ search_students · class filter + limit
+  callTool({"name":"search_students","arguments":{"class_id":"IT02","limit":3}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "total_matches": 10,
+        "returned": 3,
+        "students": [
+          {
+            "student_id": "2201011",
+            "full_name": "Trần Hoàng Tuấn",
+            "class_id": "IT02",
+            "faculty": "Information Technology"
+          },
+          {
+            "student_id": "2201012",
+            "full_name": "Bùi Đức Bình",
+            "class_id": "IT02",
+            "faculty": "Information Technology"
+          },
+          {
+            "student_id": "2201013",
+            "full_name": "Nguyễn Văn An",
+            "class_id": "IT02",
+            "faculty": "Information Technology"
+          }
+        ]
+      }
+    }
+
+▶ search_students · limit above max (50) → rejected
+  callTool({"name":"search_students","arguments":{"limit":999}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "Input validation error: Invalid arguments for tool search_students: limit: Too big: expected number to be <=50"
+    }
+
+▶ get_transcript · one semester
+  callTool({"name":"get_transcript","arguments":{"student_id":"2201010","semester":"2024-1"}})
+  ✔ 6ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201010",
+        "full_name": "Trần Đức Phúc",
+        "class_id": "IT01",
+        "semester": "2024-1",
+        "courses": [
+          {
+            "course_id": "CS101",
+            "course_name": "Introduction to Programming",
+            "semester": "2024-1",
+            "credits": 3,
+            "process_score": 4,
+            "final_score": 4.2,
+            "total": 4.1,
+            "letter": "D",
+            "point": 1,
+            "passed": true
+          },
+          {
+            "course_id": "GE101",
+            "course_name": "English 1",
+            "semester": "2024-1",
+            "credits": 2,
+            "process_score": 4.3,
+            "final_score": 2.9,
+            "total": 3.5,
+            "letter": "F",
+            "point": 0,
+            "passed": false
+          },
+          {
+            "course_id": "GE102",
+            "course_name": "Calculus",
+            "semester": "2024-1",
+            "credits": 3,
+            "process_score": 4.4,
+            "final_score": 2.6,
+            "total": 3.3,
+            "letter": "F",
+            "point": 0,
+            "passed": false
+          }
+        ]
+      }
+    }
+
+▶ class_statistics · whole class
+  callTool({"name":"class_statistics","arguments":{"class_id":"IT01"}})
+  ✔ 4ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "class_id": "IT01",
+        "course_id": null,
+        "semester": null,
+        "students": 10,
+        "grade_records": 65,
+        "average_total": 7.24,
+        "highest_total": 10,
+        "lowest_total": 3.3,
+        "pass_rate": 0.91,
+        "letter_distribution": {
+          "A": 16,
+          "B": 32,
+          "C": 5,
+          "D": 6,
+          "F": 6
+        },
+        "average_gpa": 2.92
+      }
+    }
+
+▶ class_statistics · class + course
+  callTool({"name":"class_statistics","arguments":{"class_id":"IT01","course_id":"CS201"}})
+  ✔ 2ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "class_id": "IT01",
+        "course_id": "CS201",
+        "semester": null,
+        "students": 10,
+        "grade_records": 11,
+        "average_total": 7.14,
+        "highest_total": 9.6,
+        "lowest_total": 3.3,
+        "pass_rate": 0.91,
+        "letter_distribution": {
+          "A": 1,
+          "B": 7,
+          "C": 1,
+          "D": 1,
+          "F": 1
+        },
+        "average_gpa": 2.92
+      }
+    }
+
+▶ class_statistics · unknown class
+  callTool({"name":"class_statistics","arguments":{"class_id":"XX99"}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "Unknown class \"XX99\". Known classes: BA01, BA02, IT01, IT02."
+    }
+
+▶ rank_students · top 3 of faculty
+  callTool({"name":"rank_students","arguments":{"scope":"faculty","value":"Business","top":3}})
+  ✔ 2ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "scope": "faculty",
+        "value": "Business",
+        "semester": null,
+        "ranked": 20,
+        "ranking": [
+          {
+            "rank": 1,
+            "student_id": "2202002",
+            "full_name": "Phạm Thị Lan",
+            "class_id": "BA01",
+            "gpa": 4,
+            "classification": "Excellent",
+            "credits_attempted": 18,
+            "credits_earned": 18,
+            "courses_counted": 6
+          },
+          {
+            "rank": 2,
+            "student_id": "2202006",
+            "full_name": "Trần Thu Linh",
+            "class_id": "BA01",
+            "gpa": 3.83,
+            "classification": "Excellent",
+            "credits_attempted": 18,
+            "credits_earned": 18,
+            "courses_counted": 6
+          },
+          {
+            "rank": 3,
+            "student_id": "2202011",
+            "full_name": "Đặng Văn Nam",
+            "class_id": "BA02",
+            "gpa": 3.56,
+            "classification": "Very good",
+            "credits_attempted": 18,
+            "credits_earned": 18,
+            "courses_counted": 6
+          }
+        ]
+      }
+    }
+
+▶ rank_students · missing value for scope=class
+  callTool({"name":"rank_students","arguments":{"scope":"class"}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "\"value\" is required when scope is \"class\"."
+    }
+
+▶ query_table · generic filter (final_score < 4)
+  callTool({"name":"query_table","arguments":{"table":"grades","filters":[{"column":"final_score","operator":"lt","value":"4"}],"limit":5}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "table": "grades",
+        "total_matches": 22,
+        "returned": 5,
+        "rows": [
+          {
+            "student_id": "2201005",
+            "course_id": "GE102",
+            "semester": "2024-1",
+            "process_score": "4.2",
+            "final_score": "3.8"
+          },
+          {
+            "student_id": "2201005",
+            "course_id": "CS202",
+            "semester": "2025-1",
+            "process_score": "4.1",
+            "final_score": "3.7"
+          },
+          {
+            "student_id": "2201010",
+            "course_id": "GE101",
+            "semester": "2024-1",
+            "process_score": "4.3",
+            "final_score": "2.9"
+          },
+          {
+            "student_id": "2201010",
+            "course_id": "GE102",
+            "semester": "2024-1",
+            "process_score": "4.4",
+            "final_score": "2.6"
+          },
+          {
+            "student_id": "2201010",
+            "course_id": "CS102",
+            "semester": "2024-2",
+            "process_score": "3.1",
+            "final_score": "3.9"
+          }
+        ]
+      }
+    }
+
+▶ query_table · unknown column
+  callTool({"name":"query_table","arguments":{"table":"grades","filters":[{"column":"gpa","operator":"gt","value":"3"}]}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "Unknown column(s) gpa in \"grades\". Columns: student_id, course_id, semester, process_score, final_score."
+    }
+
+✔ 24 steps (0 expected/unexpected errors) — saved outputs/examples/s2-register-tool.json

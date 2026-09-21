@@ -1,0 +1,90 @@
+
+══════════════════════════════════════════════════════════════════════════════
+C3 · Resource change notifications: listen() (2026) vs subscribeResource() (2025)
+SDK: client.listen, McpSubscription.honoredFilter / close / closed, client.subscribeResource, client.unsubscribeResource, client.setNotificationHandler('notifications/resources/updated'), handler.notify.resourceUpdated, server.sendResourceUpdated
+══════════════════════════════════════════════════════════════════════════════
+
+── 2026-07-28 — client.listen() against the real HTTP server (separate process) 
+
+▶ Open a subscription stream for one student profile
+  listen({"resourceSubscriptions":["academic://students/2201005"]})
+  ✔ 6ms → 
+    {
+      "honoredFilter": {
+        "resourceSubscriptions": [
+          "academic://students/2201005"
+        ]
+      }
+    }
+
+▶ Another client changes a grade
+  callTool update_grade({"student_id":"2201005"})
+  ✔ 212ms → 
+    {
+      "toolResult": "Grade inserted: CS202 2032-1 → total 9 (A). Cumulative GPA 1 → 1.67.",
+      "notificationsReceived": [
+        {
+          "uri": "academic://students/2201005",
+          "gpaAfterReRead": 1.67
+        }
+      ]
+    }
+
+▶ subscription.close(), then change again → no notification
+  close + callTool()
+  ✔ 237ms → 
+    {
+      "toolResult": "Grade inserted: CS202 2032-2 → total 9 (A). Cumulative GPA 1.67 → 1.67.",
+      "closedReason": "local",
+      "newNotifications": 0
+    }
+
+── 2025 — client.subscribeResource() on a long-lived connection ──────────────
+
+▶ Change a grade BEFORE subscribing → nothing arrives
+  callTool update_grade()
+  ✔ 209ms → 
+    {
+      "toolResult": "Grade inserted: CS202 2032-3 → total 9 (A). Cumulative GPA 1 → 1.67.",
+      "notificationsReceived": 0
+    }
+
+▶ subscribeResource
+  subscribeResource({"uri":"academic://students/2201005"})
+  ✔ 2ms → {}
+
+▶ Change a grade AFTER subscribing
+  callTool update_grade()
+  ✔ 214ms → 
+    {
+      "toolResult": "Grade inserted: CS202 2032-4 → total 9 (A). Cumulative GPA 1.67 → 1.67.",
+      "notificationsReceived": [
+        {
+          "uri": "academic://students/2201005",
+          "gpaAfterReRead": 1.67
+        }
+      ]
+    }
+
+▶ unsubscribeResource
+  unsubscribeResource({"uri":"academic://students/2201005"})
+  ✔ 1ms → {}
+
+▶ Change a grade after unsubscribing → nothing new
+  callTool update_grade()
+  ✔ 213ms → 
+    {
+      "newNotifications": 0
+    }
+
+── Using the wrong API for the era ───────────────────────────────────────────
+
+▶ listen() on a 2025 connection
+  listen({"resourceSubscriptions":["academic://students/2201005"]})
+  ✖ 1ms → SdkError (code METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION): subscriptions/listen requires a 2026-07-28-era connection (negotiated: 2025-11-25). On a 2025-era connection, change notifications are delivered unsolicited: use ClientOptions.listChanged and resources/subscribe instead.
+
+▶ subscribeResource() on a 2026 connection
+  subscribeResource({"uri":"academic://students/2201005"})
+  ✖ 0ms → SdkError (code METHOD_NOT_SUPPORTED_BY_PROTOCOL_VERSION): Method 'resources/subscribe' is not supported by the negotiated protocol version (wire era 2026-07-28)
+
+✔ 10 steps (2 expected/unexpected errors) — saved outputs/examples/c3-subscriptions.json
