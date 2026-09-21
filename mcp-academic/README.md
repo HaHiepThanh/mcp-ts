@@ -9,7 +9,7 @@ Seminar **MCP.2502 — MCP TypeScript SDK (v2)**. An MCP server that exposes uni
 | M2 | Client-side examples C1–C4 + method reference | ✅ |
 | M3 | `utility` server + chat host (Gemini) | ✅ |
 | M4 | VS Code config, wire trace, docs pack for slides/quiz/demo | ✅ |
-| M5 | Second LLM: Qwen via Ollama | ⏳ |
+| M5 | Second LLM (Qwen3 4B via Ollama) + model comparison | ✅ |
 
 ## Quick start
 
@@ -22,6 +22,7 @@ npm run academic:http # academic server over Streamable HTTP at http://127.0.0.1
 npm run chat          # chat with Gemini using both MCP servers (config/host.json)
 npm run check:vscode  # start the servers exactly as .vscode/mcp.json tells VS Code to
 npm run results       # rebuild docs/results.md from outputs/
+npm run compare       # benchmark every LLM configuration → docs/model-comparison.md
 ```
 
 Requires Node ≥ 20. API keys live in `.env` (see `.env.example`) and are never committed or synced.
@@ -82,6 +83,32 @@ you ─▶ host ─▶ Gemini (sees all MCP tools) ─▶ tool calls ─▶ MCP 
 - **Sampling** — `generate_student_feedback` borrows the host's Gemini through MCP sampling.
 - **Logs** — every turn is appended to `outputs/logs/chat-YYYY-MM-DD.jsonl`: question, tool calls (args, ms, errors), answer, LLM calls (model, ms, retries), tokens, elicitations.
 
+## Two LLMs, one host (M5)
+
+| Config | Model | Provider code |
+| --- | --- | --- |
+| `config/host.json` | Gemini (`gemini-3.5-flash-lite`, cloud) | `src/host/providers/gemini.ts` |
+| `config/host.qwen.json` | Qwen3 4B Instruct in **Ollama**, on this Mac (open weights; `--model qwen3:4b` = thinking variant) | `src/host/providers/openai-compatible.ts` (any OpenAI-compatible endpoint: Ollama, Groq, OpenRouter, OpenAI) |
+
+Run Qwen:
+
+```bash
+OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 ollama serve   # terminal 1 — 8k context: the 13 tool definitions alone are ~4.8k tokens
+ollama pull qwen3:4b-instruct                                                               # once, ~2.5 GB (qwen3:4b = thinking variant)
+npm run chat -- --config config/host.qwen.json                                              # terminal 2
+```
+
+Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the model only).
+
+**Benchmark** — `demo/benchmark.ts` holds 11 questions (single tool, chains, two servers, generic CSV tool, tool error, elicitation arguments, sampling). The ground truth is fetched from the MCP tools themselves, so it follows the dataset. `npm run compare` runs every case on every configuration and writes [`docs/model-comparison.md`](docs/model-comparison.md) plus the full turns in `outputs/benchmarks/`; findings are in [`docs/model-observations.md`](docs/model-observations.md).
+
+| Model | Pass (22 turns) | Median model time/turn |
+| --- | --- | --- |
+| gemini-3.5-flash-lite (cloud) | 100 % | 2.7 s |
+| qwen3:4b-instruct (local) | 100 % | 2.1 s |
+| qwen3:4b thinking (local) | 100 % | 24.4 s |
+| gemini-3.8-flash (cloud) | not measured — free daily quota exhausted |
+
 ## Using the servers in VS Code
 
 `.vscode/mcp.json` (in `seminar-emt/`, and a copy in `mcp-academic/` if you open that folder instead) registers both servers — the same command lines as `config/host.json`, no code change:
@@ -99,6 +126,7 @@ you ─▶ host ─▶ Gemini (sees all MCP tools) ─▶ tool calls ─▶ MCP 
 | [`architecture.md`](docs/architecture.md) | Problem, roles, protocol eras, algorithms and 9 Mermaid flow/sequence diagrams |
 | [`method-reference.md`](docs/method-reference.md) | Input/output of every SDK method used |
 | [`results.md`](docs/results.md) | Generated tables: examples, transports, errors, cache, chat latency |
+| [`model-comparison.md`](docs/model-comparison.md) · [`model-observations.md`](docs/model-observations.md) | Benchmark of the LLMs (generated) and what we learned |
 | [`demo-script.md`](docs/demo-script.md) | 8-minute live demo runbook with fallbacks |
 | [`quiz-facts.md`](docs/quiz-facts.md) | 30 verified facts + distractors for the multiple-choice quiz |
 | [`team-briefs.md`](docs/team-briefs.md) | Slide outline and tasks per team member (Vietnamese) |

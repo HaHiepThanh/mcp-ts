@@ -10,7 +10,7 @@ export type ServerConfig =
     | { url: string; protocol?: ProtocolChoice; disabled?: boolean };
 
 export interface HostConfig {
-    llm: { provider: 'gemini' | 'openai-compatible'; model?: string; temperature?: number; baseUrl?: string };
+    llm: { provider: 'gemini' | 'openai-compatible'; model?: string; temperature?: number; baseUrl?: string; label?: string };
     mcpServers: Record<string, ServerConfig>;
     agent: { maxToolRounds: number; systemPrompt: string };
     sampling: { approval: 'auto' | 'ask' | 'deny'; maxTokens: number };

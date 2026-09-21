@@ -12,6 +12,7 @@ import { loadEnv, PROJECT_ROOT } from '../lib/env';
 import { loadHostConfig } from './config';
 import { ChatHost } from './host';
 import { GeminiProvider } from './providers/gemini';
+import { OpenAICompatibleProvider } from './providers/openai-compatible';
 import type { LlmProvider } from './providers/provider';
 import { ask, c, closeInput, preview } from './ui';
 
@@ -25,7 +26,13 @@ if (option('model')) config.llm.model = option('model');
 
 function createProvider(): LlmProvider {
     if (config.llm.provider === 'gemini') return new GeminiProvider({ model: config.llm.model, temperature: config.llm.temperature });
-    throw new Error(`Provider "${config.llm.provider}" is not available yet (planned for M5)`);
+    if (!config.llm.baseUrl || !config.llm.model) throw new Error('openai-compatible provider needs llm.baseUrl and llm.model');
+    return new OpenAICompatibleProvider({
+        baseUrl: process.env.OLLAMA_BASE_URL ? `${process.env.OLLAMA_BASE_URL}/v1` : config.llm.baseUrl,
+        model: config.llm.model,
+        temperature: config.llm.temperature,
+        label: config.llm.label
+    });
 }
 
 const host = new ChatHost(config, createProvider(), { configFile: file, verbose: !flag('quiet') });

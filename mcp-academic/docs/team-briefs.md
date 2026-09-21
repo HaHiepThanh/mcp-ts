@@ -50,7 +50,7 @@ Tài liệu nguồn (trong `code/mcp-academic/docs/`):
 | 27 | Subscriptions (C3) & caching (C4) | results §6, C3 log | TV4 |
 | 28 | Configuration = the only thing a host needs (`config/host.json`, `.vscode/mcp.json`) | config files | TV4 |
 | 29 | **Live demo** (nhóm trưởng) | demo-script | Nhóm trưởng |
-| 30 | Results: chat turns, LLM ≈ 99 % of the time | results §8 | TV4 |
+| 30 | Results: two LLMs (Gemini vs local Qwen) — accuracy, speed, cost; LLM ≈ 99 % of the time | model-comparison, model-observations, results §8 | TV4 |
 | 31 | Lessons learned (LLM filled `process_score: 0` → elicitation saved us; model choice matters) | architecture §5, results §8 | TV4 |
 | 32 | Summary | — | TV3 |
 | 33 | References | — | TV3 |

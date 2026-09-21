@@ -30,7 +30,10 @@ export interface Usage {
 /** One request to the LLM API, for latency analysis. */
 export interface LlmCall {
     model: string;
+    /** Wall time including retries and rate-limit waits. */
     ms: number;
+    /** Time of the successful attempt only — the model's own latency. */
+    lastMs: number;
     attempts: number;
 }
 

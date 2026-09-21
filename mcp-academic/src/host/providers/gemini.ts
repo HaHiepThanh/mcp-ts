@@ -22,7 +22,8 @@ export class GeminiProvider implements LlmProvider {
     private candidates: string[] = [];
     private current = 0;
 
-    constructor(private readonly options: { model?: string; temperature?: number } = {}) {
+    /** fallback: switch to the next Flash model when one keeps failing (off for fair benchmarks). */
+    constructor(private readonly options: { model?: string; temperature?: number; fallback?: boolean } = {}) {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) throw new Error('GEMINI_API_KEY is missing — add it to .env');
         this.ai = new GoogleGenAI({ apiKey });
@@ -40,7 +41,7 @@ export class GeminiProvider implements LlmProvider {
         }
         if (preferred && !names.includes(preferred)) throw new Error(`Gemini model "${preferred}" is not available for this key`);
         const fallbacks = names.filter(n => n.includes('flash') && !EXCLUDED.test(n) && n !== preferred).sort((a, b) => version(b) - version(a));
-        this.candidates = preferred ? [preferred, ...fallbacks] : fallbacks;
+        this.candidates = preferred ? (this.options.fallback === false ? [preferred] : [preferred, ...fallbacks]) : fallbacks;
         if (this.candidates.length === 0) throw new Error('No stable Gemini Flash model available for this key');
     }
 
@@ -49,17 +50,21 @@ export class GeminiProvider implements LlmProvider {
         const started = performance.now();
         let attempts = 0;
         let lastError: unknown;
+        // Without fallback a rate-limited model is waited for (free tier: requests per minute).
+        const maxAttempts = this.candidates.length > 1 ? 3 : 4;
         for (; this.current < this.candidates.length; this.current++) {
-            for (let attempt = 1; attempt <= 3; attempt++) {
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 attempts++;
+                const attemptStart = performance.now();
                 try {
                     const response = await this.ai.models.generateContent({ model: this.model, contents, config: { temperature: this.options.temperature, ...config } });
-                    return { response, call: { model: this.model, ms: Math.round(performance.now() - started), attempts } };
+                    const now = performance.now();
+                    return { response, call: { model: this.model, ms: Math.round(now - started), lastMs: Math.round(now - attemptStart), attempts } };
                 } catch (error) {
                     lastError = error;
-                    if (isGone(error)) break;
+                    if (isGone(error) || isQuotaExhausted(error)) break; // next model (none in strict benchmark mode)
                     if (!isTransient(error)) throw error;
-                    if (attempt < 3) await sleep(1500 * attempt);
+                    if (attempt < maxAttempts) await sleep(retryDelayMs(error) ?? 1500 * attempt);
                 }
             }
             console.error(`[gemini] ${this.model} unavailable (${String(lastError).slice(0, 80)}), falling back to the next model`);
@@ -103,6 +108,15 @@ export class GeminiProvider implements LlmProvider {
         return { text: response.text?.trim() ?? '', model: call.model, usage: usageOf(response), call };
     }
 }
+
+/** Rate-limit errors (429) carry the wait Google asks for, e.g. "retryDelay": "23s". */
+function retryDelayMs(error: unknown): number | undefined {
+    const match = /"retryDelay":\s*"(\d+(?:\.\d+)?)s"/.exec(String(error));
+    return match ? Math.min(Math.ceil(Number(match[1]) * 1000) + 500, 65_000) : undefined;
+}
+
+/** A 429 without a retryDelay means the quota itself (e.g. requests per day) is used up — waiting will not help. */
+const isQuotaExhausted = (error: unknown) => /"code":\s*429/.test(String(error)) && retryDelayMs(error) === undefined;
 
 function usageOf(response: GenerateContentResponse): Usage {
     return { inputTokens: response.usageMetadata?.promptTokenCount, outputTokens: response.usageMetadata?.candidatesTokenCount };

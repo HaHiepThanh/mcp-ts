@@ -33,6 +33,8 @@ Every fact below is shown in the slides or the demo and is backed by code or a r
 | 27 | In our measurements the **LLM took ~99 %** of a chat turn; MCP tool calls took under 1 % (a few ms each) | "MCP is the bottleneck" | results §8 |
 | 28 | The same server works in several hosts **by configuration only**: our CLI (`config/host.json`) and VS Code (`.vscode/mcp.json`) | "each host needs a different server" | demo part B |
 | 29 | In our demo, elicitation caught an LLM mistake (it set `process_score: 0` that the user never asked for) — human-in-the-loop for destructive tools | — (scenario question) | architecture §5 |
+| 31 | The same host ran **Gemini (cloud)** and **Qwen3 4B (local, Ollama)** by changing only the config file — 100 % of benchmark turns passed on both | "each LLM needs its own MCP server" | model-comparison |
+| 32 | Qwen3 4B "thinking" variant was ~10× slower (24 s vs 2 s per turn) with no accuracy gain on these tool tasks | "thinking is always better" | model-observations |
 | 30 | GPA in our server: total = 40 % process + 60 % final → letter A/B/C/D/F → 4/3/2/1/0 → credit-weighted average | "simple average of totals" | architecture §7 |
 
 ## Suggested format (until the teacher gives one)

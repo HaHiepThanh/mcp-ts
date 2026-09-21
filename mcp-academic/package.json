@@ -19,7 +19,8 @@
         "utility:http": "tsx src/server/utility/main.ts --http --port 3002",
         "chat": "tsx src/host/main.ts",
         "check:vscode": "tsx scripts/check-vscode-config.ts",
-        "results": "tsx scripts/build-results.ts"
+        "results": "tsx scripts/build-results.ts",
+        "compare": "tsx scripts/compare-models.ts"
     },
     "dependencies": {
         "@google/genai": "^2.23.0",

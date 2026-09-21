@@ -1,0 +1,42 @@
+{
+    "$comment": "Model 2: Qwen3 4B (instruct = answers directly; use --model qwen3:4b for the thinking variant) in Ollama via its OpenAI-compatible API. Start Ollama with OLLAMA_CONTEXT_LENGTH=8192 — the 13 tool definitions alone are ~4.8k tokens.",
+    "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3:4b-instruct",
+        "temperature": 0.2
+    },
+    "mcpServers": {
+        "academic": {
+            "command": "node",
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/academic/main.ts"
+            ],
+            "protocol": "auto"
+        },
+        "utility": {
+            "command": "node",
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/utility/main.ts"
+            ],
+            "protocol": "auto"
+        }
+    },
+    "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+    },
+    "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+    },
+    "elicitation": {
+        "nonInteractive": "decline"
+    },
+    "logDir": "outputs/logs"
+}
