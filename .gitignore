@@ -16,3 +16,6 @@ mcp-academic/outputs/**/*
 !mcp-academic/outputs/**/.gitkeep
 
 .DS_Store
+
+# Local tooling
+.claude/

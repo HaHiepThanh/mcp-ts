@@ -1,0 +1,21 @@
+{
+    // MCP servers for VS Code (workspace = the mcp-academic folder).
+    // Open the Chat view in Agent mode → the tools of both servers appear in the tool picker.
+    // Same servers as config/host.json of our own chat host — one server, many hosts.
+    "servers": {
+        "academic": {
+            "type": "stdio",
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/academic/main.ts"],
+            "cwd": "${workspaceFolder}"
+        },
+        "utility": {
+            "type": "stdio",
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/utility/main.ts"],
+            "cwd": "${workspaceFolder}"
+        }
+        // HTTP alternative (start `npm run academic:http` first):
+        // "academic-http": { "type": "http", "url": "http://127.0.0.1:3001/mcp" }
+    }
+}

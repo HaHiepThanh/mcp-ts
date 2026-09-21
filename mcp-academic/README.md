@@ -8,7 +8,7 @@ Seminar **MCP.2502 — MCP TypeScript SDK (v2)**. An MCP server that exposes uni
 | M1 | `academic` server + server-side examples S1–S8 | ✅ |
 | M2 | Client-side examples C1–C4 + method reference | ✅ |
 | M3 | `utility` server + chat host (Gemini) | ✅ |
-| M4 | Claude Desktop / VS Code config, outputs for slides | ⏳ |
+| M4 | VS Code config, wire trace, docs pack for slides/quiz/demo | ✅ |
 | M5 | Second LLM: Qwen via Ollama | ⏳ |
 
 ## Quick start
@@ -20,6 +20,8 @@ npm run examples      # runs every example → outputs/examples/*.json + *.log
 npm run academic      # academic server over stdio
 npm run academic:http # academic server over Streamable HTTP at http://127.0.0.1:3001/mcp
 npm run chat          # chat with Gemini using both MCP servers (config/host.json)
+npm run check:vscode  # start the servers exactly as .vscode/mcp.json tells VS Code to
+npm run results       # rebuild docs/results.md from outputs/
 ```
 
 Requires Node ≥ 20. API keys live in `.env` (see `.env.example`) and are never committed or synced.
@@ -80,6 +82,27 @@ you ─▶ host ─▶ Gemini (sees all MCP tools) ─▶ tool calls ─▶ MCP 
 - **Sampling** — `generate_student_feedback` borrows the host's Gemini through MCP sampling.
 - **Logs** — every turn is appended to `outputs/logs/chat-YYYY-MM-DD.jsonl`: question, tool calls (args, ms, errors), answer, LLM calls (model, ms, retries), tokens, elicitations.
 
+## Using the servers in VS Code
+
+`.vscode/mcp.json` (in `seminar-emt/`, and a copy in `mcp-academic/` if you open that folder instead) registers both servers — the same command lines as `config/host.json`, no code change:
+
+1. Open the folder in VS Code → Command Palette → **MCP: List Servers** → start `academic` and `utility`, confirm **Trust**.
+2. Chat view → **Agent** mode → the tool picker lists the 13 tools.
+3. Prompts: type `/academic.class_report`; resources: **Add Context → MCP Resources**.
+
+`npm run check:vscode` verifies the config without opening VS Code.
+
+## Documentation for the seminar (`docs/`)
+
+| File | Content |
+| --- | --- |
+| [`architecture.md`](docs/architecture.md) | Problem, roles, protocol eras, algorithms and 9 Mermaid flow/sequence diagrams |
+| [`method-reference.md`](docs/method-reference.md) | Input/output of every SDK method used |
+| [`results.md`](docs/results.md) | Generated tables: examples, transports, errors, cache, chat latency |
+| [`demo-script.md`](docs/demo-script.md) | 8-minute live demo runbook with fallbacks |
+| [`quiz-facts.md`](docs/quiz-facts.md) | 30 verified facts + distractors for the multiple-choice quiz |
+| [`team-briefs.md`](docs/team-briefs.md) | Slide outline and tasks per team member (Vietnamese) |
+
 ## Examples (one file per SDK method group)
 
 | # | File | SDK methods | Parameter sets |
@@ -96,6 +119,7 @@ you ─▶ host ─▶ Gemini (sees all MCP tools) ─▶ tool calls ─▶ MCP 
 | C2 | `examples/client/c2-request-options-errors.ts` | `timeout`, `onprogress`, `resetTimeoutOnProgress`, `maxTotalTimeout`, `ProtocolError`, `SdkError` | 4 timeout configs + 9-case failure taxonomy |
 | C3 | `examples/client/c3-subscriptions.ts` | `listen`, `subscribeResource`, `unsubscribeResource`, `handler.notify` | 2026 stream (real HTTP server) vs 2025 subscribe, wrong-era calls |
 | C4 | `examples/client/c4-caching.ts` | server `cacheHints`, client `cacheMode`, `defaultCacheTtlMs` | 6 scenarios, requests reaching the server |
+| C5 | `examples/client/c5-wire-trace.ts` | JSON-RPC 2.0 on the wire | full message sequence, 2025 vs 2026-07-28 |
 
 **Full input/output reference of every method: [`docs/method-reference.md`](docs/method-reference.md).**
 
@@ -115,8 +139,9 @@ src/server/academic/  data loading & validation, grading, tools, resources, prom
 src/server/utility/   time, score conversion, report saving
 src/host/          chat host: config, Gemini provider, MCP hub, agent loop, terminal UI
 demo/              question list for the live demo
-examples/          _harness.ts + server/ (S1–S8) + client/ (C1–C4) + run-all.ts
-docs/              method-reference.md (input/output of every SDK method used)
-scripts/           doctor, sample-data generator, smoke server
+examples/          _harness.ts + server/ (S1–S8) + client/ (C1–C5) + run-all.ts
+docs/              architecture, method reference, results, demo script, quiz facts, team briefs
+.vscode/mcp.json   VS Code MCP configuration (also at the seminar-emt root)
+scripts/           doctor, sample-data generator, smoke server, VS Code config check, results builder
 outputs/           generated results (not committed)
 ```

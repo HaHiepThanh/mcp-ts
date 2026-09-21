@@ -17,7 +17,9 @@
         "examples": "tsx examples/run-all.ts",
         "utility": "tsx src/server/utility/main.ts",
         "utility:http": "tsx src/server/utility/main.ts --http --port 3002",
-        "chat": "tsx src/host/main.ts"
+        "chat": "tsx src/host/main.ts",
+        "check:vscode": "tsx scripts/check-vscode-config.ts",
+        "results": "tsx scripts/build-results.ts"
     },
     "dependencies": {
         "@google/genai": "^2.23.0",
