@@ -1,0 +1,139 @@
+Question 1: Which component of the MCP architecture contains the LLM?
+A. Server
+B. Host
+C. Transport
+D. Resource
+Answer: B
+
+Question 2: What problem does MCP mainly solve?
+A. It trains new language models faster
+B. It replaces REST APIs on the web
+C. It turns N x M custom connectors between AI apps and data sources into N + M
+D. It encrypts data stored in databases
+Answer: C
+
+Question 3: In MCP, who decides when a TOOL is called?
+A. The model (LLM)
+B. The end user, like a slash command
+C. The MCP server itself
+D. The transport layer
+Answer: A
+
+Question 4: Which message format does MCP use?
+A. GraphQL
+B. JSON-RPC 2.0
+C. gRPC / Protocol Buffers
+D. SOAP
+Answer: B
+
+Question 5: What is special about a JSON-RPC notification?
+A. It always has id 0
+B. It must be answered within 60 seconds
+C. It has no id and expects no response
+D. It can only be sent by the server
+Answer: C
+
+Question 6: Which two transports does the MCP TypeScript SDK provide for servers?
+A. stdio and Streamable HTTP
+B. WebSocket and FTP
+C. SMTP and HTTP
+D. gRPC and UDP
+Answer: A
+
+Question 7: In SDK v2, how is a tool registered on the server?
+A. server.addTool(name, handler)
+B. server.registerTool(name, config, handler) with a Zod inputSchema
+C. server.tool(jsonString)
+D. new Tool(name).register(server)
+Answer: B
+
+Question 8: A client calls a tool with arguments that fail the tool's inputSchema. What does the client receive?
+A. An HTTP 500 error
+B. The server process crashes
+C. A normal tool result with isError: true, so the LLM can read it and retry
+D. Nothing — the request is silently ignored
+Answer: C
+
+Question 9: A client calls getPrompt without a required argument. What happens?
+A. It returns an isError result like a tool
+B. It throws a protocol error with code -32602 (Invalid params)
+C. The server fills the argument with an empty string
+D. The prompt is returned without that part
+Answer: B
+
+Question 10: What do tool annotations such as readOnlyHint and destructiveHint do?
+A. They block the tool from writing data
+B. They are hints for the client; they do not change how the tool runs
+C. They encrypt the tool's output
+D. They make the tool run faster
+Answer: B
+
+Question 11: What is elicitation?
+A. The server asking the end user a question in the middle of a tool call
+B. The server asking the LLM to summarise text
+C. The client listing all resources
+D. Compressing JSON-RPC messages
+Answer: A
+
+Question 12: With sampling, whose LLM writes the text?
+A. The server's own model, using the server's API key
+B. The host's model — the server needs no API key
+C. A model hosted by the MCP specification team
+D. No model; sampling returns random data
+Answer: B
+
+Question 13: In protocol version 2026-07-28, what replaces the initialize handshake?
+A. ping
+B. tools/list
+C. server/discover
+D. notifications/initialized
+Answer: C
+
+Question 14: On a 2026-07-28 connection, how does a server ask the user for confirmation during a tool call?
+A. It opens a WebSocket to the client
+B. It returns an input_required result; the client answers and retries the call
+C. It sends an e-mail
+D. It cannot — confirmation was removed
+Answer: B
+
+Question 15: Which features are deprecated in MCP 2026-07-28 (SEP-2577)?
+A. Tools and resources
+B. Sampling and MCP logging
+C. Prompts and completion
+D. stdio and HTTP transports
+Answer: B
+
+Question 16: In our measurements, how many messages does a client send to connect with the 2025 handshake versus 2026-07-28?
+A. 1 vs 2
+B. 2 vs 1
+C. 3 vs 3
+D. 0 vs 0
+Answer: B
+
+Question 17: A request has timeout 400 ms, resetTimeoutOnProgress: true and maxTotalTimeout 700 ms; the job takes 1.2 s but reports progress every 150 ms. What happens?
+A. It completes after 1.2 s
+B. It times out at 400 ms
+C. It times out at about 700 ms because maxTotalTimeout is a hard cap
+D. It never times out
+Answer: C
+
+Question 18: Our Streamable HTTP server receives a request whose Host header is evil.example. What does it answer?
+A. 200 OK
+B. 404 Not Found
+C. 403 Forbidden (DNS-rebinding protection)
+D. 500 Internal Server Error
+Answer: C
+
+Question 19: In our chat measurements, which part took about 99 % of the time of a turn?
+A. The MCP tool calls
+B. Reading the CSV files
+C. The LLM requests
+D. Starting the server process
+Answer: C
+
+Question 20: Our demo used the same two MCP servers in our own CLI and in VS Code. What had to change?
+A. The server code had to be rewritten for VS Code
+B. Only the host configuration file (config/host.json vs .vscode/mcp.json)
+C. The data had to be converted to JSON
+D. A different MCP SDK had to be installed
+Answer: B

@@ -1,0 +1,83 @@
+Question 1: We ran the same MCP servers with Gemini 3.5 Flash-Lite (cloud) and Qwen3 4B Instruct (local). What had to change?
+A. The MCP server code
+B. Only the host configuration (config/host.json vs config/host.qwen.json)
+C. The dataset format
+D. The MCP protocol version
+Answer: B
+
+Question 2: In our benchmark (11 questions x 2 runs), what share of turns did Qwen3 4B Instruct running locally pass?
+A. 50 %
+B. 73 %
+C. 91 %
+D. 100 %
+Answer: D
+
+Question 3: Which configuration had the lowest median model time per turn in our benchmark?
+A. gemini-3.5-flash-lite (2.7 s)
+B. qwen3:4b-instruct (2.1 s)
+C. qwen3:4b thinking (24.4 s)
+D. All three had the same median time
+Answer: B
+
+Question 4: What did the "thinking" variant of Qwen3 4B change compared with the instruct variant on our tool tasks?
+A. Higher accuracy, same speed
+B. Same accuracy, about 10 times slower and many more output tokens
+C. Lower accuracy, faster
+D. It could not call tools at all
+Answer: B
+
+Question 5: Why could gemini-3.8-flash not be measured in the final benchmark?
+A. It does not support tool calling
+B. Its free-tier daily quota was exhausted (HTTP 429)
+C. It only answers in Vietnamese
+D. MCP does not support Gemini
+Answer: B
+
+Question 6: Why must a fair LLM benchmark disable automatic model fallback?
+A. Fallback makes the MCP server crash
+B. Otherwise answers may come from a different model than the one being measured
+C. Fallback doubles the number of tools
+D. Fallback disables elicitation
+Answer: B
+
+Question 7: Why did we start Ollama with OLLAMA_CONTEXT_LENGTH=8192?
+A. To make the model smarter
+B. Because the 13 tool definitions alone (~4.8k tokens) exceed Ollama's default 4k context
+C. Because MCP requires exactly 8192 tokens
+D. To use less RAM
+Answer: B
+
+Question 8: The LLM once sent update_grade with process_score: 0 although the user only asked to change the final score. Which MCP feature stopped the wrong change?
+A. Sampling
+B. Resource subscriptions
+C. Elicitation (the server asked the user to confirm)
+D. Caching
+Answer: C
+
+Question 9: How did we fix the process_score: 0 problem permanently?
+A. By switching to a bigger model
+B. By making both scores optional in update_grade so an omitted score keeps its current value
+C. By removing the update_grade tool
+D. By raising the temperature
+Answer: B
+
+Question 10: In our chat logs, roughly how long does one MCP tool call take compared with one LLM request?
+A. Both about 1 second
+B. Tool call a few milliseconds; LLM request about 1 second or more
+C. Tool call about 10 seconds; LLM request a few milliseconds
+D. They cannot be measured
+Answer: B
+
+Question 11: Where does the ground truth of our benchmark come from?
+A. The LLM's own answer from a previous run
+B. Values typed by hand into the test file
+C. Calling the MCP tools directly (no LLM), so it follows the dataset
+D. A public exam dataset
+Answer: C
+
+Question 12: Which statement best summarises our model comparison?
+A. Bigger cloud models are always required for tool use
+B. With well-designed tools, a small local model was as accurate as a cloud model and faster; free-tier quotas were the main bottleneck
+C. Local models cannot call MCP tools
+D. MCP adds most of the latency
+Answer: B

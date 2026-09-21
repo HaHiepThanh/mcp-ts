@@ -19,3 +19,9 @@ mcp-academic/outputs/**/*
 
 # Local tooling
 .claude/
+
+# Generated submission packages (rebuild with bash build-submission.sh)
+phase1/submission/
+phase2/submission/
+phase1/submission.zip
+phase2/submission.zip

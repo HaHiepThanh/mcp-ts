@@ -12,7 +12,10 @@ Tài liệu nguồn (trong `code/mcp-academic/docs/`):
 | `method-reference.md` | Bảng Input/Output của mọi method |
 | `results.md` | Bảng số liệu chạy thật (ví dụ + chat với Gemini) |
 | `demo-script.md` | Kịch bản demo 8 phút |
-| `quiz-facts.md` | 30 "sự thật" để ra câu hỏi trắc nghiệm |
+| `quiz-facts.md` | 32 "sự thật" để ra câu hỏi trắc nghiệm |
+| `vscode-guide.md` | Cách chạy 2 server trong VS Code |
+| `phase1/slides-content.md` (thư mục gốc) | **Nội dung nháp từng slide** — TV3/TV4 dàn trang từ đây |
+| `phase1/quiz-draft.txt`, `phase2/quiz-draft.txt` | Bộ trắc nghiệm nháp — TV5 duyệt/sửa |
 | `outputs/examples/*.log` | Output thật của từng ví dụ — chụp màn hình đưa vào slide |
 
 ---
@@ -80,7 +83,7 @@ Phân bổ thời gian: slide 1–16 ≈ 11 phút · 17–28 ≈ 9 phút · demo
 
 ## TV3 — Slide lý thuyết (slide 1–16, 32–34)
 
-**Nộp vào:** `team/slides/` · file `part-A-theory.pptx`.
+**Nộp vào:** `team/slides/` · file `part-A-theory.pptx` (bản ghép cuối đặt tên `MCP-TS-SDK-phase1.pptx` để script đóng gói tự lấy).
 
 1. Dùng **template chung** nhóm chọn (TV3 chọn và chia sẻ cho TV4 trước).
 2. Nội dung theo dàn ý trên, nguồn chính là `architecture.md`. Viết **tiếng Anh**, mỗi slide ≤ 6 dòng chữ, ưu tiên hình.
@@ -100,7 +103,7 @@ Phân bổ thời gian: slide 1–16 ≈ 11 phút · 17–28 ≈ 9 phút · demo
 
 ## TV5 — Trắc nghiệm, kiểm thử, video dự phòng
 
-**Nộp vào:** `team/quiz/questions.txt`, `team/quiz/test-report.md`, `team/video/`.
+**Nộp vào:** `team/quiz/questions-phase1.txt` (bắt đầu từ `phase1/quiz-draft.txt`), `team/quiz/test-report.md`, `team/video/`.
 
 1. **Trắc nghiệm (10–20 câu, tiếng Anh):** chọn từ `quiz-facts.md` — trả lời được từ slide/demo; mỗi câu 4 đáp án, dùng cột "tempting wrong answers" làm đáp án nhiễu; định dạng ở cuối `quiz-facts.md`. Trộn 3 mức: dễ (khái niệm), vừa (API), khó (so sánh 2025/2026, kết quả đo).
 2. **Kiểm thử như một nhóm khác:** trên máy mình, làm theo `README.md` từ đầu (cài Node ≥ 20 → `npm install` → tạo `.env` với **Gemini key của chính bạn** tại <https://aistudio.google.com/apikey> → `npm run doctor` → `npm run examples` → `npm run chat`). Ghi lại mọi chỗ khó hiểu/lỗi vào `test-report.md` (bước nào, lỗi gì, ảnh chụp). **Không gửi API key cho ai, không chụp key lên ảnh.**

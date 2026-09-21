@@ -128,6 +128,7 @@ Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the
 | [`results.md`](docs/results.md) | Generated tables: examples, transports, errors, cache, chat latency |
 | [`model-comparison.md`](docs/model-comparison.md) · [`model-observations.md`](docs/model-observations.md) | Benchmark of the LLMs (generated) and what we learned |
 | [`demo-script.md`](docs/demo-script.md) | 8-minute live demo runbook with fallbacks |
+| [`vscode-guide.md`](docs/vscode-guide.md) | Step-by-step: the two servers in VS Code Copilot Chat (Vietnamese) |
 | [`quiz-facts.md`](docs/quiz-facts.md) | 30 verified facts + distractors for the multiple-choice quiz |
 | [`team-briefs.md`](docs/team-briefs.md) | Slide outline and tasks per team member (Vietnamese) |
 
