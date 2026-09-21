@@ -6,7 +6,7 @@ Seminar **MCP.2502 — MCP TypeScript SDK (v2)**. An MCP server that exposes uni
 | --- | --- | --- |
 | M0 | Environment, Drive sync, Gemini check | ✅ |
 | M1 | `academic` server + server-side examples S1–S8 | ✅ |
-| M2 | Client-side examples C1–C6 | ⏳ |
+| M2 | Client-side examples C1–C4 + method reference | ✅ |
 | M3 | `utility` server + chat host (Gemini) | ⏳ |
 | M4 | Claude Desktop / VS Code config, outputs for slides | ⏳ |
 | M5 | Second LLM: Qwen via Ollama | ⏳ |
@@ -40,7 +40,7 @@ Scores are on the 10-point scale; each course total becomes a letter **A/B/C/D/F
 | Resource | `academic://rules/grading` | Grading rules (markdown) |
 | Resource | `academic://reports/data-quality` | Rows skipped while loading, with reasons |
 | Resource template | `academic://tables/{table}` | Raw CSV of a table (listable, completable) |
-| Resource template | `academic://students/{student_id}` | Student profile + GPA per semester (completable) |
+| Resource template | `academic://students/{student_id}` | Student profile + GPA per semester (completable, **subscribable**: updated when `update_grade` changes it) |
 | Prompt | `class_report(class_id, semester?)` | Report template, both arguments autocomplete |
 | Prompt | `study_advice(student_id)` | Advice template embedding the student-profile resource |
 
@@ -58,6 +58,12 @@ The same code serves **both protocol eras**: 2025 clients (`initialize` handshak
 | S6 | `examples/server/s6-logging-progress-cancel.ts` | `ctx.mcpReq.notify/log/signal`, `setLoggingLevel` | with/without progress, 3 log levels, cancel on 2 eras |
 | S7 | `examples/server/s7-elicitation-sampling.ts` | `elicitInput`, `requestSampling`, `inputRequired` | accept/decline/cancel × 2 eras, missing capability |
 | S8 | `examples/server/s8-transports.ts` | `serveStdio`, `createMcpHandler`, client transports | stdio/HTTP × 2 eras, timings, Host/Origin checks |
+| C1 | `examples/client/c1-client-connect.ts` | `new Client`, `connect`, `getProtocolEra`, `getDiscoverResult`, `ping`, `close` | default / auto / pin / `prior`, era mismatches |
+| C2 | `examples/client/c2-request-options-errors.ts` | `timeout`, `onprogress`, `resetTimeoutOnProgress`, `maxTotalTimeout`, `ProtocolError`, `SdkError` | 4 timeout configs + 9-case failure taxonomy |
+| C3 | `examples/client/c3-subscriptions.ts` | `listen`, `subscribeResource`, `unsubscribeResource`, `handler.notify` | 2026 stream (real HTTP server) vs 2025 subscribe, wrong-era calls |
+| C4 | `examples/client/c4-caching.ts` | server `cacheHints`, client `cacheMode`, `defaultCacheTtlMs` | 6 scenarios, requests reaching the server |
+
+**Full input/output reference of every method: [`docs/method-reference.md`](docs/method-reference.md).**
 
 Every example prints each call (method, parameters, result, time) and saves it to `outputs/examples/<name>.json`.
 
@@ -72,7 +78,8 @@ config/            grading rules, server config (the "MCP configuration" shown i
 data/sample/       generated sample CSVs + README_data.md
 src/lib/           CSV parser, env loader, stdio/HTTP runner, dual-era interaction helpers
 src/server/academic/  data loading & validation, grading, tools, resources, prompts, entry point
-examples/          _harness.ts + server/ (S1–S8) + client/ (M2)
+examples/          _harness.ts + server/ (S1–S8) + client/ (C1–C4) + run-all.ts
+docs/              method-reference.md (input/output of every SDK method used)
 scripts/           doctor, sample-data generator, smoke server
 outputs/           generated results (not committed)
 ```

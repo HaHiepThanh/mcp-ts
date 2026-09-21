@@ -10,7 +10,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { Client, type ClientOptions, InMemoryTransport, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
-import { createMcpHandler, type McpServerFactory } from '@modelcontextprotocol/server';
+import { createMcpHandler, type McpHttpHandler, type McpServerFactory } from '@modelcontextprotocol/server';
 
 import { PROJECT_ROOT } from '../src/lib/env';
 
@@ -25,6 +25,12 @@ export interface Connection {
 export interface ConnectOptions {
     era?: Era;
     capabilities?: NonNullable<ClientOptions>['capabilities'];
+    /** Extra Client options (listChanged, cache settings, ...). */
+    clientOptions?: Omit<NonNullable<ClientOptions>, 'capabilities' | 'versionNegotiation'>;
+    /** Modern era: access the in-process HTTP handler (e.g. handler.notify). */
+    onHandler?: (handler: McpHttpHandler) => void;
+    /** Modern era: count every HTTP request that reaches the handler, by JSON-RPC method. */
+    countRequests?: Map<string, number>;
     /** Register client-side handlers (elicitation, sampling, notifications) before connecting. */
     setup?: (client: Client) => void;
 }
@@ -33,15 +39,18 @@ export async function connectInProcess(factory: McpServerFactory, options: Conne
     const era = options.era ?? 'modern';
     const client = new Client(
         { name: 'example-client', version: '1.0.0' },
-        { capabilities: options.capabilities ?? {}, ...(era === 'modern' ? { versionNegotiation: { mode: 'auto' as const } } : {}) }
+        {
+            ...options.clientOptions,
+            capabilities: options.capabilities ?? {},
+            ...(era === 'modern' ? { versionNegotiation: { mode: 'auto' as const } } : {})
+        }
     );
     options.setup?.(client);
 
     if (era === 'modern') {
         const handler = createMcpHandler(factory);
-        await client.connect(
-            new StreamableHTTPClientTransport(new URL('http://in-process.local/mcp'), { fetch: (url, init) => handler.fetch(new Request(url, init)) })
-        );
+        options.onHandler?.(handler);
+        await client.connect(inProcessHttpTransport(handler, options.countRequests));
         return { client, era, close: async () => (await client.close(), await handler.close()) };
     }
 
@@ -50,6 +59,18 @@ export async function connectInProcess(factory: McpServerFactory, options: Conne
     await server.connect(serverTransport);
     await client.connect(clientTransport);
     return { client, era, close: async () => (await client.close(), await server.close()) };
+}
+
+/** A Streamable HTTP client transport whose requests are served in-process by `handler` (no socket). */
+export function inProcessHttpTransport(handler: McpHttpHandler, countRequests?: Map<string, number>): StreamableHTTPClientTransport {
+    const fetch = async (url: string | URL, init?: RequestInit) => {
+        if (countRequests && typeof init?.body === 'string') {
+            const method = (JSON.parse(init.body) as { method?: string }).method ?? '(response)';
+            countRequests.set(method, (countRequests.get(method) ?? 0) + 1);
+        }
+        return handler.fetch(new Request(url, init));
+    };
+    return new StreamableHTTPClientTransport(new URL('http://in-process.local/mcp'), { fetch });
 }
 
 interface Step {

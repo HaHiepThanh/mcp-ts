@@ -11,6 +11,8 @@ import { type McpServer, ResourceNotFoundError, ResourceTemplate } from '@modelc
 import { toCsv } from '../../lib/csv';
 import type { AcademicData } from './data';
 
+export const studentUri = (studentId: string): string => `academic://students/${studentId}`;
+
 export function registerAcademicResources(server: McpServer, data: AcademicData): void {
     server.registerResource(
         'grading-rules',

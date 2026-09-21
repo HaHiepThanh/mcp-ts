@@ -43,10 +43,12 @@ export interface DataIssue {
     row: Record<string, string>;
 }
 
-interface AcademicConfig {
+export interface AcademicConfig {
     dataDir: string;
     gradingConfig: string;
     tables: { students: string; courses: string; grades: string };
+    /** Freshness hints attached to cacheable results (2026-07-28, SEP-2549). */
+    cacheHints?: Record<string, { ttlMs: number; cacheScope: 'public' | 'private' }>;
 }
 
 const SCORE_MIN = 0;
@@ -59,6 +61,7 @@ export class AcademicData {
     readonly issues: DataIssue[] = [];
     /** Every CSV in dataDir, unvalidated — backs the generic table tools. */
     readonly tables = new Map<string, CsvTable>();
+    private readonly gradeListeners = new Set<(studentId: string) => void>();
 
     constructor(
         readonly dataDir: string,
@@ -159,13 +162,24 @@ export class AcademicData {
         const index = this.grades.findIndex(
             g => g.student_id === record.student_id && g.course_id === record.course_id && g.semester === record.semester
         );
-        if (index === -1) {
-            this.grades.push(record);
-            return 'inserted';
-        }
-        this.grades[index] = record;
-        return 'updated';
+        if (index === -1) this.grades.push(record);
+        else this.grades[index] = record;
+        for (const listener of this.gradeListeners) listener(record.student_id);
+        return index === -1 ? 'inserted' : 'updated';
     }
+
+    /** Be told whenever a student's grades change. Returns an unsubscribe function. */
+    onGradeChanged(listener: (studentId: string) => void): () => void {
+        this.gradeListeners.add(listener);
+        return () => this.gradeListeners.delete(listener);
+    }
+}
+
+let config: AcademicConfig | undefined;
+
+export function getAcademicConfig(): AcademicConfig {
+    config ??= JSON.parse(readFileSync(path.join(PROJECT_ROOT, 'config/academic.json'), 'utf8')) as AcademicConfig;
+    return config;
 }
 
 let shared: AcademicData | undefined;
@@ -173,7 +187,7 @@ let shared: AcademicData | undefined;
 /** One dataset per process, so per-request HTTP server instances share state. */
 export function getAcademicData(): AcademicData {
     if (!shared) {
-        const config = JSON.parse(readFileSync(path.join(PROJECT_ROOT, 'config/academic.json'), 'utf8')) as AcademicConfig;
+        const config = getAcademicConfig();
         const dataDir = path.resolve(PROJECT_ROOT, process.env.ACADEMIC_DATA_DIR ?? config.dataDir);
         shared = new AcademicData(dataDir, new Grading(loadGradingConfig(config.gradingConfig)), config.tables);
     }

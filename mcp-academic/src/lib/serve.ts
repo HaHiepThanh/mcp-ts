@@ -7,22 +7,28 @@
 import { createServer } from 'node:http';
 
 import { localhostHostValidation, localhostOriginValidation, toNodeHandler } from '@modelcontextprotocol/node';
-import { createMcpHandler, type McpServerFactory } from '@modelcontextprotocol/server';
+import { createMcpHandler, type McpHttpHandler, type McpServerFactory } from '@modelcontextprotocol/server';
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
+
+export type TransportKind = 'stdio' | 'http';
 
 export interface ServeOptions {
     name: string;
     defaultPort: number;
+    /** HTTP only: access the handler, e.g. to publish change notifications via handler.notify. */
+    onHttpHandler?: (handler: McpHttpHandler) => void;
 }
 
-export function parseServeArgs(argv: string[], defaultPort: number): { transport: 'stdio' | 'http'; port: number } {
+export function parseServeArgs(argv: string[], defaultPort: number): { transport: TransportKind; port: number } {
     const portIndex = argv.indexOf('--port');
     const port = portIndex >= 0 ? Number(argv[portIndex + 1]) : Number(process.env.PORT ?? defaultPort);
     return { transport: argv.includes('--http') ? 'http' : 'stdio', port };
 }
 
-export function runServer(factory: McpServerFactory, { name, defaultPort }: ServeOptions): void {
+/** `makeFactory` learns which transport it serves, so it can pick per-connection vs per-request behaviour. */
+export function runServer(makeFactory: (transport: TransportKind) => McpServerFactory, { name, defaultPort, onHttpHandler }: ServeOptions): void {
     const { transport, port } = parseServeArgs(process.argv.slice(2), defaultPort);
+    const factory = makeFactory(transport);
 
     if (transport === 'stdio') {
         void serveStdio(factory);
@@ -31,6 +37,7 @@ export function runServer(factory: McpServerFactory, { name, defaultPort }: Serv
     }
 
     const handler = createMcpHandler(factory);
+    onHttpHandler?.(handler);
     const handle = toNodeHandler(handler);
     // Reject requests whose Host/Origin is not localhost (DNS-rebinding protection).
     const hostOk = localhostHostValidation();
