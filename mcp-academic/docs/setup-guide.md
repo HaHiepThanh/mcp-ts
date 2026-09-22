@@ -47,6 +47,12 @@ Kết quả đúng: dòng cuối `13/13 examples passed` (con số có thể tă
    ```bash
    ollama pull qwen3:4b-instruct
    ```
+> ⚠️ **Hai loại "server", đừng nhầm:**
+> - **Ollama** = server chạy *model Qwen* (cổng 11434) → **bạn phải tự bật** ở bước 3 dưới đây.
+> - **MCP server** `academic` + `utility` → **KHÔNG cần bật**: `npm run chat` tự khởi động chúng (stdio). Chỉ bật tay `npm run academic:http` / `utility:http` khi dùng `config/host.http.json`.
+>
+> Lỗi `Cannot reach http://127.0.0.1:11434/v1 … Is Ollama running?` nghĩa là **chưa chạy `ollama serve`** (hoặc đã tắt cửa sổ đó).
+
 3. **Bật Ollama với ngữ cảnh 8k** — bắt buộc, vì phần mô tả 13 tool đã ~4.8k token, mặc định 4k sẽ cắt mất tool:
    - macOS (Terminal):
      ```bash
@@ -58,6 +64,7 @@ Kết quả đúng: dòng cuối `13/13 examples passed` (con số có thể tă
      ```
    - Nếu app Ollama đã tự chạy ở góc màn hình (biểu tượng con lạc đà) → **Quit** nó trước, rồi chạy lệnh trên (nếu không lệnh sẽ báo cổng 11434 đã bị chiếm).
    - Để cửa sổ này mở trong lúc dùng.
+   - Kiểm tra (ở cửa sổ khác): `curl http://127.0.0.1:11434/api/version` → ra `{"version":"..."}` là Ollama đã chạy.
 4. Mở **cửa sổ Terminal thứ 2**, trong thư mục `mcp-academic`:
    ```bash
    npm run chat -- --config config/host.qwen.json
