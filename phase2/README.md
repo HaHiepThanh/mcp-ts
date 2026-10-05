@@ -1,9 +1,3 @@
-# Lần 2 — nộp gì cho thầy
-
-Thầy đã xác nhận: Lần 2 **không có Training/Test**, thay vào đó **trình diễn cấu hình MCP**, mỗi cấu hình chạy ra kết quả khác nhau, có LOG ghi lại.
-
-Tạo gói nộp: `bash build-submission.sh` (cùng lệnh với Lần 1) → **`phase2/submission/`** + **`phase2/submission.zip`**.
-
 ## Đối chiếu yêu cầu (`requirement.md`) → file
 
 | Yêu cầu của đề | Nằm ở đâu trong `submission/` | Trạng thái |

@@ -2,14 +2,17 @@
 
 | Ai | Việc | Đầu vào | Nộp (Drive `MCP-TS-Seminar/team/`) | Xong khi |
 | --- | --- | --- | --- | --- |
-| **Phú** | Slide phần A: bài toán, kiến trúc, giao thức, giải thuật, lưu đồ | `phase1/slides-content.md`, `mcp-academic/docs/architecture.md` (sơ đồ Mermaid → <https://mermaid.live> → PNG) | `slides/part-A-theory.pptx` | Đủ 19 slide, mọi số liệu lấy từ tài liệu, tiếng Anh |
-| **Hoàng** | Slide phần B: SDK API, ví dụ từng method + bộ tham số, kết quả 2 LLM · **ghép A + B** | `phase1/slides-content.md`, `docs/method-reference.md`, `phase1/frozen/examples-output/*.log` (chụp màn hình) | `slides/part-B-technical.pptx` → bản ghép **`slides/MCP-TS-SDK-phase1.pptx`** | ≥ 30 slide tổng, cùng 1 template |
+| **Thiện** | **Toàn bộ slide Phase 1** (37 slide) + soạn tài liệu — làm theo outline chi tiết từng slide | **[`docs/outline-phase1-final.md`](docs/outline-phase1-final.md)** (bắt buộc đọc trước), `phase1/slides-content.md`, `mcp-academic/docs/architecture.md` (Mermaid → <https://mermaid.live> → PNG), `docs/method-reference.md`, `phase1/frozen/examples-output/*.log` | **`slides/MCP-TS-SDK-phase1.pptx`** | ≥ 30 slide, đủ 3 lưu đồ + bảng I/O + ảnh code, tiếng Anh, 1 template |
+| **Phú / Hoàng** | Hỗ trợ Thiện: rà số liệu và thuật ngữ kỹ thuật ở khối 2, 3, 4 của outline | slide Thiện gửi | góp ý trong nhóm chat | Số liệu khớp `docs/results.md` |
 | **Khoa** | Trắc nghiệm Lần 1: duyệt 20 câu nháp (đúng đáp án? trả lời được từ slide?), sửa/thay câu khó hiểu | `phase1/quiz-draft.txt`, `docs/quiz-facts.md` | `quiz/questions-phase1.txt` | 10–20 câu, định dạng như bản nháp |
 | **Khoa** | Kiểm thử "như nhóm khác": cài đặt theo `setup-guide.md` trên máy mình từ đầu, chạy `npm run examples` + `npm run chat` | `setup-guide.md` | `quiz/test-report.md` (bước nào vướng, ảnh chụp lỗi) | Chạy được hoặc có báo cáo lỗi cụ thể |
 | **Khoa** | Video demo dự phòng Lần 1 (~8 phút, thuyết minh tiếng Anh) | `docs/demo-script.md` | `video/demo-phase1.mp4` | Theo đúng kịch bản Part A + B |
-| **Tiến** | Duyệt độ chính xác kỹ thuật của slide phần B trước khi Hoàng ghép | slide của Hoàng | góp ý trong nhóm chat | — |
+| **Tiến** | Duyệt lần cuối độ chính xác kỹ thuật của slide trước khi nộp | slide của Thiện | góp ý trong nhóm chat | — |
 
 ## Giai đoạn 2 — xây Lần 2 (code)
+
+> **Thiện** không code. Việc của Thiện ở giai đoạn 2: dựng và ghép **slide Phase 2** (≥ 20 slide) cùng Khoa —
+> Khoa lo nội dung và số liệu, Thiện lo trình bày — và soạn tài liệu khi nhóm cần. Phân công code bên dưới giữ nguyên.
 
 Lần 2 cần: **tình huống chạy thử · các bộ tham số (cấu hình) · kết quả + so sánh · nhận xét · cải tiến · LOG**. Nhóm mở rộng dữ liệu (thêm giảng viên, điểm danh, rèn luyện, tài chính) để có tình huống phong phú, rồi đo nhiều cấu hình.
 
