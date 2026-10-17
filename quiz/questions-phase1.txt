@@ -1,0 +1,104 @@
+Question 1: What integration problem does MCP mainly address?
+A. Slow training of language models
+B. M x N custom connections between applications and data services
+C. Limited computer storage
+D. Low screen resolution
+Answer: B
+
+Question 2: Which component manages the LLM session in the architecture presented?
+A. The MCP server
+B. The transport layer
+C. The host application
+D. The resource template
+Answer: C
+
+Question 3: What does an MCP client maintain?
+A. A connection to a specific MCP server
+B. The training dataset of the LLM
+C. The student's final exam score
+D. The model's neural network weights
+Answer: A
+
+Question 4: Which MCP primitive is model-controlled?
+A. Resources
+B. Prompts
+C. Configuration files
+D. Tools
+Answer: D
+
+Question 5: Which MCP primitive provides contextual data through URIs?
+A. Tools
+B. Resources
+C. Prompts
+D. Model weights
+Answer: B
+
+Question 6: Who selects an MCP prompt template in the architecture presented?
+A. The CSV generator
+B. The transport layer
+C. The user
+D. The grading algorithm
+Answer: C
+
+Question 7: Which two transports are used in this project?
+A. stdio and Streamable HTTP
+B. FTP and SMTP
+C. Bluetooth and USB
+D. UDP and GraphQL
+Answer: A
+
+Question 8: Why does the project use a tool to calculate GPA?
+A. To ask the LLM to guess missing grades
+B. To train a new model for every student
+C. To avoid reading student records
+D. To calculate results deterministically from data and rules
+Answer: D
+
+Question 9: According to the project's grading rules, how is the course total calculated?
+A. 50% process score + 50% final exam score
+B. 40% process score + 60% final exam score
+C. 60% process score + 40% final exam score
+D. 100% final exam score
+Answer: B
+
+Question 10: Which grade does the project retain for GPA calculation when a course is retaken?
+A. The first grade
+B. The lowest grade
+C. The highest grade
+D. A randomly selected grade
+Answer: C
+
+Question 11: Where are the project's grading boundaries configured?
+A. config/grading.json
+B. package-lock.json
+C. The presentation file
+D. The user's chat question
+Answer: A
+
+Question 12: Which method registers a tool in the server code shown?
+A. server.addStudent()
+B. client.openTool()
+C. model.trainTool()
+D. server.registerTool()
+Answer: D
+
+Question 13: In the prompt example shown, what happens when a required student_id argument is missing?
+A. The server selects a random student
+B. The call fails with protocol error -32602 (Invalid params)
+C. The prompt updates all students
+D. The missing argument becomes zero
+Answer: B
+
+Question 14: What safety mechanism does the presentation describe for grade updates?
+A. The model can change grades without review
+B. Updates are approved automatically after a timeout
+C. Elicitation asks the user for confirmation
+D. The server removes the original transcript
+Answer: C
+
+Question 15: Compared with Qwen3 4B Instruct, what happened when the thinking variant was used in the benchmark presented?
+A. It had about ten times higher latency without improving accuracy on these tasks
+B. It removed the need for MCP servers
+C. It could not read any tool definitions
+D. It changed the project's grading rules
+Answer: A
