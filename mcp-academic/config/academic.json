@@ -5,13 +5,33 @@
     "tables": {
         "students": "students.csv",
         "courses": "courses.csv",
-        "grades": "grades.csv"
+        "grades": "grades.csv",
+        "teachers": "teachers.csv",
+        "sections": "sections.csv",
+        "attendance": "attendance.csv",
+        "conduct": "conduct.csv"
     },
     "cacheHints": {
-        "tools/list": { "ttlMs": 60000, "cacheScope": "public" },
-        "prompts/list": { "ttlMs": 60000, "cacheScope": "public" },
-        "resources/list": { "ttlMs": 60000, "cacheScope": "public" },
-        "resources/templates/list": { "ttlMs": 60000, "cacheScope": "public" },
-        "resources/read": { "ttlMs": 30000, "cacheScope": "private" }
-    }
+        "tools/list": {
+            "ttlMs": 60000,
+            "cacheScope": "public"
+        },
+        "prompts/list": {
+            "ttlMs": 60000,
+            "cacheScope": "public"
+        },
+        "resources/list": {
+            "ttlMs": 60000,
+            "cacheScope": "public"
+        },
+        "resources/templates/list": {
+            "ttlMs": 60000,
+            "cacheScope": "public"
+        },
+        "resources/read": {
+            "ttlMs": 30000,
+            "cacheScope": "private"
+        }
+    },
+    "rulesConfig": "config/academic-rules.json"
 }

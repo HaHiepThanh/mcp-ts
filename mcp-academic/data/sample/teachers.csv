@@ -1,0 +1,13 @@
+teacher_id,full_name,faculty,title,degree,hire_date,email
+T01,Võ Bảo Vy,Information Technology,Lecturer,MSc,2006-09-01,vy.t01@example.edu.vn
+T02,Phạm Mai Lan,Information Technology,Lecturer,MSc,2013-08-01,lan.t02@example.edu.vn
+T03,Đặng Thu Linh,Information Technology,Senior Lecturer,PhD,2018-09-01,linh.t03@example.edu.vn
+T04,Đặng Mai Linh,Information Technology,Associate Professor,PhD,2009-10-01,linh.t04@example.edu.vn
+T05,Võ Thu Vy,Information Technology,Professor,PhD,2005-12-01,vy.t05@example.edu.vn
+T06,Đỗ Thị Trang,Business Administration,Lecturer,MSc,2019-04-01,trang.t06@example.edu.vn
+T07,Bùi Quốc Cường,Business Administration,Lecturer,MSc,2017-06-01,cuong.t07@example.edu.vn
+T08,Phạm Hoàng Dũng,Business Administration,Senior Lecturer,PhD,2018-12-01,dung.t08@example.edu.vn
+T09,Phạm Mai Lan,Business Administration,Associate Professor,PhD,2009-09-01,lan.t09@example.edu.vn
+T10,Nguyễn Hoàng Cường,Business Administration,Professor,PhD,2017-01-01,cuong.t10@example.edu.vn
+T11,Phạm Quốc Long,General Education,Lecturer,MSc,2011-07-01,long.t11@example.edu.vn
+T12,Đỗ Hoàng An,General Education,Lecturer,MSc,2018-08-01,an.t12@example.edu.vn

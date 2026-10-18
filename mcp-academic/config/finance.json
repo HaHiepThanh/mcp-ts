@@ -1,0 +1,22 @@
+{
+    "$comment": "Finance server config (FAKE amounts, VND). The finance server reads its own CSVs in dataDir; grades, conduct and sections come from the academic dataset.",
+    "dataDir": "data/sample/finance",
+    "tables": { "tuition": "tuition.csv", "scholarships": "scholarships.csv", "payroll": "payroll.csv" },
+    "currency": "VND",
+    "scholarshipRules": {
+        "requireNoFailedCourse": true,
+        "requireTuitionPaid": true
+    },
+    "teachingRatePerPeriod": {
+        "Lecturer": 100000,
+        "Senior Lecturer": 120000,
+        "Associate Professor": 150000,
+        "Professor": 180000
+    },
+    "overtimeRatePerPeriod": 150000,
+    "semesterMonths": {
+        "2024-1": ["2024-09", "2024-10", "2024-11", "2024-12"],
+        "2024-2": ["2025-02", "2025-03", "2025-04", "2025-05"],
+        "2025-1": ["2025-09", "2025-10", "2025-11", "2025-12"]
+    }
+}

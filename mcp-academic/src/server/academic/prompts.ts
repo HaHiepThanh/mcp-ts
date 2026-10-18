@@ -84,4 +84,31 @@ export function registerAcademicPrompts(server: McpServer, data: AcademicData): 
             };
         }
     );
+
+    server.registerPrompt(
+        'advisor_meeting',
+        {
+            title: 'Prepare an advisor meeting',
+            description: "Brief for a meeting with one student: grades, attendance and conduct of a semester",
+            argsSchema: z.object({
+                student_id: completable(z.string().describe('Student ID, e.g. "2201010"'), value => [...data.students.keys()].filter(id => id.startsWith(value)).slice(0, 20)),
+                semester: completable(z.string().describe('Semester, e.g. "2025-1"'), value => data.semesters().filter(s => s.startsWith(value ?? '')))
+            })
+        },
+        ({ student_id, semester }) => ({
+            messages: [
+                {
+                    role: 'user' as const,
+                    content: {
+                        type: 'text' as const,
+                        text:
+                            `Prepare a one-page brief for an advisor meeting with student ${student_id} about semester ${semester}.\n` +
+                            'Use calculate_gpa, get_transcript, attendance_summary and at_risk_students. Include:\n' +
+                            '1. Semester GPA and classification\n2. Courses with a D or F\n3. Attendance problems (exam bans)\n' +
+                            '4. Conduct score\n5. Three questions the advisor should ask the student.'
+                    }
+                }
+            ]
+        })
+    );
 }

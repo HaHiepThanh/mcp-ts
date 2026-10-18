@@ -1,0 +1,24 @@
+{
+    "$comment": "Phase-2 academic rules. Thresholds only — the code reads them, nothing is hard-coded.",
+    "attendance": {
+        "weeksPerSection": 15,
+        "maxAbsencePct": 20,
+        "countAsAbsent": ["absent"],
+        "$note": "late and excused do not count as absences"
+    },
+    "conduct": {
+        "scale": [
+            { "min": 90, "label": "Excellent" },
+            { "min": 80, "label": "Good" },
+            { "min": 65, "label": "Fairly good" },
+            { "min": 50, "label": "Average" },
+            { "min": 0, "label": "Weak" }
+        ]
+    },
+    "atRisk": {
+        "gpaBelow": 2.0,
+        "conductBelow": 50,
+        "anyExamBan": true
+    },
+    "teachingQuotaPeriodsPerSemester": 180
+}

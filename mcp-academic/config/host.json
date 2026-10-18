@@ -8,12 +8,29 @@
     "mcpServers": {
         "academic": {
             "command": "node",
-            "args": ["--import", "tsx", "src/server/academic/main.ts"],
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/academic/main.ts"
+            ],
             "protocol": "auto"
         },
         "utility": {
             "command": "node",
-            "args": ["--import", "tsx", "src/server/utility/main.ts"],
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/utility/main.ts"
+            ],
+            "protocol": "auto"
+        },
+        "finance": {
+            "command": "node",
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/finance/main.ts"
+            ],
             "protocol": "auto"
         }
     },

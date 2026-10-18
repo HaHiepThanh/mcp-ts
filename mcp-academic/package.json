@@ -17,6 +17,8 @@
         "examples": "tsx examples/run-all.ts",
         "utility": "tsx src/server/utility/main.ts",
         "utility:http": "tsx src/server/utility/main.ts --http --port 3002",
+        "finance": "tsx src/server/finance/main.ts",
+        "finance:http": "tsx src/server/finance/main.ts --http --port 3003",
         "chat": "tsx src/host/main.ts",
         "check:vscode": "tsx scripts/check-vscode-config.ts",
         "results": "tsx scripts/build-results.ts",

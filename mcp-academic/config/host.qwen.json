@@ -25,6 +25,15 @@
                 "src/server/utility/main.ts"
             ],
             "protocol": "auto"
+        },
+        "finance": {
+            "command": "node",
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/finance/main.ts"
+            ],
+            "protocol": "auto"
         }
     },
     "agent": {
