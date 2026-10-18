@@ -65,9 +65,32 @@ export interface DataIssue {
     row: Record<string, string>;
 }
 
+export interface AcademicRulesConfig {
+    attendance: {
+        maxAbsenceRatio: number;
+        countedStatuses: string[];
+    };
+    conduct: {
+        grades: { label: string; minScore: number }[];
+    };
+    atRisk: {
+        lowGpaThreshold: number;
+        highAbsenceRatio: number;
+        lowConductScore: number;
+    };
+}
+
+export function loadAcademicRules(file = 'config/academic-rules.json'): AcademicRulesConfig {
+    const raw = readFileSync(path.resolve(PROJECT_ROOT, file), 'utf8');
+    const cfg = JSON.parse(raw) as AcademicRulesConfig;
+    cfg.conduct.grades.sort((a, b) => b.minScore - a.minScore);
+    return cfg;
+}
+
 export interface AcademicConfig {
     dataDir: string;
     gradingConfig: string;
+    rulesConfig?: string;
     tables: {
         students: string;
         courses: string;
@@ -96,6 +119,7 @@ export class AcademicData {
     constructor(
         readonly dataDir: string,
         readonly grading: Grading,
+        readonly rules: AcademicRulesConfig,
         tableFiles: AcademicConfig['tables']
     ) {
         for (const file of readdirSync(dataDir).filter(f => f.toLowerCase().endsWith('.csv')).sort()) {
@@ -103,13 +127,13 @@ export class AcademicData {
         }
         this.loadStudents(this.table(tableFiles.students));
         this.loadCourses(this.table(tableFiles.courses));
-        this.loadGrades(this.table(tableFiles.grades));
         if (tableFiles.teachers && this.tables.has(path.basename(tableFiles.teachers, '.csv'))) {
             this.loadTeachers(this.table(tableFiles.teachers));
         }
         if (tableFiles.sections && this.tables.has(path.basename(tableFiles.sections, '.csv'))) {
             this.loadSections(this.table(tableFiles.sections));
         }
+        this.loadGrades(this.table(tableFiles.grades));
     }
 
     private table(file: string): CsvTable {
@@ -155,6 +179,18 @@ export class AcademicData {
             if (!student_id || !course_id || !semester) return this.issue('grades', i, 'missing student_id, course_id or semester', row);
             if (!this.students.has(student_id)) return this.issue('grades', i, `unknown student_id ${student_id}`, row);
             if (!this.courses.has(course_id)) return this.issue('grades', i, `unknown course_id ${course_id}`, row);
+
+            // Check that grade belongs to a valid section (same course, semester, and student's class)
+            if (this.sections.size > 0) {
+                const student = this.students.get(student_id)!;
+                const hasMatchingSection = [...this.sections.values()].some(
+                    sec => sec.course_id === course_id && sec.semester === semester && sec.class_id === student.class_id
+                );
+                if (!hasMatchingSection) {
+                    return this.issue('grades', i, `no matching section for course ${course_id}, semester ${semester}, class ${student.class_id}`, row);
+                }
+            }
+
             const scores = [row.process_score, row.final_score];
             if (scores.some(s => s === '' || s === undefined)) return this.issue('grades', i, 'missing score', row);
             const [process_score, final_score] = scores.map(Number);
@@ -261,7 +297,12 @@ export function getAcademicData(): AcademicData {
     if (!shared) {
         const config = getAcademicConfig();
         const dataDir = path.resolve(PROJECT_ROOT, process.env.ACADEMIC_DATA_DIR ?? config.dataDir);
-        shared = new AcademicData(dataDir, new Grading(loadGradingConfig(config.gradingConfig)), config.tables);
+        shared = new AcademicData(
+            dataDir,
+            new Grading(loadGradingConfig(config.gradingConfig)),
+            loadAcademicRules(config.rulesConfig ?? 'config/academic-rules.json'),
+            config.tables
+        );
     }
     return shared;
 }

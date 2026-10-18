@@ -1,0 +1,25 @@
+{
+    "$comment": "Experiment 1: Terse tool descriptions variant",
+    "llm": {
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "temperature": 0.2
+    },
+    "mcpServers": {
+        "academic": {
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/academic/main.ts"],
+            "protocol": "auto"
+        },
+        "utility": {
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/utility/main.ts"],
+            "protocol": "auto"
+        }
+    },
+    "agent": {
+        "maxToolRounds": 4,
+        "systemPrompt": "You are an academic assistant. Get facts from tools."
+    },
+    "logDir": "outputs/logs"
+}

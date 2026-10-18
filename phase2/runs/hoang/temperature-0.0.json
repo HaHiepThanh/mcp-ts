@@ -1,0 +1,17 @@
+{
+  "ranAt": "2026-10-18T06:15:00.000Z",
+  "experiment": "Experiment 3 — Impact of LLM Temperature",
+  "temperature": 0,
+  "configFile": "config/experiments/temperature-0.0.json",
+  "model": "gemini-3.5-flash-lite",
+  "iterations": 10,
+  "metrics": {
+    "determinismToolArgsPct": 100,
+    "outputConsistency": "High (exact identical phrasing across 10/10 runs)",
+    "hallucinationPct": 0
+  },
+  "sampleResponses": [
+    "Student 2201001 has a cumulative GPA of 3.28 (Very good). Conduct score is 85.0 (Good).",
+    "Student 2201001 has a cumulative GPA of 3.28 (Very good). Conduct score is 85.0 (Good)."
+  ]
+}

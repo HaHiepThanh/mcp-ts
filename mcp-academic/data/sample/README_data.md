@@ -8,9 +8,9 @@ Replace with the team's real data in `data/real/` and point `config/academic.jso
 | courses.csv | 10 | course_id, course_name, credits, faculty |
 | grades.csv | 261 (+6 injected) | student_id, course_id, semester, process_score, final_score |
 | teachers.csv | 20 | teacher_id, full_name, faculty, title, degree, hire_date, email |
-| sections.csv | 24 | section_id, course_id, semester, class_id, teacher_id, room, weekday, start_period, periods |
+| sections.csv | 41 | section_id, course_id, semester, class_id, teacher_id, room, weekday, start_period, periods |
 | conduct.csv | 120 | student_id, semester, score |
-| attendance.csv | 3600 | student_id, section_id, week, status |
+| attendance.csv | 3915 | student_id, section_id, week, status |
 
 Every 5th student in each class is a weak student; their F grades are retaken in semester 2025-1.
 

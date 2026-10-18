@@ -94,7 +94,16 @@ for (const cls of CLASSES) {
 // ── Teachers & Sections (Phú's schema as required dependencies) ──────
 const TEACHER_TITLES = ['Lecturer', 'Senior Lecturer', 'Associate Professor', 'Professor'] as const;
 const TEACHER_DEGREES = ['MSc', 'PhD'] as const;
-const teachers: Record<string, unknown>[] = [];
+type TeacherRow = Record<string, unknown> & {
+    teacher_id: string;
+    full_name: string;
+    faculty: string;
+    title: string;
+    degree: string;
+    hire_date: string;
+    email: string;
+};
+const teachers: TeacherRow[] = [];
 
 for (let i = 1; i <= 20; i++) {
     const gender = random() < 0.5 ? 'Male' : 'Female';
@@ -116,31 +125,90 @@ for (let i = 1; i <= 20; i++) {
 }
 
 // Sections: section_id, course_id, semester, class_id, teacher_id, room, weekday, start_period, periods
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+// Timetable constraints: No room, teacher or class can overlap on weekday + period.
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const PERIOD_SLOTS = [
+    { start: 1, periods: 3 }, // Periods 1..3
+    { start: 4, periods: 3 }, // Periods 4..6
+    { start: 7, periods: 3 }  // Periods 7..9
+];
+
 const sections: Record<string, unknown>[] = [];
 const sectionMap = new Map<string, string>(); // "course_id|semester|class_id" -> section_id
 let secCounter = 1;
 
-for (const cls of CLASSES) {
+// Collect all distinct (class_id, semester, course_id) that actually have student enrollments/grades
+const requiredSections = new Set<string>();
+for (const g of grades) {
+    const st = students.find(s => s.student_id === g.student_id) as { class_id: string } | undefined;
+    if (st) {
+        requiredSections.add(`${g.course_id}|${g.semester}|${st.class_id}`);
+    }
+}
+
+// Track timetable bookings: semester -> key -> boolean
+const classBookings = new Set<string>();   // `${semester}|${class_id}|${weekday}|${start}`
+const teacherBookings = new Set<string>(); // `${semester}|${teacher_id}|${weekday}|${start}`
+const roomBookings = new Set<string>();    // `${semester}|${room}|${weekday}|${start}`
+
+for (const req of [...requiredSections].sort()) {
+    const [course_id, semester, class_id] = req.split('|');
+    const cls = CLASSES.find(c => c.class_id === class_id)!;
     const facultyTeachers = teachers.filter(t => t.faculty === cls.faculty);
-    for (const [semester, courseIds] of Object.entries(PLAN[cls.faculty])) {
-        for (const course_id of courseIds) {
-            const section_id = `SEC${String(secCounter++).padStart(3, '0')}`;
-            const teacher = pick(facultyTeachers);
-            sections.push({
-                section_id,
-                course_id,
-                semester,
-                class_id: cls.class_id,
-                teacher_id: teacher.teacher_id,
-                room: `${cls.class_id.slice(0, 2)}-${100 + Math.floor(random() * 20)}`,
-                weekday: pick(WEEKDAYS),
-                start_period: 1 + Math.floor(random() * 6),
-                periods: 3
-            });
-            sectionMap.set(`${course_id}|${semester}|${cls.class_id}`, section_id);
+
+    const section_id = `SEC${String(secCounter++).padStart(3, '0')}`;
+    let chosenTeacher: { teacher_id: string } | undefined;
+    let chosenSlot: { start: number; periods: number } | undefined;
+    let chosenDay: string | undefined;
+    let chosenRoom: string | undefined;
+
+    // Search for conflict-free slot for this class, teacher, and room
+    slotSearch: for (const day of WEEKDAYS) {
+        for (const slot of PERIOD_SLOTS) {
+            const classKey = `${semester}|${class_id}|${day}|${slot.start}`;
+            if (classBookings.has(classKey)) continue;
+
+            for (const t of facultyTeachers) {
+                const teacherKey = `${semester}|${t.teacher_id}|${day}|${slot.start}`;
+                if (teacherBookings.has(teacherKey)) continue;
+
+                // Pick a room
+                for (let r = 1; r <= 10; r++) {
+                    const roomCandidate = `${class_id.slice(0, 2)}-${100 + r}`;
+                    const roomKey = `${semester}|${roomCandidate}|${day}|${slot.start}`;
+                    if (!roomBookings.has(roomKey)) {
+                        chosenTeacher = t;
+                        chosenDay = day;
+                        chosenSlot = slot;
+                        chosenRoom = roomCandidate;
+                        classBookings.add(classKey);
+                        teacherBookings.add(teacherKey);
+                        roomBookings.add(roomKey);
+                        break slotSearch;
+                    }
+                }
+            }
         }
     }
+
+    // Fallback if full: pick random teacher and assign slot
+    const assignedTeacher = chosenTeacher ?? pick(facultyTeachers);
+    const assignedDay = chosenDay ?? pick(WEEKDAYS);
+    const assignedSlot = chosenSlot ?? pick(PERIOD_SLOTS);
+    const assignedRoom = chosenRoom ?? `${class_id.slice(0, 2)}-101`;
+
+    sections.push({
+        section_id,
+        course_id,
+        semester,
+        class_id,
+        teacher_id: assignedTeacher.teacher_id,
+        room: assignedRoom,
+        weekday: assignedDay,
+        start_period: assignedSlot.start,
+        periods: assignedSlot.periods
+    });
+    sectionMap.set(`${course_id}|${semester}|${class_id}`, section_id);
 }
 
 // ── Hoàng's dataset: Conduct & Attendance ─────────────────────────────
@@ -164,7 +232,16 @@ const WEEKS = 15;
 const attendance: Record<string, unknown>[] = [];
 
 for (const section of sections) {
-    const enrolledStudents = students.filter(s => s.class_id === section.class_id);
+    const sCourse = section.course_id as string;
+    const sSem = section.semester as string;
+    const sClass = section.class_id as string;
+
+    // A student is enrolled in this section if they belong to this class AND have a grade for this course in this semester
+    const enrolledStudents = students.filter(st => {
+        if (st.class_id !== sClass) return false;
+        return grades.some(g => g.student_id === st.student_id && g.course_id === sCourse && g.semester === sSem);
+    });
+
     for (const st of enrolledStudents) {
         const sId = String(st.student_id);
         const isWeak = Number(sId.slice(-3)) % 5 === 0;

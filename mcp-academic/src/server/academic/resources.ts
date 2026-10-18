@@ -32,7 +32,13 @@ export function registerAcademicResources(server: McpServer, data: AcademicData)
                     mimeType: 'application/json',
                     text: JSON.stringify(
                         {
-                            loaded: { students: data.students.size, courses: data.courses.size, grades: data.grades.length },
+                            loaded: {
+                                students: data.students.size,
+                                courses: data.courses.size,
+                                grades: data.grades.length,
+                                teachers: data.teachers.size,
+                                sections: data.sections.size
+                            },
                             skipped: data.issues.length,
                             issues: data.issues
                         },

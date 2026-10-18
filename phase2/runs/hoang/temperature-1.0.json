@@ -1,0 +1,17 @@
+{
+  "ranAt": "2026-10-18T06:25:00.000Z",
+  "experiment": "Experiment 3 — Impact of LLM Temperature",
+  "temperature": 1,
+  "configFile": "config/experiments/temperature-1.0.json",
+  "model": "gemini-3.5-flash-lite",
+  "iterations": 10,
+  "metrics": {
+    "determinismToolArgsPct": 90,
+    "outputConsistency": "Highly variable / creative",
+    "hallucinationPct": 10
+  },
+  "edgeCaseIssues": [
+    "Run #4 invented extra guidance details not returned by MCP tools.",
+    "Run #7 attempted to pass an invented filter argument to conduct_score."
+  ]
+}

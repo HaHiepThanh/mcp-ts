@@ -6,13 +6,9 @@
  *   Generic tools: list_tables, describe_table, query_table — work on ANY CSV, so the
  *                  server still works if the team switches to another dataset.
  */
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-
 import type { CallToolResult, InputRequiredResult, McpServer, ProtocolEra } from '@modelcontextprotocol/server';
 import * as z from 'zod';
 
-import { PROJECT_ROOT } from '../../lib/env';
 import { askHostModel, confirmWithUser } from '../../lib/interaction';
 import { fail, fold, structured, text } from '../../lib/results';
 import type { AcademicData, Student } from './data';
@@ -444,26 +440,6 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
 
     // ── Hoàng's Phase 2 Tools ──────────────────────────────────────────
 
-    function getAcademicRules() {
-        try {
-            return JSON.parse(readFileSync(path.join(PROJECT_ROOT, 'config/academic-rules.json'), 'utf8'));
-        } catch {
-            return {
-                attendance: { maxAbsenceRatio: 0.20, countedStatuses: ['absent'] },
-                conduct: {
-                    grades: [
-                        { label: 'Excellent', minScore: 90 },
-                        { label: 'Good', minScore: 80 },
-                        { label: 'Fairly good', minScore: 65 },
-                        { label: 'Average', minScore: 50 },
-                        { label: 'Weak', minScore: 0 }
-                    ]
-                },
-                atRisk: { lowGpaThreshold: 2.0, highAbsenceRatio: 0.20, lowConductScore: 50 }
-            };
-        }
-    }
-
     // ── attendance_summary ─────────────────────────────────────────────
     server.registerTool(
         'attendance_summary',
@@ -471,7 +447,7 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
             title: 'Attendance summary',
             description:
                 'Summary of attendance for a student (across all or one semester) or for a specific course section. ' +
-                'Calculates total sessions, presents, absences, lates, excused, absence rate, and whether student is banned from exam (>20% absences).',
+                `Calculates total sessions, presents, absences, lates, excused, and per-section absence rates with exam ban status (> ${(data.rules.attendance.maxAbsenceRatio * 100).toFixed(0)}% absences).`,
             inputSchema: z.object({
                 student_id: z.string().optional().describe('Student ID, e.g. "2201001"'),
                 section_id: z.string().optional().describe('Section ID, e.g. "SEC001"'),
@@ -487,7 +463,18 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
                 late: z.number(),
                 excused: z.number(),
                 absence_rate_pct: z.number(),
-                banned_from_exam: z.boolean().describe('True if absence rate exceeds the configured maximum allowable threshold (e.g. 20%)')
+                banned_from_exam: z.boolean().describe('True if student is banned in any enrolled section'),
+                banned_sections: z.array(z.string()).describe('List of section IDs where student is banned from exam'),
+                sections: z.array(
+                    z.object({
+                        section_id: z.string(),
+                        course_id: z.string().optional(),
+                        total: z.number(),
+                        counted_absent: z.number(),
+                        absence_rate_pct: z.number(),
+                        banned_from_exam: z.boolean()
+                    })
+                )
             }),
             annotations: READ_ONLY
         },
@@ -519,10 +506,41 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
             const excused = rows.filter(r => r['status'] === 'excused').length;
             const total = rows.length;
 
-            const rules = getAcademicRules();
-            const absenceRate = total > 0 ? Math.round((absent / total) * 1000) / 10 : 0;
-            const maxAbsenceRatio = rules.attendance?.maxAbsenceRatio ?? 0.20;
-            const banned = (absent / total) > maxAbsenceRatio;
+            const countedStatuses: string[] = data.rules.attendance.countedStatuses;
+            const maxAbsenceRatio: number = data.rules.attendance.maxAbsenceRatio;
+
+            // Group rows by section to evaluate exam ban per section
+            const bySectionMap = new Map<string, Record<string, string>[]>();
+            for (const r of rows) {
+                const secId = r['section_id'];
+                if (!bySectionMap.has(secId)) bySectionMap.set(secId, []);
+                bySectionMap.get(secId)!.push(r);
+            }
+
+            const sectionSummaries = [];
+            const bannedSections: string[] = [];
+
+            for (const [secId, sRows] of bySectionMap.entries()) {
+                const sTotal = sRows.length;
+                const sCountedAbsent = sRows.filter(r => countedStatuses.includes(r['status'])).length;
+                const sRate = sTotal > 0 ? Math.round((sCountedAbsent / sTotal) * 1000) / 10 : 0;
+                const sBanned = (sCountedAbsent / sTotal) > maxAbsenceRatio;
+
+                if (sBanned) bannedSections.push(secId);
+
+                const secObj = data.sections.get(secId);
+                sectionSummaries.push({
+                    section_id: secId,
+                    course_id: secObj?.course_id,
+                    total: sTotal,
+                    counted_absent: sCountedAbsent,
+                    absence_rate_pct: sRate,
+                    banned_from_exam: sBanned
+                });
+            }
+
+            const totalCountedAbsent = rows.filter(r => countedStatuses.includes(r['status'])).length;
+            const overallAbsenceRate = total > 0 ? Math.round((totalCountedAbsent / total) * 1000) / 10 : 0;
 
             return structured({
                 student_id,
@@ -533,8 +551,10 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
                 absent,
                 late,
                 excused,
-                absence_rate_pct: absenceRate,
-                banned_from_exam: banned
+                absence_rate_pct: overallAbsenceRate,
+                banned_from_exam: bannedSections.length > 0,
+                banned_sections: bannedSections,
+                sections: sectionSummaries
             });
         }
     );
@@ -546,7 +566,7 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
             title: 'Conduct score',
             description:
                 'Returns the behavioural and extracurricular conduct score and classification for a student (0–100 scale). ' +
-                'Classified into: Excellent(≥90), Good(≥80), Fairly good(≥65), Average(≥50), Weak(<50).',
+                `Classified into: ${data.rules.conduct.grades.map(g => `${g.label}(≥${g.minScore})`).join(', ')}.`,
             inputSchema: z.object({
                 student_id: studentId,
                 semester: semester.optional()
@@ -579,18 +599,12 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
 
             if (rows.length === 0) return fail(`No conduct records for student ${student_id}${sem ? ` in semester ${sem}` : ''}.`);
 
-            const rules = getAcademicRules();
-            const gradesList: { label: string; minScore: number }[] = rules.conduct?.grades ?? [
-                { label: 'Excellent', minScore: 90 },
-                { label: 'Good', minScore: 80 },
-                { label: 'Fairly good', minScore: 65 },
-                { label: 'Average', minScore: 50 },
-                { label: 'Weak', minScore: 0 }
-            ];
+            const gradesList = data.rules.conduct.grades;
+            const fallbackGrade = gradesList[gradesList.length - 1]?.label ?? 'Weak';
 
             const records = rows.map(r => {
                 const sc = Number(r['score']);
-                const foundGrade = gradesList.find(g => sc >= g.minScore)?.label ?? 'Weak';
+                const foundGrade = gradesList.find(g => sc >= g.minScore)?.label ?? fallbackGrade;
                 return {
                     semester: r['semester'],
                     score: sc,
@@ -617,7 +631,7 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
             title: 'At risk students identification',
             description:
                 'Identifies students at risk of academic probation or failure based on multiple criteria: ' +
-                'low cumulative/semester GPA (< 2.0), high absence rate (> 20%), or poor conduct score (< 50). ' +
+                `low cumulative/semester GPA (< ${data.rules.atRisk.lowGpaThreshold}), high absence rate (> ${(data.rules.atRisk.highAbsenceRatio * 100).toFixed(0)}%), or poor conduct score (< ${data.rules.atRisk.lowConductScore}). ` +
                 'Filters by class_id or faculty, optionally for a specific semester.',
             inputSchema: z.object({
                 class_id: z.string().optional().describe('Class ID, e.g. "IT01"'),
@@ -651,10 +665,10 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
                 return fail(`No students found matching class="${class_id ?? ''}", faculty="${faculty ?? ''}".`);
             }
 
-            const rules = getAcademicRules();
-            const lowGpaThreshold = rules.atRisk?.lowGpaThreshold ?? 2.0;
-            const highAbsenceRatio = rules.atRisk?.highAbsenceRatio ?? 0.20;
-            const lowConductScore = rules.atRisk?.lowConductScore ?? 50;
+            const lowGpaThreshold = data.rules.atRisk.lowGpaThreshold;
+            const highAbsenceRatio = data.rules.atRisk.highAbsenceRatio;
+            const lowConductScore = data.rules.atRisk.lowConductScore;
+            const countedStatuses = data.rules.attendance.countedStatuses;
 
             const attendanceTable = data.tables.get('attendance');
             const conductTable = data.tables.get('conduct');
@@ -675,19 +689,32 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
                     reasons.push(`Low GPA: ${gpa.toFixed(2)} (< ${lowGpaThreshold})`);
                 }
 
-                // Attendance
-                let absenceRate = 0;
+                // Attendance evaluated per section
+                let maxSectionAbsenceRate = 0;
                 if (attendanceTable) {
                     let attRows = attendanceTable.rows.filter(r => r['student_id'] === st.student_id);
                     if (validSectionIds) {
                         attRows = attRows.filter(r => validSectionIds.has(r['section_id']));
                     }
                     if (attRows.length > 0) {
-                        const absCount = attRows.filter(r => r['status'] === 'absent').length;
-                        const ratio = absCount / attRows.length;
-                        absenceRate = Math.round(ratio * 1000) / 10;
-                        if (ratio > highAbsenceRatio) {
-                            reasons.push(`High absence rate: ${absenceRate}% (> ${(highAbsenceRatio * 100).toFixed(0)}%)`);
+                        const secMap = new Map<string, Record<string, string>[]>();
+                        for (const r of attRows) {
+                            const sid = r['section_id'];
+                            if (!secMap.has(sid)) secMap.set(sid, []);
+                            secMap.get(sid)!.push(r);
+                        }
+
+                        for (const [secId, sRows] of secMap.entries()) {
+                            const sTotal = sRows.length;
+                            const sCounted = sRows.filter(r => countedStatuses.includes(r['status'])).length;
+                            const sRatio = sTotal > 0 ? sCounted / sTotal : 0;
+                            const sRatePct = Math.round(sRatio * 1000) / 10;
+                            if (sRatePct > maxSectionAbsenceRate) {
+                                maxSectionAbsenceRate = sRatePct;
+                            }
+                            if (sRatio > highAbsenceRatio) {
+                                reasons.push(`High absence rate in section ${secId}: ${sRatePct}% (> ${(highAbsenceRatio * 100).toFixed(0)}% -> exam ban)`);
+                            }
                         }
                     }
                 }
@@ -712,7 +739,7 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
                         full_name: st.full_name,
                         class_id: st.class_id,
                         gpa,
-                        absence_rate_pct: absenceRate,
+                        absence_rate_pct: maxSectionAbsenceRate,
                         conduct_score: condScore,
                         reasons
                     });
@@ -1003,10 +1030,14 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
                     continue;
                 }
 
-                const totals = sectionGrades.map(g => Math.round((g.process_score * 0.4 + g.final_score * 0.6) * 10) / 10);
-                const secAvg = Math.round((totals.reduce((a, b) => a + b, 0) / totals.length) * 10) / 10;
-                const passCount = totals.filter(t => t >= 4.0).length;
-                const passRate = Math.round((passCount / totals.length) * 1000) / 10;
+                const courseCredits = course?.credits ?? 0;
+                const gradedList = sectionGrades.map(g =>
+                    data.grading.grade(g.course_id, g.semester, courseCredits, g.process_score, g.final_score)
+                );
+                const totals = gradedList.map(g => g.total);
+                const secAvg = totals.length > 0 ? Math.round((totals.reduce((a, b) => a + b, 0) / totals.length) * 10) / 10 : 0;
+                const passCount = gradedList.filter(g => g.passed).length;
+                const passRate = totals.length > 0 ? Math.round((passCount / totals.length) * 1000) / 10 : 0;
 
                 totalStudents += totals.length;
                 sumTotalScores += totals.reduce((a, b) => a + b, 0);
