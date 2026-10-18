@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { loadEnv, PROJECT_ROOT } from '../src/lib/env';
@@ -11,6 +11,20 @@ loadEnv();
 
 const SLEEP_MS = 1500;
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+function cleanReports(): void {
+    const reportsDir = path.resolve(PROJECT_ROOT, 'outputs/reports');
+    if (existsSync(reportsDir)) {
+        for (const file of readdirSync(reportsDir)) {
+            if (file === '.gitkeep') continue;
+            try {
+                unlinkSync(path.join(reportsDir, file));
+            } catch {
+                // ignore
+            }
+        }
+    }
+}
 
 const QUESTIONS = [
     // Q1: Composite multi-round workflow
@@ -183,6 +197,8 @@ async function runExperiment(exp: ExperimentRun): Promise<TurnLog[]> {
     console.log(`RUNNING EXPERIMENT: ${exp.id} (${exp.configFile})`);
     console.log(`========================================`);
 
+    cleanReports();
+
     let servers: { academic: ChildProcess; utility: ChildProcess } | undefined;
     if (exp.needsHttp) {
         servers = await startHttpServers();
@@ -190,6 +206,7 @@ async function runExperiment(exp: ExperimentRun): Promise<TurnLog[]> {
 
     try {
         const { config, file } = loadHostConfig(exp.configFile);
+        config.elicitation.nonInteractive = 'accept';
         const provider = new GeminiProvider({
             model: config.llm.model,
             temperature: config.llm.temperature

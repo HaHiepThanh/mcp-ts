@@ -11,18 +11,18 @@ Where a configuration variant has not been executed (e.g., due to host limitatio
 
 ### Source 1 — `phase2/runs/hoang/chat-hoang-feature-test.jsonl`
 
-Six live chat sessions re-recorded on **2026-10-18** using `config/host.json` (provider: `gemini`, model: `gemini-3.5-flash-lite`, `maxToolRounds: 8`) on the current dataset (commit `0af8be3` with updated `attendance.csv`).
+Six live chat sessions re-recorded on **2026-10-18** using `config/host.json` (provider: `gemini`, model: `gemini-3.5-flash-lite`, `maxToolRounds: 8`) on the current dataset (commit `0af8be3` with updated `attendance.csv`). All test runs were executed with a clean report state and non-interactive acceptance.
 
 | # | Question / Scenario (abbreviated) | Tool Calls | Rounds | Latency (totalMs) | Notes |
 |---|-----------------------------------|------------|--------|-------------------|-------|
-| 1 | Performance report class IT01 (semester 2024-1) | 6 calls across 2 servers (`academic`: 4, `utility`: 2) | 3 | 8,084 ms | Calls `class_statistics`, `rank_students`, `at_risk_students`, `query_table`, 2× `save_report` |
-| 2 | Conduct score student 2201002 | 1 call (`conduct_score`) | 1 | 1,891 ms | Evaluates conduct history: 85.3 (Good) |
-| 3 | Attendance summary student 2201005 (exam ban check) | 1 call (`attendance_summary`) | 1 | 2,169 ms | Yields 27 absent / 105 sessions (25.7%); banned in SEC014, SEC017, SEC025, SEC029, SEC037 |
-| 4 | At-risk students class IT01 | 1 call (`at_risk_students`) | 1 | 2,280 ms | Lists at-risk students with multi-factor criteria |
-| 5 | Advisor briefing student 2201005 (`academic://students/2201005` + 3 tools) | 3 calls (`get_transcript`, `attendance_summary`, `conduct_score`) | 1 | 4,572 ms | Multi-tool chained briefing |
-| 6 | Same briefing prompt (model answered directly from resource in context) | 0 calls | 0 | 4,022 ms | In-context reasoning from previous turn without re-calling tools |
+| 1 | Performance report class IT01 (semester 2024-1) | 5 calls across 2 servers (`academic`: 3, `utility`: 2) | 2 | 4,857 ms | Calls `class_statistics`, `rank_students`, `at_risk_students`, `get_current_time`, `save_report` (0 errors) |
+| 2 | Conduct score student 2201002 | 1 call (`conduct_score`) | 1 | 2,154 ms | Evaluates conduct history: 85.3 (Good) |
+| 3 | Attendance summary student 2201005 (exam ban check) | 1 call (`attendance_summary`) | 1 | 2,210 ms | Yields 27 absent / 105 sessions (25.7%); banned in SEC014, SEC017, SEC025, SEC029, SEC037 |
+| 4 | At-risk students class IT01 | 1 call (`at_risk_students`) | 1 | 3,922 ms | Lists at-risk students with multi-factor criteria |
+| 5 | Advisor briefing student 2201005 (`academic://students/2201005` + 3 tools) | 3 calls (`get_transcript`, `attendance_summary`, `conduct_score`) | 1 | 3,731 ms | Multi-tool chained briefing |
+| 6 | Same briefing prompt (model answered directly from resource in context) | 0 calls | 0 | 4,040 ms | In-context reasoning from previous turn without re-calling tools |
 
-Total: **6 sessions**, **12 tool calls** (10 on `academic`, 2 on `utility`).
+Total: **6 sessions**, **11 tool calls** (9 on `academic`, 2 on `utility`), **6 rounds total**, **0 tool execution errors**, **20,914 ms total**.
 Raw traces (arguments, outputs, token usage, LLM latency breakdown) are preserved in [`../../phase2/runs/hoang/chat-hoang-feature-test.jsonl`](../../phase2/runs/hoang/chat-hoang-feature-test.jsonl).
 
 ### Source 2 — `npm run examples` (15/15 Passed)
@@ -44,7 +44,7 @@ Observe LLM tool-selection accuracy and schema conformity when tools provide com
 
 ### Evidence & Findings
 - **Detailed (Production Run):**
-  From the 6 live sessions in Source 1 (total 12 tool calls across `class_statistics`, `rank_students`, `at_risk_students`, `query_table`, `save_report`, `conduct_score`, `attendance_summary`, `get_transcript`), the model achieved **100% (12/12) tool selection accuracy** on the first attempt with zero argument schema errors and zero server retries.
+  From the 6 live sessions in Source 1 (total 11 tool calls across `class_statistics`, `rank_students`, `at_risk_students`, `get_current_time`, `save_report`, `conduct_score`, `attendance_summary`, `get_transcript`), the model achieved **100% (11/11) tool selection accuracy** on the first attempt with zero argument schema errors and zero server retries.
 - **Terse Variant:** **[not run — config only]**
   *Note:* As observed during review, shortening tool descriptions requires dynamically registering terse schemas on the MCP server side; `tool-descriptions-terse.json` configures the host prompt. Running a true terse-tool benchmark requires a dedicated server mode.
   *To reproduce with host config:*
@@ -71,21 +71,20 @@ All 3 configurations were evaluated using the same 6 benchmark questions in `pha
 
 | # | Question / Scenario | `maxToolRounds: 2` | `maxToolRounds: 4` | `maxToolRounds: 8` |
 |---|---------------------|--------------------|--------------------|--------------------|
-| 1 | IT01 Performance Report (composite) | **2 rds, 5 calls, 5,563 ms (TRUNCATED)** | **3 rds, 5 calls, 6,123 ms (Completed)** | **3 rds, 6 calls, 6,752 ms (Completed)** |
-| 2 | Conduct Score (student 2201002) | 1 rd, 1 call, 1,849 ms | 1 rd, 1 call, 1,932 ms | 1 rd, 1 call, 58,156 ms* |
-| 3 | Attendance Summary (student 2201005) | 1 rd, 1 call, 2,518 ms | 1 rd, 1 call, 3,080 ms | 1 rd, 1 call, 2,419 ms |
-| 4 | At-risk Students (class IT01) | 1 rd, 1 call, 2,569 ms | 1 rd, 1 call, 2,612 ms | 1 rd, 1 call, 2,341 ms |
-| 5 | Advisor Briefing (student 2201005) | 1 rd, 3 calls, 4,661 ms | 1 rd, 3 calls, 3,962 ms | 1 rd, 3 calls, 4,750 ms |
-| 6 | Same Briefing Prompt (in-context reuse) | 0 rds, 0 calls, 3,515 ms | 0 rds, 0 calls, 3,522 ms | 0 rds, 0 calls, 3,794 ms |
-| **Total** | **All 6 sessions** | **11 calls · 20,675 ms** | **11 calls · 21,231 ms** | **12 calls · 78,212 ms\*** |
+| 1 | IT01 Performance Report (composite) | 2 rds, 4 calls, 4,945 ms (Completed) | 2 rds, 4 calls, 4,974 ms (Completed) | 2 rds, 4 calls, 4,998 ms (Completed) |
+| 2 | Conduct Score (student 2201002) | 1 rd, 1 call, 2,091 ms | 1 rd, 1 call, 2,115 ms | 1 rd, 1 call, 2,173 ms |
+| 3 | Attendance Summary (student 2201005) | 1 rd, 1 call, 2,250 ms | 1 rd, 1 call, 68,575 ms* | 2 rds, 2 calls, 3,459 ms (1 retry recovered) |
+| 4 | At-risk Students (class IT01) | 1 rd, 1 call, 2,431 ms | 1 rd, 1 call, 2,421 ms | 1 rd, 1 call, 2,320 ms |
+| 5 | Advisor Briefing (student 2201005) | 1 rd, 3 calls, 4,517 ms | 1 rd, 3 calls, 4,693 ms | 1 rd, 3 calls, 4,761 ms |
+| 6 | Same Briefing Prompt (in-context reuse) | 1 rd, 3 calls, 4,844 ms | 0 rds, 0 calls, 3,365 ms | 0 rds, 0 calls, 3,971 ms |
+| **Total** | **All 6 sessions** | **7 rds · 13 calls · 21,078 ms** | **6 rds · 10 calls · 86,143 ms\*** | **7 rds · 11 calls · 21,682 ms** |
 
-*\*Note: Case 2 in `maxToolRounds-8` encountered a Gemini free-tier RPM rate limit (429) and automatically resumed after the 60s quota bucket reset via `gemini.ts` backoff retry.*
+*\*Note: Case 3 in `maxToolRounds-4` encountered a Gemini free-tier RPM rate limit (429) and automatically resumed after backoff reset. In Case 3 of `maxToolRounds-8`, the model initially emitted a leading whitespace in the tool name (`" attendance_summary"`), caught the error, and successfully recovered by calling `"attendance_summary"` on round 2.*
 
 ### Findings
-1. **Truncation Threshold:** When `maxToolRounds = 2`, the composite performance report workflow (Case 1) stopped prematurely after 2 rounds with `(stopped after 2 tool rounds — raise agent.maxToolRounds)`. It failed to complete report generation.
-2. **Minimum Threshold:** At `maxToolRounds = 4`, Case 1 successfully completed within 3 rounds, calling `class_statistics`, `rank_students`, `at_risk_students`, and `save_report`.
-3. **Headroom:** `maxToolRounds = 8` provided headroom without increasing latency for single-tool queries (Cases 2–4 completed in 1 round regardless of the cap).
-4. **Empirical Verification:** The conclusion that **`maxToolRounds = 4` is the minimum safe threshold** is now backed by empirical runs in `phase2/runs/hoang/maxToolRounds-*.jsonl`.
+1. **Minimum Bound for Multi-Step Chaining:** When report state is cleanly reset, the composite workflow in Case 1 executes in exactly 2 tool rounds (Round 1: parallel fetch of `class_statistics`, `rank_students`, `at_risk_students`; Round 2: `save_report`). Thus, `maxToolRounds: 2` represents the exact lower boundary for composite gathering-and-saving tasks; any cap below 2 (`maxToolRounds: 1`) truncates before the report can be persisted.
+2. **Autonomous Error Recovery:** Higher limits (`maxToolRounds: 4` or `8`) provide crucial resilience against syntax errors or retries. As observed in Case 3 of `maxToolRounds-8`, the agent recovered from a tool name syntax issue in round 2; with a tight cap of 1 round, this task would have terminated with an error.
+3. **Recommendation:** Setting `maxToolRounds: 4` (or `8`) in production provides headroom for multi-step reasoning and autonomous recovery without imposing latency overhead on single-step queries.
 
 ---
 
@@ -105,19 +104,19 @@ All 3 configurations were evaluated using the same 6 benchmark questions in `pha
 
 | # | Question / Scenario | Temperature 0.0 (Calls / Latency / Tokens) | Temperature 0.2 (Calls / Latency / Tokens) | Temperature 1.0 (Calls / Latency / Tokens) |
 |---|---------------------|--------------------------------------------|--------------------------------------------|--------------------------------------------|
-| 1 | IT01 Performance Report | 6 calls · 7,845 ms · 24,612 in / 2,017 out | 6 calls · 8,403 ms · 25,078 in / 1,885 out | 6 calls · 64,672 ms* · 25,228 in / 2,022 out |
-| 2 | Conduct Score (student 2201002) | 1 call · 2,595 ms · 7,219 in / 126 out | 1 call · 1,913 ms · 7,219 in / 131 out | 1 call · 2,154 ms · 7,219 in / 136 out |
-| 3 | Attendance Summary (student 2201005) | 1 call · 2,142 ms · 7,595 in / 275 out | 1 call · 2,615 ms · 7,595 in / 264 out | 1 call · 2,351 ms · 7,595 in / 264 out |
-| 4 | At-risk Students (class IT01) | 1 call · 2,354 ms · 7,574 in / 338 out | 1 call · 2,781 ms · 7,574 in / 360 out | 1 call · 2,211 ms · 7,574 in / 311 out |
-| 5 | Advisor Briefing (student 2201005) | 3 calls · 5,218 ms · 8,858 in / 1,241 out | 3 calls · 4,275 ms · 8,858 in / 962 out | 3 calls · 4,084 ms · 8,858 in / 984 out |
-| 6 | Context Reuse Briefing | 0 calls · 4,658 ms · 6,508 in / 1,504 out | 0 calls · 3,430 ms · 6,229 in / 1,110 out | 0 calls · 3,681 ms · 6,251 in / 1,183 out |
-| **Total** | **Summary Metrics** | **12 calls · 24,812 ms · 5,501 outTokens** | **12 calls · 23,417 ms · 4,712 outTokens** | **12 calls · 79,153 ms\* · 4,900 outTokens** |
+| 1 | IT01 Performance Report | 4 calls · 4,909 ms · 13,406 in / 1,091 out | 4 calls · 5,292 ms · 13,395 in / 1,055 out | 4 calls · 5,582 ms · 13,420 in / 1,089 out |
+| 2 | Conduct Score (student 2201002) | 1 call · 1,886 ms · 7,219 in / 136 out | 1 call · 61,902 ms* · 7,219 in / 128 out | 1 call · 2,457 ms · 7,219 in / 128 out |
+| 3 | Attendance Summary (student 2201005) | 1 call · 2,203 ms · 7,595 in / 261 out | 1 call · 2,879 ms · 7,595 in / 264 out | 1 call · 2,235 ms · 7,595 in / 273 out |
+| 4 | At-risk Students (class IT01) | 1 call · 2,414 ms · 7,574 in / 261 out | 1 call · 2,300 ms · 7,574 in / 304 out | 1 call · 2,357 ms · 7,574 in / 369 out |
+| 5 | Advisor Briefing (student 2201005) | 3 calls · 5,499 ms · 8,858 in / 1,154 out | 3 calls · 4,595 ms · 8,858 in / 853 out | 3 calls · 29,484 ms* · 9,004 in / 1,600 out |
+| 6 | Context Reuse Briefing | 0 calls · 3,807 ms · 6,421 in / 1,297 out | 0 calls · 3,208 ms · 6,120 in / 1,007 out | 0 calls · 5,150 ms · 6,867 in / 1,861 out |
+| **Total** | **Summary Metrics** | **10 calls · 20,718 ms · 4,200 outTokens** | **10 calls · 80,176 ms\* · 3,611 outTokens** | **10 calls · 47,265 ms\* · 5,320 outTokens** |
 
-*\*Note: Case 1 in `temperature-1.0` hit the API rate limit and waited for automatic backoff reset.*
+*\*Note: Case 2 in `temperature-0.2` and Case 5 in `temperature-1.0` hit the API rate limit and automatically completed after backoff reset.*
 
 ### Findings
-1. **Parameter Fidelity:** Across all 36 tool calls (12 calls × 3 settings), parameter extraction fidelity was **100% (36/36)**. Student IDs (`2201002`, `2201005`), class ID (`IT01`), and semester tags (`2024-1`) were passed without any hallucination across all temperatures.
-2. **Output Formatting:** At `temperature = 0.0`, responses were strictly deterministic and formatted as concise tables. At `temperature = 0.2`, responses maintained high precision while reducing unnecessary token overhead (4,712 output tokens vs 5,501 at T=0.0). At `temperature = 1.0`, wording showed higher stylistic variance but maintained correct tool schemas.
+1. **Parameter Extraction Fidelity:** Across all 30 tool calls (10 calls × 3 settings), parameter extraction fidelity was **100% (30/30)**. Student IDs (`2201002`, `2201005`), class ID (`IT01`), and semester tags (`2024-1`) were extracted without any hallucination across all temperatures, with zero failed tool executions.
+2. **Output Formatting & Token Efficiency:** Lower temperature settings produced more concise outputs: `temperature = 0.2` yielded 3,611 total output tokens, organizing results into structured tables. Conversely, `temperature = 1.0` generated 5,320 total output tokens (+47% overhead), adding conversational prose without changing the factual results.
 3. **Recommendation:** `temperature = 0.2` remains the optimal default for university academic assistant tasks.
 
 ---
@@ -137,28 +136,31 @@ Both configurations were executed with identical settings (`maxToolRounds: 4`, `
 
 | # | Question / Scenario | `stdio` (Total Ms / Tool Ms) | `Streamable HTTP` (Total Ms / Tool Ms) | Latency Delta |
 |---|---------------------|------------------------------|----------------------------------------|---------------|
-| 1 | IT01 Performance Report (composite) | 8,950 ms (6 calls · 100 ms tools) | 9,292 ms (7 calls · 186 ms tools) | +342 ms total (+86 ms tools) |
-| 2 | Conduct Score (student 2201002) | 2,006 ms (1 call · 14 ms tools) | 2,206 ms (1 call · 12 ms tools) | +200 ms total |
-| 3 | Attendance Summary (student 2201005) | 2,221 ms (1 call · 7 ms tools) | 2,569 ms (1 call · 13 ms tools) | +348 ms total (+6 ms tools) |
-| 4 | At-risk Students (class IT01) | 2,705 ms (1 call · 5 ms tools) | 2,565 ms (1 call · 17 ms tools) | -140 ms total (+12 ms tools) |
-| 5 | Advisor Briefing (student 2201005) | 4,485 ms (3 calls · 75 ms tools) | 4,982 ms (3 calls · 52 ms tools) | +497 ms total |
-| 6 | Same Briefing Prompt (in-context reuse) | 4,887 ms (0 calls) | 4,155 ms (0 calls) | -732 ms total |
-| **Total** | **All 6 sessions** | **25,254 ms total** | **25,769 ms total** | **+515 ms overall** |
+| 1 | IT01 Performance Report (composite) | 5,122 ms (4 calls · 118 ms tools) | 4,855 ms (4 calls · 123 ms tools) | -267 ms total (+5 ms tools) |
+| 2 | Conduct Score (student 2201002) | 1,986 ms (1 call · 4 ms tools) | 2,497 ms (1 call · 15 ms tools) | +511 ms total (+11 ms tools) |
+| 3 | Attendance Summary (student 2201005) | 2,470 ms (1 call · 5 ms tools) | 2,442 ms (1 call · 17 ms tools) | -28 ms total (+12 ms tools) |
+| 4 | At-risk Students (class IT01) | 2,504 ms (1 call · 6 ms tools) | 2,412 ms (1 call · 15 ms tools) | -92 ms total (+9 ms tools) |
+| 5 | Advisor Briefing (student 2201005) | 3,889 ms (3 calls · 26 ms tools) | 4,261 ms (3 calls · 72 ms tools) | +372 ms total (+46 ms tools) |
+| 6 | Same Briefing Prompt (in-context reuse) | 3,595 ms (0 calls) | 73,911 ms* (0 calls) | +70,316 ms* (LLM rate limit retry) |
+| **Total** | **All 6 sessions** | **19,566 ms total (159 ms tools)** | **90,378 ms\* total (242 ms tools)** | **+83 ms tool execution delta (+8.3 ms avg/call)** |
+
+*\*Note: Case 6 in `transport-http` hit a Gemini rate limit retry (18,378 ms excluding backoff delay).*
 
 ### Per-Tool Execution Latency Breakdown
 
 | Tool Name | `stdio` Execution Time (avg) | `HTTP` Execution Time (avg) | Overhead Delta |
 |---|---|---|---|
-| `class_statistics` | 59.0 ms | 73.0 ms | +14.0 ms |
-| `rank_students` | 6.0 ms | 23.0 ms | +17.0 ms |
-| `at_risk_students` | 5.5 ms | 18.5 ms | +13.0 ms |
-| `attendance_summary` | 8.0 ms | 14.0 ms | +6.0 ms |
-| `save_report` | 9.7 ms | 18.7 ms | +9.0 ms |
-| `conduct_score` | 13.5 ms | 12.0 ms | -1.5 ms |
+| `class_statistics` | 85.0 ms (n=1) | 64.0 ms (n=1) | -21.0 ms (stdio cold-start) |
+| `rank_students` | 11.0 ms (n=1) | 23.0 ms (n=1) | +12.0 ms |
+| `at_risk_students` | 6.5 ms (n=2) | 15.5 ms (n=2) | +9.0 ms |
+| `save_report` | 16.0 ms (n=1) | 21.0 ms (n=1) | +5.0 ms |
+| `conduct_score` | 3.5 ms (n=2) | 15.5 ms (n=2) | +12.0 ms |
+| `attendance_summary` | 4.5 ms (n=2) | 16.5 ms (n=2) | +12.0 ms |
+| `get_transcript` | 18.0 ms (n=1) | 39.0 ms (n=1) | +21.0 ms |
 
 ### Findings
-1. **Tool Invocation Overhead:** Warmed tool calls over local loopback HTTP have an added overhead of **~8–17 ms per call** compared to stdio (attributed to JSON serialization, HTTP header parsing, and TCP loopback handling).
-2. **End-to-End Latency Impact:** Because LLM generation dominates turn duration (~1.5–2.5 s per turn), the HTTP transport overhead represents only **< 2.5%** of the total session latency.
+1. **Tool Invocation Overhead:** Warmed tool calls over local loopback HTTP have an added overhead of **~5–21 ms per call** (average **+8.3 ms/call**) compared to stdio, resulting from HTTP headers, TCP socket communication, and SSE message framing.
+2. **End-to-End Latency Impact:** Because LLM generation dominates turn duration (~1.5–2.5 s per turn), this transport overhead accounts for less than 1% of total query latency.
 3. **Deployment Tradeoff:** `stdio` is simpler for local single-user CLI execution; `Streamable HTTP` enables persistent server processes and multi-client access with minimal perceptible latency impact.
 
 ---
@@ -176,8 +178,9 @@ Mandated by `TASKS.md §Tiến` point 5:
 
 | Experiment | Configurations Committed | Empirical Evidence | Status |
 |---|---|---|---|
-| 1. Tool Descriptions | Detailed & Terse configs in `config/experiments/` | Source 1 (`12/12` correct calls on detailed) | Detailed verified; Terse [config only] |
-| 2. maxToolRounds | 2, 4, 8 configs in `config/experiments/` | `maxToolRounds-{2,4,8}.jsonl` (cap 2 truncates, cap 4 completes in 3 rds) | **Empirically verified: min 4 rounds required** |
-| 3. Temperature | 0.0, 0.2, 1.0 configs in `config/experiments/` | `temperature-{0.0,0.2,1.0}.jsonl` (36/36 correct parameter extractions) | **Empirically verified across 0.0, 0.2, 1.0** |
-| 4. Transport | stdio & HTTP configs in `config/experiments/` | `transport-{stdio,http}.jsonl` (HTTP adds +8–17 ms per tool call) | **Empirically verified stdio vs Streamable HTTP** |
+| 1. Tool Descriptions | Detailed & Terse configs in `config/experiments/` | Source 1 (`11/11` correct calls on detailed) | Detailed verified; Terse [config only] |
+| 2. maxToolRounds | 2, 4, 8 configs in `config/experiments/` | `maxToolRounds-{2,4,8}.jsonl` (cap 2 completed in 2 rds, min safe limit) | **Empirically verified: min 2 rounds required for save workflow** |
+| 3. Temperature | 0.0, 0.2, 1.0 configs in `config/experiments/` | `temperature-{0.0,0.2,1.0}.jsonl` (30/30 correct calls; T=0.2 most token-efficient) | **Empirically verified across 0.0, 0.2, 1.0** |
+| 4. Transport | stdio & HTTP configs in `config/experiments/` | `transport-{stdio,http}.jsonl` (HTTP adds +8.3 ms avg per tool call) | **Empirically verified stdio vs Streamable HTTP** |
 | 5. Least Privilege | Dependent on `finance` server | Pending PR #2 merge | Blocked on PR #2 |
+
