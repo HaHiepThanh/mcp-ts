@@ -1,0 +1,13 @@
+
+> mcp-academic@0.1.0 doctor
+> tsx scripts/doctor.ts
+
+== mcp-academic environment check ==
+
+✅ Node.js: v24.18.0 (need >= 20)
+✅ File .env: loaded: mcp-academic\.env
+✅ MCP SDK v2 (stdio): server "smoke" — 1 tool, connect 472ms, callTool 5ms → "Hello MCP team! The MCP server is working."
+✅ Gemini: key valid, model "gemini-3.8-flash" replied "OK" in 23458ms (attempt 1)
+⚠️  Ollama: cannot reach http://127.0.0.1:11434 — Ollama not installed or not running
+
+Report written: outputs\logs\doctor.json

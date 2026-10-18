@@ -1,0 +1,12 @@
+{
+  "kind": "summary",
+  "started": "2026-10-18T11:16:13.706Z",
+  "finished": "2026-10-18T11:16:14.636Z",
+  "label": "gemini-http-tools",
+  "total": 31,
+  "passed": 26,
+  "failed": 0,
+  "errors": 0,
+  "skipped": 5,
+  "log": "gemini-http-tools-2026-10-18T11-16-13-706Z.jsonl"
+}

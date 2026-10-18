@@ -1,0 +1,163 @@
+MCP TypeScript SDK Seminar — Phase 2
+20 questions. One correct option per question.
+The answer key follows each question. All numeric examples use the synthetic sample data.
+
+Question 1: When switching the existing assistant from Gemini to Qwen, which part normally changes?
+A. The CSV column names
+B. The host's LLM provider and model configuration
+C. Every MCP server implementation
+D. Every student's identifier
+Answer: B
+Source: mcp-academic/docs/model-observations.md, What we compared
+
+Question 2: Why does the benchmark disable automatic model fallback?
+A. To ensure the measured model actually produced the answer
+B. To remove the tool schemas
+C. To disable HTTP
+D. To increase the dataset size
+Answer: A
+Source: phase2/improvements.md, item 5
+
+Question 3: What does a limit of eight tool rounds control?
+A. The number of CSV rows
+B. The maximum number of registered tools
+C. The number of semesters
+D. The maximum number of tool-result cycles in a conversation turn
+Answer: D
+Source: mcp-academic/src/host/host.ts, ask
+
+Question 4: Why can a small local model need a larger context window for MCP tasks?
+A. CSV files must always be copied into the system prompt
+B. HTTP requires an 8,192-token header
+C. Tool schemas, instructions, history and results all consume context
+D. Context length changes the grade scale
+Answer: C
+Source: mcp-academic/docs/model-observations.md, Context window
+
+Question 5: What is the safest conclusion when one stdio run is faster than one HTTP run?
+A. HTTP always reduces accuracy
+B. This run is an observation; repetitions are needed to estimate a reliable latency difference
+C. Stdio will always be faster for every model
+D. The LLM used no tokens
+Answer: B
+Source: phase2/runs/khoa/README.md, measurement limits
+
+Question 6: A user asks to change only a final exam score. How should update_grade handle an omitted process score?
+A. Keep its existing value and ask for confirmation before changing the grade
+B. Set it to zero
+C. Set it equal to the final score
+D. Delete the previous grade
+Answer: A
+Source: phase2/improvements.md, item 1
+
+Question 7: How is a grade associated with a course section in this dataset?
+A. By course_id alone
+B. By student name and room
+C. By course_id, semester and the student's class_id
+D. By teacher title alone
+Answer: C
+Source: mcp-academic/src/server/academic/data.ts, loadGrades
+
+Question 8: Which tool returns a class's weekly course schedule for a specified semester?
+A. conduct_score
+B. tuition_status
+C. teacher_grade_report
+D. class_timetable
+Answer: D
+Source: mcp-academic/src/server/academic/tools.ts, class_timetable
+
+Question 9: T001 has three sections with three teaching periods each in semester 2024-1. What is the weekly workload?
+A. 3 periods
+B. 9 periods
+C. 27 periods
+D. 45 periods
+Answer: B
+Source: phase2/test-reference.xlsx, Sections; test case P2-08
+
+Question 10: What does students_graded in teacher_grade_report count?
+A. Graded enrolments across the teacher's selected sections, so a student may count more than once
+B. Unique teachers
+C. All students in the university
+D. Only students with an A
+Answer: A
+Source: mcp-academic/src/server/academic/tools.ts, teacher_grade_report
+
+Question 11: The absence rule bans a student only when absences are greater than 20%. What happens at exactly 3 absences out of 15 meetings?
+A. The student is automatically banned
+B. The semester is deleted
+C. Attendance becomes unavailable
+D. The absence ratio is exactly 20%, so this rule does not ban the student
+Answer: D
+Source: config/academic-rules.json; test case P2-13
+
+Question 12: What happens at 4 absences out of 15 meetings under the same rule?
+A. The ratio is 20%, so there is no ban
+B. Late attendance becomes an absence
+C. The ratio is about 26.7%, so the student is banned in that section
+D. All students in the class are banned
+Answer: C
+Source: mcp-academic/config/academic-rules.json; test case P2-14
+
+Question 13: Which status currently counts toward the configured absence ratio?
+A. present
+B. absent
+C. late
+D. excused
+Answer: B
+Source: mcp-academic/config/academic-rules.json, attendance.countedStatuses
+
+Question 14: What conduct classification applies to a score of exactly 50?
+A. Average
+B. Weak
+C. Good
+D. Excellent
+Answer: A
+Source: mcp-academic/config/academic-rules.json; test case P2-20
+
+Question 15: When does the current at_risk_students implementation flag a student?
+A. Only when the student has all three risk factors simultaneously
+B. Whenever the student has an unpaid salary
+C. Only when every section exceeds the absence threshold
+D. When any configured GPA, per-section absence or conduct risk condition is met
+Answer: D
+Source: mcp-academic/src/server/academic/tools.ts, at_risk_students
+
+Question 16: Why should the answer key calculate expected values from CSV independently of the server?
+A. To make every model pass
+B. To hide invalid rows
+C. To help detect a business-rule bug shared by the tool output and its tool-derived oracle
+D. To avoid retaining the source data
+Answer: C
+Source: phase2/test-reference.xlsx; phase2/scripts/prepare-reference.py
+
+Question 17: What should an assistant with only academic and utility servers do when asked for a teacher's salary?
+A. Estimate it from the teacher's title
+B. Explain that the required finance data/tool is unavailable
+C. Ask query_table to read a finance file outside its data directory
+D. Invent a plausible amount
+Answer: B
+Source: phase2/configs/gemini-stdio.json; TASKS.md, least privilege
+
+Question 18: Where should scholarship eligibility rules be evaluated?
+A. In deterministic server code using GPA, conduct, owed courses and tuition rules
+B. In the model's guess based on the student's name
+C. In PowerPoint animations
+D. In a random seed independent of grades
+Answer: A
+Source: TASKS.md, Tien's finance requirements; finance PR #2
+
+Question 19: What must a payroll approval tool do before changing data?
+A. Turn off the log
+B. Ignore the user's reply
+C. Ask for explicit confirmation through elicitation
+D. Change the transport to stdio
+Answer: C
+Source: TASKS.md, finance tools
+
+Question 20: What is the correct treatment of the five finance test cases while finance PR #2 remains unmerged?
+A. Count them as successful tests on main
+B. Replace their values with zero
+C. Merge finance code into Khoa's branch without review
+D. Keep their PR snapshot provenance and mark execution on main as skipped
+Answer: D
+Source: phase2/reference-manifest.json; phase2/test-cases.csv

@@ -1,0 +1,377 @@
+{
+  "example": "s10-attendance-conduct",
+  "title": "S10 · Hoàng: Attendance, Conduct & At-Risk Students Tools",
+  "sdkMethods": [
+    "attendance_summary",
+    "conduct_score",
+    "at_risk_students"
+  ],
+  "ranAt": "2026-10-18T10:57:45.774Z",
+  "steps": [
+    {
+      "step": "Valid student attendance (all semesters)",
+      "method": "callTool",
+      "params": {
+        "name": "attendance_summary",
+        "arguments": {
+          "student_id": "2201001"
+        }
+      },
+      "ok": true,
+      "ms": 12,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201001",
+          "total_sessions": 90,
+          "present": 76,
+          "absent": 8,
+          "late": 3,
+          "excused": 3,
+          "absence_rate_pct": 8.9,
+          "banned_from_exam": false,
+          "banned_sections": [],
+          "sections": [
+            {
+              "section_id": "SEC014",
+              "course_id": "CS101",
+              "total": 15,
+              "counted_absent": 0,
+              "absence_rate_pct": 0,
+              "banned_from_exam": false
+            },
+            {
+              "section_id": "SEC017",
+              "course_id": "CS102",
+              "total": 15,
+              "counted_absent": 2,
+              "absence_rate_pct": 13.3,
+              "banned_from_exam": false
+            },
+            {
+              "section_id": "SEC021",
+              "course_id": "CS201",
+              "total": 15,
+              "counted_absent": 1,
+              "absence_rate_pct": 6.7,
+              "banned_from_exam": false
+            },
+            {
+              "section_id": "SEC025",
+              "course_id": "CS202",
+              "total": 15,
+              "counted_absent": 2,
+              "absence_rate_pct": 13.3,
+              "banned_from_exam": false
+            },
+            {
+              "section_id": "SEC029",
+              "course_id": "GE101",
+              "total": 15,
+              "counted_absent": 1,
+              "absence_rate_pct": 6.7,
+              "banned_from_exam": false
+            },
+            {
+              "section_id": "SEC037",
+              "course_id": "GE102",
+              "total": 15,
+              "counted_absent": 2,
+              "absence_rate_pct": 13.3,
+              "banned_from_exam": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "Valid section attendance for semester 2024-1",
+      "method": "callTool",
+      "params": {
+        "name": "attendance_summary",
+        "arguments": {
+          "section_id": "SEC001",
+          "semester": "2024-1"
+        }
+      },
+      "ok": true,
+      "ms": 5,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "section_id": "SEC001",
+          "semester": "2024-1",
+          "total_sessions": 150,
+          "present": 128,
+          "absent": 12,
+          "late": 8,
+          "excused": 2,
+          "absence_rate_pct": 8,
+          "banned_from_exam": false,
+          "banned_sections": [],
+          "sections": [
+            {
+              "section_id": "SEC001",
+              "course_id": "BA101",
+              "total": 150,
+              "counted_absent": 12,
+              "absence_rate_pct": 8,
+              "banned_from_exam": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "Invalid student ID",
+      "method": "callTool",
+      "params": {
+        "name": "attendance_summary",
+        "arguments": {
+          "student_id": "9999999"
+        }
+      },
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "isError": true,
+        "text": "No student with student_id \"9999999\". Use search_students to find the right ID."
+      }
+    },
+    {
+      "step": "Student conduct across all recorded semesters",
+      "method": "callTool",
+      "params": {
+        "name": "conduct_score",
+        "arguments": {
+          "student_id": "2201002"
+        }
+      },
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201002",
+          "full_name": "Nguyễn Mai Vy",
+          "class_id": "IT01",
+          "records": [
+            {
+              "semester": "2024-1",
+              "score": 79,
+              "grade": "Fairly good"
+            },
+            {
+              "semester": "2024-2",
+              "score": 81,
+              "grade": "Good"
+            },
+            {
+              "semester": "2025-1",
+              "score": 96,
+              "grade": "Excellent"
+            }
+          ],
+          "average_score": 85.3
+        }
+      }
+    },
+    {
+      "step": "Student conduct for semester 2024-2",
+      "method": "callTool",
+      "params": {
+        "name": "conduct_score",
+        "arguments": {
+          "student_id": "2201005",
+          "semester": "2024-2"
+        }
+      },
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201005",
+          "full_name": "Trần Thị Lan",
+          "class_id": "IT01",
+          "records": [
+            {
+              "semester": "2024-2",
+              "score": 57,
+              "grade": "Average"
+            }
+          ],
+          "average_score": 57
+        }
+      }
+    },
+    {
+      "step": "Invalid conduct query (student not found)",
+      "method": "callTool",
+      "params": {
+        "name": "conduct_score",
+        "arguments": {
+          "student_id": "2209999"
+        }
+      },
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "isError": true,
+        "text": "No student with student_id \"2209999\". Use search_students to find the right ID."
+      }
+    },
+    {
+      "step": "At-risk students in class IT01",
+      "method": "callTool",
+      "params": {
+        "name": "at_risk_students",
+        "arguments": {
+          "class_id": "IT01"
+        }
+      },
+      "ok": true,
+      "ms": 8,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "filter": {
+            "class_id": "IT01"
+          },
+          "total_evaluated": 10,
+          "at_risk_count": 2,
+          "students": [
+            {
+              "student_id": "2201005",
+              "full_name": "Trần Thị Lan",
+              "class_id": "IT01",
+              "gpa": 1,
+              "absence_rate_pct": 33.3,
+              "conduct_score": 53.3,
+              "reasons": [
+                "Low GPA: 1.00 (< 2)",
+                "High absence rate in section SEC014: 26.7% (> 20% -> exam ban)",
+                "High absence rate in section SEC017: 33.3% (> 20% -> exam ban)",
+                "High absence rate in section SEC025: 26.7% (> 20% -> exam ban)",
+                "High absence rate in section SEC029: 33.3% (> 20% -> exam ban)",
+                "High absence rate in section SEC037: 33.3% (> 20% -> exam ban)"
+              ]
+            },
+            {
+              "student_id": "2201010",
+              "full_name": "Trần Đức Phúc",
+              "class_id": "IT01",
+              "gpa": 2.06,
+              "absence_rate_pct": 40,
+              "conduct_score": 55,
+              "reasons": [
+                "High absence rate in section SEC017: 26.7% (> 20% -> exam ban)",
+                "High absence rate in section SEC019: 40% (> 20% -> exam ban)",
+                "High absence rate in section SEC021: 40% (> 20% -> exam ban)",
+                "High absence rate in section SEC029: 33.3% (> 20% -> exam ban)",
+                "High absence rate in section SEC033: 26.7% (> 20% -> exam ban)",
+                "High absence rate in section SEC041: 33.3% (> 20% -> exam ban)"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "At-risk students in Business Administration faculty (semester 2024-1)",
+      "method": "callTool",
+      "params": {
+        "name": "at_risk_students",
+        "arguments": {
+          "faculty": "Business Administration",
+          "semester": "2024-1"
+        }
+      },
+      "ok": true,
+      "ms": 8,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "filter": {
+            "faculty": "Business Administration",
+            "semester": "2024-1"
+          },
+          "total_evaluated": 20,
+          "at_risk_count": 4,
+          "students": [
+            {
+              "student_id": "2202005",
+              "full_name": "Bùi Thị Hương",
+              "class_id": "BA01",
+              "gpa": 0.63,
+              "absence_rate_pct": 40,
+              "conduct_score": 43,
+              "reasons": [
+                "Low GPA: 0.63 (< 2)",
+                "High absence rate in section SEC001: 33.3% (> 20% -> exam ban)",
+                "High absence rate in section SEC027: 40% (> 20% -> exam ban)",
+                "High absence rate in section SEC035: 40% (> 20% -> exam ban)",
+                "Poor conduct score: 43 (< 50)"
+              ]
+            },
+            {
+              "student_id": "2202010",
+              "full_name": "Phạm Văn Long",
+              "class_id": "BA01",
+              "gpa": 0,
+              "absence_rate_pct": 26.7,
+              "conduct_score": 62,
+              "reasons": [
+                "Low GPA: 0.00 (< 2)",
+                "High absence rate in section SEC001: 26.7% (> 20% -> exam ban)",
+                "High absence rate in section SEC035: 26.7% (> 20% -> exam ban)"
+              ]
+            },
+            {
+              "student_id": "2202015",
+              "full_name": "Bùi Ngọc Ngân",
+              "class_id": "BA02",
+              "gpa": 0.38,
+              "absence_rate_pct": 33.3,
+              "conduct_score": 60,
+              "reasons": [
+                "Low GPA: 0.38 (< 2)",
+                "High absence rate in section SEC028: 33.3% (> 20% -> exam ban)"
+              ]
+            },
+            {
+              "student_id": "2202020",
+              "full_name": "Bùi Quốc Phúc",
+              "class_id": "BA02",
+              "gpa": 0.25,
+              "absence_rate_pct": 33.3,
+              "conduct_score": 48,
+              "reasons": [
+                "Low GPA: 0.25 (< 2)",
+                "High absence rate in section SEC002: 33.3% (> 20% -> exam ban)",
+                "High absence rate in section SEC036: 26.7% (> 20% -> exam ban)",
+                "Poor conduct score: 48 (< 50)"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "Non-existent class query",
+      "method": "callTool",
+      "params": {
+        "name": "at_risk_students",
+        "arguments": {
+          "class_id": "NONEXISTENT"
+        }
+      },
+      "ok": true,
+      "ms": 5,
+      "result": {
+        "isError": true,
+        "text": "No students found matching class=\"NONEXISTENT\", faculty=\"\"."
+      }
+    }
+  ]
+}
