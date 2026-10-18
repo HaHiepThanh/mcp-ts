@@ -1,163 +1,145 @@
-MCP TypeScript SDK Seminar — Phase 2
-20 questions. One correct option per question.
-The answer key follows each question. All numeric examples use the synthetic sample data.
+MCP TypeScript SDK Phase Two
+20 multiple choice questions
+Choose one answer for each question
+Adapted from phase2/quiz-draft.txt and the new Phase Two features.
+Historical model results refer to the earlier benchmark, not the new Khoa run.
 
-Question 1: When switching the existing assistant from Gemini to Qwen, which part normally changes?
-A. The CSV column names
-B. The host's LLM provider and model configuration
-C. Every MCP server implementation
-D. Every student's identifier
+Question 1: What is the main job of MCP in this system?
+A. Make every calculation inside the language model
+B. Provide a standard interface for discovering and calling tools
+C. Replace all CSV files with a database
+D. Remove the need for logs
 Answer: B
-Source: mcp-academic/docs/model-observations.md, What we compared
 
-Question 2: Why does the benchmark disable automatic model fallback?
-A. To ensure the measured model actually produced the answer
-B. To remove the tool schemas
-C. To disable HTTP
-D. To increase the dataset size
+Question 2: Which part normally changes when switching from Gemini to Qwen?
+A. Host provider and model configuration
+B. Student identifiers
+C. Course credits
+D. The meaning of every tool
 Answer: A
-Source: phase2/improvements.md, item 5
 
-Question 3: What does a limit of eight tool rounds control?
-A. The number of CSV rows
-B. The maximum number of registered tools
-C. The number of semesters
-D. The maximum number of tool-result cycles in a conversation turn
+Question 3: Why is model fallback disabled in a fair benchmark?
+A. It removes all retries
+B. It changes the CSV data
+C. It ensures the intended model produced the measured answers
+D. It disables HTTP
+Answer: C
+
+Question 4: What does the maximum tool round setting control?
+A. The number of student rows
+B. The number of teachers
+C. The number of CSV columns
+D. The maximum tool and result cycles in a turn
 Answer: D
-Source: mcp-academic/src/host/host.ts, ask
 
-Question 4: Why can a small local model need a larger context window for MCP tasks?
-A. CSV files must always be copied into the system prompt
-B. HTTP requires an 8,192-token header
-C. Tool schemas, instructions, history and results all consume context
-D. Context length changes the grade scale
-Answer: C
-Source: mcp-academic/docs/model-observations.md, Context window
-
-Question 5: What is the safest conclusion when one stdio run is faster than one HTTP run?
-A. HTTP always reduces accuracy
-B. This run is an observation; repetitions are needed to estimate a reliable latency difference
-C. Stdio will always be faster for every model
-D. The LLM used no tokens
+Question 5: How does a grade join a section?
+A. By room alone
+B. By course semester and the student class
+C. By teacher title alone
+D. By student name alone
 Answer: B
-Source: phase2/runs/khoa/README.md, measurement limits
 
-Question 6: A user asks to change only a final exam score. How should update_grade handle an omitted process score?
-A. Keep its existing value and ask for confirmation before changing the grade
-B. Set it to zero
-C. Set it equal to the final score
-D. Delete the previous grade
-Answer: A
-Source: phase2/improvements.md, item 1
-
-Question 7: How is a grade associated with a course section in this dataset?
-A. By course_id alone
-B. By student name and room
-C. By course_id, semester and the student's class_id
-D. By teacher title alone
-Answer: C
-Source: mcp-academic/src/server/academic/data.ts, loadGrades
-
-Question 8: Which tool returns a class's weekly course schedule for a specified semester?
+Question 6: Which tool shows the weekly schedule of a class?
 A. conduct_score
 B. tuition_status
-C. teacher_grade_report
-D. class_timetable
-Answer: D
-Source: mcp-academic/src/server/academic/tools.ts, class_timetable
-
-Question 9: T001 has three sections with three teaching periods each in semester 2024-1. What is the weekly workload?
-A. 3 periods
-B. 9 periods
-C. 27 periods
-D. 45 periods
-Answer: B
-Source: phase2/runs/khoa/test-reference.xlsx, Sections; test case P2-08
-
-Question 10: What does students_graded in teacher_grade_report count?
-A. Graded enrolments across the teacher's selected sections, so a student may count more than once
-B. Unique teachers
-C. All students in the university
-D. Only students with an A
-Answer: A
-Source: mcp-academic/src/server/academic/tools.ts, teacher_grade_report
-
-Question 11: The absence rule bans a student only when absences are greater than 20%. What happens at exactly 3 absences out of 15 meetings?
-A. The student is automatically banned
-B. The semester is deleted
-C. Attendance becomes unavailable
-D. The absence ratio is exactly 20%, so this rule does not ban the student
-Answer: D
-Source: config/academic-rules.json; test case P2-13
-
-Question 12: What happens at 4 absences out of 15 meetings under the same rule?
-A. The ratio is 20%, so there is no ban
-B. Late attendance becomes an absence
-C. The ratio is about 26.7%, so the student is banned in that section
-D. All students in the class are banned
+C. class_timetable
+D. payroll_summary
 Answer: C
-Source: mcp-academic/config/academic-rules.json; test case P2-14
 
-Question 13: Which status currently counts toward the configured absence ratio?
-A. present
-B. absent
-C. late
-D. excused
+Question 7: Which model had the lowest median model time in the earlier 11-case comparison run twice per model?
+A. Gemini Flash Lite at 2.7 seconds
+B. Qwen Thinking at 24.4 seconds
+C. All models had the same median
+D. Qwen Instruct at 2.1 seconds
+Answer: D
+
+Question 8: How did Qwen Thinking compare with Qwen Instruct in that earlier small benchmark?
+A. Both passed 22 of 22 turns, but Thinking took much longer
+B. Thinking passed twice as many turns
+C. Thinking used no output tokens
+D. Instruct could not call tools
+Answer: A
+
+Question 9: Three absences out of fifteen meetings equal twenty percent. What does the current rule do?
+A. Always ban the student
+B. Do not ban because the rule uses greater than twenty percent
+C. Delete the section
+D. Treat all late meetings as absent
 Answer: B
-Source: mcp-academic/config/academic-rules.json, attendance.countedStatuses
 
-Question 14: What conduct classification applies to a score of exactly 50?
+Question 10: Four absences out of fifteen meetings give what result?
+A. Exactly twenty percent and no ban
+B. No attendance information
+C. About twenty six point seven percent and an exam ban
+D. A conduct score of forty
+Answer: C
+
+Question 11: How was the earlier update_grade problem with an unwanted process_score of zero fixed?
+A. Remove all grade updates
+B. Ask the model to guess the old score
+C. Replace every omitted score with zero
+D. Make scores optional so an omitted score keeps its current value
+Answer: D
+
+Question 12: What conduct classification applies to a score of fifty?
 A. Average
 B. Weak
 C. Good
 D. Excellent
 Answer: A
-Source: mcp-academic/config/academic-rules.json; test case P2-20
 
-Question 15: When does the current at_risk_students implementation flag a student?
-A. Only when the student has all three risk factors simultaneously
-B. Whenever the student has an unpaid salary
-C. Only when every section exceeds the absence threshold
-D. When any configured GPA, per-section absence or conduct risk condition is met
-Answer: D
-Source: mcp-academic/src/server/academic/tools.ts, at_risk_students
-
-Question 16: Why should the answer key calculate expected values from CSV independently of the server?
-A. To make every model pass
-B. To hide invalid rows
-C. To help detect a business-rule bug shared by the tool output and its tool-derived oracle
-D. To avoid retaining the source data
-Answer: C
-Source: phase2/runs/khoa/test-reference.xlsx; phase2/runs/khoa/scripts/prepare-reference.py
-
-Question 17: What should an assistant with only academic and utility servers do when asked for a teacher's salary?
-A. Estimate it from the teacher's title
-B. Explain that the required finance data/tool is unavailable
-C. Ask query_table to read a finance file outside its data directory
-D. Invent a plausible amount
+Question 13: When does the current risk tool flag a student?
+A. Only when all risk conditions happen together
+B. When any configured GPA absence or conduct risk condition is met
+C. Only when the student owes tuition
+D. Only when every section is missing
 Answer: B
-Source: phase2/runs/khoa/configs/gemini-stdio.json; TASKS.md, least privilege
 
-Question 18: Where should scholarship eligibility rules be evaluated?
-A. In deterministic server code using GPA, conduct, owed courses and tuition rules
-B. In the model's guess based on the student's name
-C. In PowerPoint animations
-D. In a random seed independent of grades
-Answer: A
-Source: TASKS.md, Tien's finance requirements; finance PR #2
-
-Question 19: What must a payroll approval tool do before changing data?
-A. Turn off the log
-B. Ignore the user's reply
-C. Ask for explicit confirmation through elicitation
-D. Change the transport to stdio
+Question 14: What information should an advising briefing combine?
+A. Salary only
+B. GPA only
+C. Transcript attendance and conduct
+D. Teacher title and payroll month only
 Answer: C
-Source: TASKS.md, finance tools
 
-Question 20: What is the correct treatment of the five finance test cases while finance PR #2 remains unmerged?
-A. Count them as successful tests on main
-B. Replace their values with zero
-C. Merge finance code into Khoa's branch without review
-D. Keep their PR snapshot provenance and mark execution on main as skipped
+Question 15: Where should scholarship eligibility be decided?
+A. In the model guess
+B. In the student name
+C. In PowerPoint
+D. In server code using the configured conditions
 Answer: D
-Source: phase2/runs/khoa/reference-manifest.json; phase2/runs/khoa/test-cases.csv
+
+Question 16: How is tuition balance calculated?
+A. Amount due minus amount paid
+B. Amount due plus amount paid
+C. Credits plus conduct
+D. Salary minus GPA
+Answer: A
+
+Question 17: What should an assistant without finance tools do with a salary question?
+A. Guess from teacher title
+B. Explain that the required finance tool or data is unavailable
+C. Read an unrelated file outside its data folder
+D. Invent a typical salary
+Answer: B
+
+Question 18: What must a payroll approval tool do before changing state?
+A. Remove the log
+B. Ignore the user reply
+C. Ask for explicit user confirmation
+D. Switch to another model
+Answer: C
+
+Question 19: Why do we check expected answers independently in Excel?
+A. To make every model pass
+B. To replace source data with guesses
+C. To avoid recording errors
+D. To detect a calculation bug that a tool-derived answer key could repeat
+Answer: D
+
+Question 20: What is a fair conclusion from one small transport comparison?
+A. Report the observed times and repeat before making a general speed claim
+B. HTTP is always faster
+C. Stdio is always more accurate
+D. Network conditions never matter
+Answer: A

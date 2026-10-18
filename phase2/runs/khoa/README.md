@@ -1,52 +1,79 @@
-# Khoa — Phase 2 measurement report
+# Khoa — Phase 2
 
-Measured on 18 October 2026 (Asia/Saigon), Windows, Node.js v24.18.0. The files below preserve timestamps in UTC. All academic records are synthetic sample data. Hardware and network were not controlled.
+Bộ nộp làm lại theo phạm vi của Khoa. Không có video. Không sửa code hay dữ liệu của Phú, Hoàng và Tiến.
 
-## Current results
+## Mở tệp nào
 
-Each sweep contains 26 executable academic cases and five finance cases explicitly skipped on main. Gemini uses `gemini-3.5-flash-lite`, temperature 0.2, maxToolRounds 8, fresh conversations and disabled model fallback. The system prompt, dataset and questions are identical between transports. HTTP servers are started locally on 3001/3002. Startup/model discovery time is outside per-question timings.
+| Tệp | Nội dung |
+| --- | --- |
+| `MCP-TS-SDK-phase2.pptx` | 31 slide thuyết trình toàn bộ Phase 2 bằng tiếng Anh |
+| `MCP-TS-SDK-phase2-script.docx` | Lời nói tiếng Anh dễ hiểu theo từng slide và câu hỏi thường gặp |
+| `test-cases.csv` | 24 câu kiểm thử, đúng 5 cột yêu cầu |
+| `test-reference.xlsx` | 55 đáp án bằng công thức Excel từ CSV, có phép tính trung gian |
+| `questions-phase2.txt` | 20 câu trắc nghiệm và đáp án |
+| `check-stdio.jsonl`, `check-http.jsonl` | Log kiểm tra trực tiếp MCP, có kết quả đầy đủ |
+| `gemini-stdio.jsonl` | Log chạy Gemini: câu hỏi, tool/args, kết quả, câu trả lời, thời gian, token |
+| `comparison.csv` | Bảng so sánh lấy từ log |
+| `configs/` | Hai cấu hình được dùng khi đo |
 
-| Configuration | Exact tool/argument/value subset | Finance skipped | Median question time | Median individual tool time | Tokens in / out | Extra API attempts |
-| --- | --- | --- | --- | --- | --- | --- |
-| gemini-stdio-tools | 26/26 | 5 | 1 ms | 1 ms | not applicable | not applicable |
-| gemini-http-tools | 26/26 | 5 | 7 ms | 7 ms | not applicable | not applicable |
-| gemini-stdio-llm | 25/26 | 5 | 2,068 ms | 2 ms | 188089 / 3595 | 4 |
-| gemini-http-llm | 26/26 | 5 | 2,014 ms | 7 ms | 188014 / 3625 | 6 |
+`phase2/test-cases.csv` ở vị trí yêu cầu của đề và bản CSV trong thư mục này có nội dung giống hệt nhau. Tiến/Hoàng dùng tệp đó để bổ sung vào benchmark chung; PR này không sửa `demo/benchmark.ts`.
 
-## Interpretation and scoring limits
+## Tình huống và đáp án
 
-- Direct MCP checks compare independent CSV/Excel reference values with real structured tool results. They exercise transport and calculation behavior without an LLM.
-- The LLM subset score requires every listed tool, the required argument values and the listed structured values. It is deliberately stricter than semantic answer correctness. For example, P2-03 expects retrieval `limit: 1`; retrieving 50 and presenting one teacher can produce a correct user-facing answer while failing that configuration check.
-- The answer-presence screen is a diagnostic, not an accuracy score. Natural phrases such as “no matches” can express zero without the digit 0. Boolean exam-ban decisions, missing-data explanations and the completeness of advising/risk reasons need semantic review. Every case is marked `requiresHumanReview`.
-- Golden numeric values come from CSV calculations independent of production grading/tool functions. `test-reference.xlsx` contains 59 formula metrics with independent CSV cross-checks. All agree under Artifact Tool, and a disposable conduct-input change verified recalculation. A human has not yet reviewed the workbook in Microsoft Excel; do not describe this as Khoa having calculated the answers by hand.
-- One sweep per transport does not establish a general speed advantage. API retries and network variability affect end-to-end latency. These are new Phase 2 measurements, separate from the historical 11-case model comparison on an Apple M4 Pro.
-- Qwen was not measured: Ollama was unavailable. The supplied Gemini key was valid. Finance, a true terse-tool-description variant and the full round/temperature matrix are outside this measured slice. Existing Hoang results remain in their own logs and documents.
+15 câu học vụ/tư vấn và 9 câu tài chính, bao phủ toàn bộ 4 tool giảng viên, 3 tool điểm danh/rèn luyện/cảnh báo và 6 tool đọc finance. Có tham số hợp lệ, ID sai, học kỳ không có dữ liệu và hai biên vắng 3/15, 4/15 buổi.
 
-## Failed strict checks
+Trong CSV, `expected_values` chứa đáp án theo từng tool. `note` chứa tham số, nguồn snapshot và ô Excel đối chiếu. `Answers` là trang đầu workbook: cột C tính bằng công thức, D đối chiếu độc lập từ CSV, E kiểm tra khớp. Các trang sau giữ nguồn và bước tính. Có thể dùng workbook để tự kiểm tra từng phép tính trong Excel; không ghi nhận người dùng đã duyệt tay thay họ.
 
-- gemini-stdio-llm, P2-03: failed. Inspect `gemini-stdio-llm-2026-10-18T11-14-50-444Z.jsonl` for the arguments, complete MCP output and final answer.
+## Chạy đo thật ngày 18 tháng 10 năm 2026
 
-## Evidence files
+Môi trường Windows, Node.js 24.18.0. Dữ liệu sample giả; ngày tài chính cố định `2026-10-18`.
 
-- [gemini-stdio-tools-2026-10-18T11-16-09-673Z.jsonl](gemini-stdio-tools-2026-10-18T11-16-09-673Z.jsonl) — gemini-stdio-tools
-- [gemini-http-tools-2026-10-18T11-16-13-706Z.jsonl](gemini-http-tools-2026-10-18T11-16-13-706Z.jsonl) — gemini-http-tools
-- [gemini-stdio-llm-2026-10-18T11-14-50-444Z.jsonl](gemini-stdio-llm-2026-10-18T11-14-50-444Z.jsonl) — gemini-stdio-llm
-- [gemini-http-llm-2026-10-18T11-11-15-424Z.jsonl](gemini-http-llm-2026-10-18T11-11-15-424Z.jsonl) — gemini-http-llm
+| Lượt chạy | Số câu | Qua kiểm tra | Lỗi chạy | Median mỗi câu |
+| --- | --- | --- | --- | --- |
+| MCP stdio | 24 | 24 | 0 | 3.0 ms |
+| MCP HTTP | 24 | 24 | 0 | 7.5 ms |
+| Gemini stdio | 24 | 24 | 0 | 2,851.5 ms |
 
-Also retained: `doctor.json`, the 15/15 example-suite summary, S9/S10 outputs, workbook validation and configuration snapshots. `comparison.csv` and `comparison.json` are rebuilt from the selected complete traces, not hand-entered results. The console return code may be 1 when a strict case fails; its recorded failure remains in the report.
+Gemini: `gemini-3.5-flash-lite`, temperature 0.2, maxToolRounds 8, hội thoại mới mỗi câu, tắt fallback. Tổng token vào/ra: 237,665/3,692; số lần thử API bổ sung: 3. Có nhịp nghỉ 9 giây giữa câu để phù hợp quota 15 request/phút; nhịp nghỉ đó không nằm trong thời gian từng câu.
 
-The first complete HTTP LLM sweep recorded all 31 cases before a harness cleanup error (`ChatHost.close` did not exist). Its summary is reconstructed from the unchanged complete case records and marked `recovered_from_complete_cases` in comparison.json. The runner now closes `host.hub` and has a TypeScript check. This cleanup issue did not change recorded model calls, outputs or per-question times.
+Điểm là kiểm tra tool, tham số yêu cầu và giá trị kết quả, không phải thước đo đầy đủ cho độ đúng ngữ nghĩa. Các câu tư vấn và lý do cảnh báo vẫn cần đọc nội dung. Log giữ nguyên cả retry và lỗi nếu có; không tự điền kết quả cho câu chưa chạy.
 
-## Reproduce
+## Nguồn dùng cho bản trình bày
 
-From `mcp-academic/`, after `npm install` and local `.env` configuration:
+- Học vụ: `main` tại `2c4110ab6ff60e84e386ace7f0d158bf0ab4a0e2`.
+- Finance: PR #2 tại `530d5da97e12a9ecaece0fd4e7066dec8c888621`, chạy từ checkout riêng. **Finance đã được kiểm thử nhưng chưa merge vào main.** HR/conduct của snapshot đó khác main, nên các phép tính finance dùng trọn bộ CSV tương ứng.
+- Hoàng: `phase2/runs/hoang/maxToolRounds-*.jsonl`, `temperature-*.jsonl` và `mcp-academic/docs/experiments.md`.
+- Nhận xét model: `mcp-academic/docs/model-observations.md` và `model-comparison.md`. Đây là kết quả cũ trên bộ 11 câu và máy khác, được phân biệt trong slide.
+- Cải tiến: `phase2/improvements.md`.
+
+## Nhận xét và cải tiến
+
+- Kết quả kiểm tra MCP khớp 55 chỉ số Excel độc lập, gồm cả finance. Cách này giúp phát hiện lỗi nếu tool và oracle của cùng code cùng tính sai.
+- HTTP có thêm chi phí trao đổi cục bộ; một lượt đo chưa đủ kết luận transport nào luôn nhanh hơn.
+- Lưu toàn bộ structured result; không dùng đoạn preview 400 ký tự để chấm JSON.
+- Tắt fallback khi so model, giữ tên model và số lần thử trong log.
+- Thí nghiệm mô tả tool ngắn thật chưa được đo; không coi việc đổi system prompt là đổi schema.
+- Sau khi merge finance và thống nhất dataset, chạy lại đủ 24 câu trên snapshot chung. Qwen 27 tool cần đo ngân sách context lại; không áp số đo 20 tool cũ cho bản này.
+
+## Chạy lại các câu hỏi
+
+Cài dependency theo `mcp-academic/docs/setup-guide.md` và giữ API key trong `.env` được Git ignore. Với snapshot đang đo, finance chạy từ checkout riêng tại thư mục cùng cấp repo: `_khoa-rebuild/finance/mcp-academic`. Cấu hình stdio ghi đường dẫn làm việc đó; khi finance đã merge, bỏ trường `cwd` của finance để dùng chung app.
+
+Để lấy đúng bản finance đã đo, chạy một lần từ thư mục gốc repo:
 
 ```powershell
-node node_modules/typescript/bin/tsc --noEmit -p ../phase2/runs/khoa/tsconfig.json
-node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts
-node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --config ../phase2/runs/khoa/configs/gemini-http.json --start-http
-node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --llm
-node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --llm --config ../phase2/runs/khoa/configs/gemini-http.json --start-http
+git clone https://github.com/HaHiepThanh/mcp-ts.git ../_khoa-rebuild/finance
+git -C ../_khoa-rebuild/finance checkout 530d5da97e12a9ecaece0fd4e7066dec8c888621
+npm --prefix ../_khoa-rebuild/finance/mcp-academic ci
 ```
 
-Then run `python phase2/runs/khoa/scripts/summarize-runs.py` from the repository root. Read `phase2/runs/khoa/KHOA-HANDOFF.md` before regenerating references or enabling finance.
+Sau đó thử một câu với cấu hình đã lưu:
+
+```powershell
+cd mcp-academic
+npm run chat -- --config ../phase2/runs/khoa/configs/host-stdio.json --ask "How many sections and weekly teaching periods does T001 have in semester 2024-1?"
+```
+
+HTTP cần khởi động academic cổng 3001, utility 3002 từ main và finance 3003 từ snapshot finance, rồi dùng `configs/host-http.json`. Công cụ dựng tệp và file tạm không đưa vào bộ nộp. Các log chứa cấu hình thực, commit nguồn và toàn bộ expected cases để đối chiếu.
+
+Các tệp đã đưa lên GitHub qua PR; chưa upload Google Drive. Không có video theo yêu cầu.
