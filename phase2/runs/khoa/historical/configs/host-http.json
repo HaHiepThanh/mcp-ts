@@ -1,0 +1,34 @@
+{
+  "$comment": "Chat host config. 'mcpServers' uses the same shape as Claude Desktop / VS Code (command+args for stdio, url for HTTP). 'protocol': auto | legacy | 2026-07-28.",
+  "llm": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite",
+    "temperature": 0.2
+  },
+  "mcpServers": {
+    "academic": {
+      "url": "http://127.0.0.1:3001/mcp",
+      "protocol": "auto"
+    },
+    "utility": {
+      "url": "http://127.0.0.1:3002/mcp",
+      "protocol": "auto"
+    },
+    "finance": {
+      "url": "http://127.0.0.1:3003/mcp",
+      "protocol": "auto"
+    }
+  },
+  "agent": {
+    "maxToolRounds": 8,
+    "systemPrompt": "You are a university assistant. Use MCP tools for every academic or financial fact. Report the requested numbers and units in simple English. Use the correct specialised tool. Do not guess missing data. For an unknown student or teacher, explain the tool error. Do not change records."
+  },
+  "sampling": {
+    "approval": "deny",
+    "maxTokens": 600
+  },
+  "elicitation": {
+    "nonInteractive": "decline"
+  },
+  "logDir": "outputs/logs/khoa-final-http"
+}

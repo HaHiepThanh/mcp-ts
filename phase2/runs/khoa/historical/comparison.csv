@@ -1,0 +1,4 @@
+configuration,cases,passed,failed,errors,median_ms,input_tokens,output_tokens,extra_api_attempts,log
+host-stdio-tools,24,24,0,0,3.0,0,0,0,check-stdio.jsonl
+host-http-tools,24,24,0,0,7.5,0,0,0,check-http.jsonl
+host-stdio-llm,24,24,0,0,2851.5,237665,3692,3,gemini-stdio.jsonl
