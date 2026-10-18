@@ -180,6 +180,16 @@ export class AcademicData {
             if (!this.students.has(student_id)) return this.issue('grades', i, `unknown student_id ${student_id}`, row);
             if (!this.courses.has(course_id)) return this.issue('grades', i, `unknown course_id ${course_id}`, row);
 
+            const scores = [row.process_score, row.final_score];
+            if (scores.some(s => s === '' || s === undefined)) return this.issue('grades', i, 'missing score', row);
+            const [process_score, final_score] = scores.map(Number);
+            if ([process_score, final_score].some(s => Number.isNaN(s) || s < SCORE_MIN || s > SCORE_MAX)) {
+                return this.issue('grades', i, `score outside ${SCORE_MIN}–${SCORE_MAX}`, row);
+            }
+            const key = `${student_id}|${course_id}|${semester}`;
+            if (seen.has(key)) return this.issue('grades', i, 'duplicate grade row (same student, course, semester)', row);
+            seen.add(key);
+
             // Check that grade belongs to a valid section (same course, semester, and student's class)
             if (this.sections.size > 0) {
                 const student = this.students.get(student_id)!;
@@ -191,15 +201,6 @@ export class AcademicData {
                 }
             }
 
-            const scores = [row.process_score, row.final_score];
-            if (scores.some(s => s === '' || s === undefined)) return this.issue('grades', i, 'missing score', row);
-            const [process_score, final_score] = scores.map(Number);
-            if ([process_score, final_score].some(s => Number.isNaN(s) || s < SCORE_MIN || s > SCORE_MAX)) {
-                return this.issue('grades', i, `score outside ${SCORE_MIN}–${SCORE_MAX}`, row);
-            }
-            const key = `${student_id}|${course_id}|${semester}`;
-            if (seen.has(key)) return this.issue('grades', i, 'duplicate grade row (same student, course, semester)', row);
-            seen.add(key);
             this.grades.push({ student_id, course_id, semester, process_score, final_score });
         });
     }
