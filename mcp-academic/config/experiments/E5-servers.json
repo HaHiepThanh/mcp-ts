@@ -1,0 +1,42 @@
+{
+    "id": "E5",
+    "title": "Servers switched on (least privilege)",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 1,
+    "question": "What does each extra server cost in prompt tokens, and does the LLM refuse cleanly when a needed server is off?",
+    "hypothesis": "Prompt tokens grow with the number of tools; without the finance server the finance questions are refused without invented numbers.",
+    "variants": [
+        {
+            "id": "academic",
+            "label": "academic only (15 tools)",
+            "set": {
+                "servers": [
+                    "academic"
+                ]
+            }
+        },
+        {
+            "id": "academic+utility",
+            "label": "academic + utility (18 tools)",
+            "set": {
+                "servers": [
+                    "academic",
+                    "utility"
+                ]
+            }
+        },
+        {
+            "id": "all",
+            "label": "academic + utility + finance (22 tools, base)",
+            "set": {
+                "servers": [
+                    "academic",
+                    "utility",
+                    "finance"
+                ]
+            }
+        }
+    ]
+}

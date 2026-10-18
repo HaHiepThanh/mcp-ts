@@ -75,11 +75,21 @@ export class McpHub {
         return entry;
     }
 
-    /** Every tool of every server, in the shape the LLM provider expects. */
-    toolSpecs(): ToolSpec[] {
-        return [...this.servers.values()].flatMap(s =>
+    /**
+     * Every tool of every server, in the shape the LLM provider expects.
+     * mode "terse" strips every description (tool and parameters); "misleading" swaps the descriptions of the given tool pairs.
+     */
+    toolSpecs(view: { mode: 'full' | 'terse' | 'misleading'; swap?: [string, string][] } = { mode: 'full' }): ToolSpec[] {
+        const specs = [...this.servers.values()].flatMap(s =>
             s.tools.map(t => ({ name: `${s.name}${SEPARATOR}${t.name}`, description: `[${s.name}] ${t.description ?? t.title ?? t.name}`, parameters: cleanSchema(t.inputSchema) }))
         );
+        if (view.mode === 'terse') return specs.map(spec => ({ ...spec, description: spec.name.split(SEPARATOR)[1], parameters: stripDescriptions(spec.parameters) }));
+        if (view.mode === 'misleading') {
+            const byName = new Map(specs.map(spec => [spec.name.replace(SEPARATOR, '.'), spec.description]));
+            const swapped = new Map((view.swap ?? []).flatMap(([a, b]) => [[a, byName.get(b)], [b, byName.get(a)]] as const));
+            return specs.map(spec => ({ ...spec, description: swapped.get(spec.name.replace(SEPARATOR, '.')) ?? spec.description }));
+        }
+        return specs;
     }
 
     instructions(): string {
@@ -118,6 +128,12 @@ export class McpHub {
 function cleanSchema(schema: Record<string, unknown>): Record<string, unknown> {
     const { $schema: _ignored, ...rest } = schema;
     return rest;
+}
+
+function stripDescriptions(value: unknown): Record<string, unknown> {
+    if (Array.isArray(value)) return value.map(stripDescriptions) as unknown as Record<string, unknown>;
+    if (!value || typeof value !== 'object') return value as Record<string, unknown>;
+    return Object.fromEntries(Object.entries(value).filter(([k]) => k !== 'description').map(([k, v]) => [k, stripDescriptions(v)]));
 }
 
 /** What the LLM receives back for one tool call. */

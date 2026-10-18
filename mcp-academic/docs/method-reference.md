@@ -58,6 +58,23 @@ Every example saves its real calls and results to `outputs/examples/<example>.js
 
 ---
 
+### Phase-2 tools (same `registerTool` API — input → output)
+
+| Server | Tool | Input | Output | Errors | Example |
+| --- | --- | --- | --- | --- | --- |
+| academic | `search_teachers` | `keyword?`, `faculty?` | `{ total_matches, teachers[{ teacher_id, full_name, faculty, title, degree, courses[] }] }` | — (empty list) | S9 |
+| academic | `teacher_workload` | `teacher_id`, `semester` | `{ sections[], total_periods, quota_periods, overtime_periods }` | unknown teacher / semester → `isError` | S9 |
+| academic | `class_timetable` | `class_id`, `semester` | `{ sessions[{ weekday, start_period, course_id, course_name, room, teacher_id, teacher_name }] }` | unknown class / semester → `isError` | S9 |
+| academic | `attendance_summary` | `student_id`, `semester` | `{ courses[{ absent, late, excused, absence_pct, exam_banned }], banned_courses[] }` | unknown student → `isError` | S10 |
+| academic | `at_risk_students` | `scope` (`class`/`faculty`), `value`, `semester` | `{ checked, at_risk[{ student_id, semester_gpa, conduct, reasons[] }] }` | unknown class → `isError`; bad enum → schema | S10 |
+| academic | prompt `advisor_meeting` | `student_id`, `semester` (completable) | `{ messages[] }` | missing argument → `ProtocolError -32602` | S10 |
+| finance | `tuition_status` | `student_id`, `semester?` | `{ semesters[{ amount_due, amount_paid, outstanding, paid_in_full }], total_outstanding }` | unknown student → `isError` | S11 |
+| finance | `check_scholarship_eligibility` | `student_id`, `semester`, `scholarship_id?` | `{ results[{ scholarship_id, eligible, conditions[{ condition, required, actual, ok }] }] }` | unknown scholarship → `isError` | S11 |
+| finance | `rank_scholarship_candidates` | `faculty`, `semester`, `scholarship_id` | `{ slots, eligible_count, winners[{ rank, student_id, gpa, conduct }] }` | unknown faculty → `isError` | S11 |
+| finance | `calculate_teacher_pay` | `teacher_id`, `month` (`YYYY-MM`) | `{ base_salary, teaching_periods, rate_per_period, teaching_pay, overtime_periods, overtime_pay, bonus, deductions, net_pay }` | no payroll month → `isError`; bad format → schema | S11 |
+
+---
+
 ## 2. Client side (`@modelcontextprotocol/client`)
 
 ### Connecting

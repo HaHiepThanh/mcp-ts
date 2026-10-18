@@ -1,0 +1,33 @@
+{
+    "id": "E6",
+    "title": "Ollama context window",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 1,
+    "question": "Is the local model's context window big enough for 22 tool definitions plus the conversation?",
+    "hypothesis": "At 4k the tool definitions and results are cut off and accuracy collapses; 8k and 16k behave the same.",
+    "variants": [
+        {
+            "id": "ctx-4k",
+            "label": "num_ctx 4096",
+            "set": {
+                "llm.model": "qwen3-4b-ctx4k:latest"
+            }
+        },
+        {
+            "id": "ctx-8k",
+            "label": "num_ctx 8192 (base)",
+            "set": {
+                "llm.model": "qwen3-4b-ctx8k:latest"
+            }
+        },
+        {
+            "id": "ctx-16k",
+            "label": "num_ctx 16384",
+            "set": {
+                "llm.model": "qwen3-4b-ctx16k:latest"
+            }
+        }
+    ]
+}

@@ -1,0 +1,53 @@
+{
+    "id": "E4",
+    "title": "Tool description quality",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 1,
+    "question": "How much does the LLM rely on the tool descriptions written in the MCP server?",
+    "hypothesis": "Terse descriptions (names only) lower the pass rate; misleading descriptions make the model pick the wrong tool.",
+    "variants": [
+        {
+            "id": "full",
+            "label": "full descriptions (base)",
+            "set": {
+                "toolDescriptions": {
+                    "mode": "full"
+                }
+            }
+        },
+        {
+            "id": "terse",
+            "label": "terse: tool name only, no parameter descriptions",
+            "set": {
+                "toolDescriptions": {
+                    "mode": "terse"
+                }
+            }
+        },
+        {
+            "id": "misleading",
+            "label": "misleading: 3 pairs of descriptions swapped",
+            "set": {
+                "toolDescriptions": {
+                    "mode": "misleading",
+                    "swap": [
+                        [
+                            "academic.calculate_gpa",
+                            "academic.get_transcript"
+                        ],
+                        [
+                            "academic.teacher_workload",
+                            "academic.class_timetable"
+                        ],
+                        [
+                            "finance.tuition_status",
+                            "finance.check_scholarship_eligibility"
+                        ]
+                    ]
+                }
+            }
+        }
+    ]
+}

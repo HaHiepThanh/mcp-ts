@@ -1,0 +1,46 @@
+{
+    "id": "E2",
+    "title": "temperature",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": [
+        "A1",
+        "A2",
+        "B1",
+        "B2",
+        "B3",
+        "C2",
+        "C3",
+        "D1",
+        "D3",
+        "G1",
+        "G2",
+        "G3"
+    ],
+    "repeat": 3,
+    "question": "Does a higher sampling temperature make answers less stable or less correct?",
+    "hypothesis": "temperature 1.0 gives more different answers between runs and a lower pass rate than 0 / 0.2.",
+    "variants": [
+        {
+            "id": "temp-0",
+            "label": "temperature 0",
+            "set": {
+                "llm.temperature": 0
+            }
+        },
+        {
+            "id": "temp-0.2",
+            "label": "temperature 0.2 (base)",
+            "set": {
+                "llm.temperature": 0.2
+            }
+        },
+        {
+            "id": "temp-1.0",
+            "label": "temperature 1.0",
+            "set": {
+                "llm.temperature": 1.0
+            }
+        }
+    ]
+}

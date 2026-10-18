@@ -41,12 +41,18 @@ Scores are on the 10-point scale; each course total becomes a letter **A/B/C/D/F
 | Tool | `update_grade` | Changes a grade after the user confirms — **elicitation** |
 | Tool | `generate_student_feedback` | Feedback paragraph written by the host's LLM — **sampling** |
 | Tool | `list_tables` / `describe_table` / `query_table` | Generic tools for **any** CSV (backup-domain plan) |
+| Tool *(phase 2)* | `search_teachers` | Lecturers by name/ID/faculty, with the courses they teach |
+| Tool *(phase 2)* | `teacher_workload` | Sections and teaching periods of a lecturer vs the quota (`config/academic-rules.json`) |
+| Tool *(phase 2)* | `class_timetable` | Weekly timetable of a class: day, period, course, room, lecturer |
+| Tool *(phase 2)* | `attendance_summary` | Absences per course; > 20 % absent → banned from that exam |
+| Tool *(phase 2)* | `at_risk_students` | Students to warn in a class/faculty, each with reasons (GPA, exam ban, conduct) |
 | Resource | `academic://rules/grading` | Grading rules (markdown) |
 | Resource | `academic://reports/data-quality` | Rows skipped while loading, with reasons |
 | Resource template | `academic://tables/{table}` | Raw CSV of a table (listable, completable) |
 | Resource template | `academic://students/{student_id}` | Student profile + GPA per semester (completable, **subscribable**: updated when `update_grade` changes it) |
 | Prompt | `class_report(class_id, semester?)` | Report template, both arguments autocomplete |
 | Prompt | `study_advice(student_id)` | Advice template embedding the student-profile resource |
+| Prompt *(phase 2)* | `advisor_meeting(student_id, semester)` | Brief for an advisor meeting: grades, attendance, conduct |
 
 The same code serves **both protocol eras**: 2025 clients (`initialize` handshake, e.g. Claude Desktop) and 2026-07-28 clients (`server/discover`). Server→client requests use `elicitInput`/`requestSampling` on 2025 connections and `return inputRequired(...)` on 2026 ones — see [`src/lib/interaction.ts`](src/lib/interaction.ts).
 
@@ -60,6 +66,30 @@ The same code serves **both protocol eras**: 2025 clients (`initialize` handshak
 | Resource template | `utility://reports/{filename}` | Read a saved report back (listable) |
 
 The two servers do not know about each other — the host's LLM combines them (e.g. statistics from `academic`, then `save_report` from `utility`).
+
+## The `finance` server (phase 2)
+
+Separate on purpose (least privilege): a host that must not see money matters simply does not connect it. Read-only; every decision is computed in code. Rules and rates: [`config/finance.json`](config/finance.json). Data (FAKE amounts): `data/sample/finance/` — the academic server cannot read this folder.
+
+| Kind | Name | What it does |
+| --- | --- | --- |
+| Tool | `tuition_status` | Amount due / paid / outstanding per semester |
+| Tool | `check_scholarship_eligibility` | Every condition (semester GPA, conduct, no F, tuition paid) with required vs actual value |
+| Tool | `rank_scholarship_candidates` | Eligible students of a faculty, ranked, within the slots |
+| Tool | `calculate_teacher_pay` | Base + teaching periods × rate + overtime + bonus − deductions |
+
+Run: `npm run finance` (stdio) · `npm run finance:http` (port 3003). Total with the other two servers: **22 tools**.
+
+## Phase 2 experiments
+
+| Command | What |
+| --- | --- |
+| `npm run experiment -- E3` | Run one experiment (`config/experiments/E3-*.json`): every configuration × the scenarios of `demo/scenarios.ts`; logs to `../phase2/runs/E3/` |
+| `npm run experiment -- E3 --only rounds-2` / `--resume` | One configuration / continue an interrupted run |
+| `npm run experiments:report` | Rebuild `docs/experiments.md` and `docs/scenarios.md` from the logs (no LLM call) |
+| `python3 ../phase2/manual_check.py` | Independent re-computation of the ground truth from the CSVs |
+
+Base configuration of every experiment: [`config/host.experiment.json`](config/host.experiment.json). E6 needs the Ollama models `qwen3-4b-ctx4k/8k/16k` (same weights as `qwen3:4b-instruct`, different `num_ctx` — see `phase2/README.md`).
 
 ## The chat host (`src/host/`)
 
@@ -132,6 +162,7 @@ Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the
 | [`setup-guide.md`](docs/setup-guide.md) | Team setup: Node, clone, local Qwen (Ollama) or Gemini key + `.env` (Vietnamese) |
 | [`quiz-facts.md`](docs/quiz-facts.md) | 30 verified facts + distractors for the multiple-choice quiz |
 | [`team-briefs.md`](docs/team-briefs.md) | Slide outline and tasks per team member (Vietnamese) |
+| [`scenarios.md`](docs/scenarios.md) · [`experiments.md`](docs/experiments.md) | Phase 2: the 24 test scenarios, and the 8 experiments with results and observations (generated) |
 
 ## Examples (one file per SDK method group)
 
@@ -145,6 +176,9 @@ Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the
 | S6 | `examples/server/s6-logging-progress-cancel.ts` | `ctx.mcpReq.notify/log/signal`, `setLoggingLevel` | with/without progress, 3 log levels, cancel on 2 eras |
 | S7 | `examples/server/s7-elicitation-sampling.ts` | `elicitInput`, `requestSampling`, `inputRequired` | accept/decline/cancel × 2 eras, missing capability |
 | S8 | `examples/server/s8-transports.ts` | `serveStdio`, `createMcpHandler`, client transports | stdio/HTTP × 2 eras, timings, Host/Origin checks |
+| S9 | `examples/server/s9-teachers.ts` | phase-2 tools: `search_teachers`, `teacher_workload`, `class_timetable` | 10 calls (valid / edge / invalid) |
+| S10 | `examples/server/s10-attendance-conduct.ts` | `attendance_summary`, `at_risk_students`, prompt `advisor_meeting`, data-quality resource | 7 calls + 2 prompt calls |
+| S11 | `examples/server/s11-finance.ts` | the `finance` server's 4 tools | 13 calls (valid / edge / invalid) |
 | C1 | `examples/client/c1-client-connect.ts` | `new Client`, `connect`, `getProtocolEra`, `getDiscoverResult`, `ping`, `close` | default / auto / pin / `prior`, era mismatches |
 | C2 | `examples/client/c2-request-options-errors.ts` | `timeout`, `onprogress`, `resetTimeoutOnProgress`, `maxTotalTimeout`, `ProtocolError`, `SdkError` | 4 timeout configs + 9-case failure taxonomy |
 | C3 | `examples/client/c3-subscriptions.ts` | `listen`, `subscribeResource`, `unsubscribeResource`, `handler.notify` | 2026 stream (real HTTP server) vs 2025 subscribe, wrong-era calls |
@@ -167,6 +201,10 @@ data/sample/       generated sample CSVs + README_data.md
 src/lib/           CSV parser, env loader, stdio/HTTP runner, dual-era interaction helpers
 src/server/academic/  data loading & validation, grading, tools, resources, prompts, entry point
 src/server/utility/   time, score conversion, report saving
+src/server/finance/   tuition, scholarships, lecturer pay (phase 2)
+config/experiments/   the 8 phase-2 experiments (one parameter changed per file)
+demo/scenarios.ts     the 24 phase-2 test scenarios with their ground-truth oracle
+scripts/experiment.ts runner → ../phase2/runs/ ; scripts/experiments-report.ts → docs/experiments.md
 src/host/          chat host: config, Gemini provider, MCP hub, agent loop, terminal UI
 demo/              question list for the live demo
 examples/          _harness.ts + server/ (S1–S8) + client/ (C1–C5) + run-all.ts

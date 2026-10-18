@@ -1,0 +1,40 @@
+{
+    "id": "E3",
+    "title": "maxToolRounds",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 1,
+    "question": "Do multi-step questions break when the host allows fewer tool rounds?",
+    "hypothesis": "Single-tool scenarios (A) pass with 1 round; chains (B), several servers (C) and harder analysis (G) need 2+ rounds.",
+    "variants": [
+        {
+            "id": "rounds-1",
+            "label": "maxToolRounds 1",
+            "set": {
+                "agent.maxToolRounds": 1
+            }
+        },
+        {
+            "id": "rounds-2",
+            "label": "maxToolRounds 2",
+            "set": {
+                "agent.maxToolRounds": 2
+            }
+        },
+        {
+            "id": "rounds-4",
+            "label": "maxToolRounds 4",
+            "set": {
+                "agent.maxToolRounds": 4
+            }
+        },
+        {
+            "id": "rounds-8",
+            "label": "maxToolRounds 8 (base)",
+            "set": {
+                "agent.maxToolRounds": 8
+            }
+        }
+    ]
+}

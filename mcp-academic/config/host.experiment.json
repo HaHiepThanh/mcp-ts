@@ -1,0 +1,54 @@
+{
+    "$comment": "Base configuration of every phase-2 experiment: Qwen3 4B Instruct (8k context, Ollama), temperature 0.2, maxToolRounds 8, full tool descriptions, all 3 servers over stdio. Each experiment changes ONE of these.",
+    "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3-4b-ctx8k:latest",
+        "temperature": 0.2
+    },
+    "mcpServers": {
+        "academic": {
+            "command": "node",
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/academic/main.ts"
+            ],
+            "protocol": "auto"
+        },
+        "utility": {
+            "command": "node",
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/utility/main.ts"
+            ],
+            "protocol": "auto"
+        },
+        "finance": {
+            "command": "node",
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/finance/main.ts"
+            ],
+            "protocol": "auto"
+        }
+    },
+    "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+    },
+    "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+    },
+    "elicitation": {
+        "nonInteractive": "decline"
+    },
+    "logDir": "outputs/logs",
+    "toolDescriptions": {
+        "mode": "full"
+    }
+}

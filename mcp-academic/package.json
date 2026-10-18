@@ -22,7 +22,9 @@
         "chat": "tsx src/host/main.ts",
         "check:vscode": "tsx scripts/check-vscode-config.ts",
         "results": "tsx scripts/build-results.ts",
-        "compare": "tsx scripts/compare-models.ts"
+        "compare": "tsx scripts/compare-models.ts",
+        "experiment": "tsx scripts/experiment.ts",
+        "experiments:report": "tsx scripts/experiments-report.ts"
     },
     "dependencies": {
         "@google/genai": "^2.23.0",
