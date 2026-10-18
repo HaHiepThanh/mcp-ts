@@ -1,96 +1,84 @@
 # Khoa — Phase 2
 
-Bộ nộp làm lại theo phạm vi của Khoa. Không có video. Không sửa code hay dữ liệu của Phú, Hoàng và Tiến.
+Bộ dùng chung hiện tại có **15 câu K01–K15 trên dữ liệu main `2c4110a`**. Chín câu finance K16–K24 được chuyển sang `finance-pending.csv`, đánh dấu **provisional**, chờ PR #2 rebase/merge và tính lại từ dataset chung. Không dùng kết quả hai snapshot làm một benchmark trên main.
 
-## Mở tệp nào
+## Tệp nộp
 
 | Tệp | Nội dung |
 | --- | --- |
-| `MCP-TS-SDK-phase2.pptx` | 31 slide thuyết trình toàn bộ Phase 2 bằng tiếng Anh |
-| `MCP-TS-SDK-phase2-script.docx` | Lời nói tiếng Anh dễ hiểu theo từng slide và câu hỏi thường gặp |
-| `test-cases.csv` | 24 câu kiểm thử, đúng 5 cột yêu cầu |
-| `test-reference.xlsx` | 55 đáp án từ CSV và sheet Manual ghi 62 phép tính/kiểm tra từng bước cho đủ 24 câu |
-| `manual-checks.md` | 24 bài tính từng bước, bảng ứng viên/lương và đối chiếu nội dung câu trả lời Gemini |
-| `questions-phase2.txt` | 20 câu trắc nghiệm và đáp án |
-| `check-stdio.jsonl`, `check-http.jsonl` | Log kiểm tra trực tiếp MCP, có kết quả đầy đủ |
-| `gemini-stdio.jsonl` | Log chạy Gemini: câu hỏi, tool/args, kết quả, câu trả lời, thời gian, token |
-| `comparison.csv` | Bảng so sánh lấy từ log |
-| `configs/` | Hai cấu hình được dùng khi đo |
+| `test-cases.csv` | 15 câu tiếng Anh; giống hệt `phase2/test-cases.csv`, để chuyển vào benchmark chung |
+| `finance-pending.csv` | 9 câu finance provisional; chưa chuyển vào benchmark |
+| `test-reference.xlsx` | 21 sheet; Answers và Manual có cột scope main/provisional |
+| `manual-checks.md` | Phép tính từng bước, lý do cảnh báo và đối chiếu câu trả lời |
+| `check-stdio.jsonl`, `check-http.jsonl`, `gemini-stdio.jsonl` | Ba lượt đo mới trên cùng 15 câu main |
+| `comparison.csv` | Kết quả lấy từ ba log mới |
+| `configs/` | Academic + utility, không có finance hay cwd ngoài repo |
+| `historical/` | Log 24 câu, cấu hình và bảng so sánh cũ; giữ nguyên để truy vết hai snapshot |
+| `MCP-TS-SDK-phase2.pptx` | 31 slide; finance ghi provisional, bảng kết quả dùng lượt đo mới |
+| `MCP-TS-SDK-phase2-script.docx` | Lời thuyết trình tiếng Anh khớp từng slide và FAQ |
+| `questions-phase2.txt` | 20 câu trắc nghiệm; đã trộn lựa chọn, 5 đáp án mỗi chữ A/B/C/D |
 
-`phase2/test-cases.csv` ở vị trí yêu cầu của đề và bản CSV trong thư mục này có nội dung giống hệt nhau. Tiến/Hoàng dùng tệp đó để bổ sung vào benchmark chung; PR này không sửa `demo/benchmark.ts`.
+Runner được commit tại `mcp-academic/scripts/run-khoa-cases.ts`. Không sửa code server, dữ liệu, Phase 1 hay `demo/benchmark.ts` của các bạn khác.
 
-## Tình huống và đáp án
+## Chạy lại bằng một lệnh
 
-15 câu học vụ/tư vấn và 9 câu tài chính, bao phủ toàn bộ 4 tool giảng viên, 3 tool điểm danh/rèn luyện/cảnh báo và 6 tool đọc finance. Có tham số hợp lệ, ID sai, học kỳ không có dữ liệu và hai biên vắng 3/15, 4/15 buổi.
+Cài dependency theo `mcp-academic/docs/setup-guide.md` (`npm ci`), dùng Node ≥20.12 và cấu hình `GEMINI_API_KEY` trong `.env` được Git ignore. Từ `mcp-academic/`:
 
-Trong CSV, `expected_values` chứa đáp án theo từng tool. `note` chứa tham số, nguồn snapshot và ô Excel đối chiếu. `Answers` là trang đầu workbook: cột C tính bằng công thức từ các sheet CSV, D đối chiếu độc lập, E kiểm tra khớp. Sheet `Manual` ghi riêng các phép tính số học với số đầu vào của snapshot đã chốt, gồm 62 phép tính/kiểm tra cho đủ 24 câu, kể cả lỗi và câu tư vấn. `manual-checks.md` giải thích đầy đủ phép lọc, cộng, chia, so ngưỡng, bảng ứng viên và cộng lương. Nếu đổi snapshot CSV, cần cập nhật các số đầu vào tính tay ở Manual; công thức nguồn ở Answers vẫn tính lại từ các sheet CSV.
+```powershell
+npx tsx scripts/run-khoa-cases.ts --suite
+```
 
-Các phép tính do Codex chuẩn bị và kiểm tra chéo từ CSV, không ghi rằng Khoa đã ký duyệt. Workbook được tính lại và kiểm tra lỗi bằng Artifact Tool; không gọi đó là kiểm tra tự động trong Microsoft Excel. Việc cài add-in không phải điều kiện nộp của đề.
+Lệnh đọc trực tiếp `phase2/test-cases.csv`, chạy MCP stdio, tự mở/đóng HTTP academic cổng 3001 và utility 3002, rồi chạy Gemini stdio. Log được lưu vào thư mục mới `outputs/khoa/<timestamp>/`, đường dẫn được in cuối lệnh. Mỗi lượt có JSONL đầy đủ và `comparison.csv`; không ghi đè bằng chứng đã có. Dừng các server đang chiếm 3001/3002 trước khi chạy suite.
 
-## Chạy đo thật ngày 18 tháng 10 năm 2026
+Các chế độ riêng:
 
-Môi trường Windows, Node.js 24.18.0. Dữ liệu sample giả; ngày tài chính cố định `2026-10-18`.
+```powershell
+npx tsx scripts/run-khoa-cases.ts --dry-run
+npx tsx scripts/run-khoa-cases.ts --only K07,K08,K12
+npx tsx scripts/run-khoa-cases.ts --llm
+```
 
-| Lượt chạy | Số câu | Qua kiểm tra | Lỗi chạy | Median mỗi câu |
+`--config <file>` chọn cấu hình khác; `--start-http` tự khởi động HTTP cho lượt chạy riêng; `--out <folder>` chọn thư mục log mới; `--pace-ms` chỉnh thời gian nghỉ giữa câu khi gọi LLM. Runner từ chối CSV provisional, ID trùng/sai cấu trúc và công cụ thay đổi dữ liệu. Không cần checkout finance hay thư mục `_khoa-rebuild` để chạy bộ hiện tại.
+
+Log giữ hash CSV, runner, cấu hình, các CSV/quy tắc nguồn, commit checkout, tool/args, structured result đầy đủ, câu trả lời, thời gian, token và số lần thử API. Fallback bị tắt, hội thoại mới mỗi câu. `answerScreenPass` chỉ kiểm tra sự xuất hiện của giá trị; không thay cho đọc nội dung. Lượt chạy lỗi/chưa đủ câu có `complete: false` hoặc lỗi tương ứng và exit code khác 0.
+
+## Kết quả mới ngày 18-10-2026
+
+| Lượt chạy | Số câu | Qua kiểm tra | Lỗi | Median mỗi câu |
 | --- | --- | --- | --- | --- |
-| MCP stdio | 24 | 24 | 0 | 3.0 ms |
-| MCP HTTP | 24 | 24 | 0 | 7.5 ms |
-| Gemini stdio | 24 | 24 | 0 | 2,851.5 ms |
+| MCP stdio | 15 | 15 | 0 | 3 ms |
+| MCP HTTP | 15 | 15 | 0 | 8 ms |
+| Gemini stdio | 15 | 15 | 0 | 2.187 s |
 
-Gemini: `gemini-3.5-flash-lite`, temperature 0.2, maxToolRounds 8, hội thoại mới mỗi câu, tắt fallback. Tổng token vào/ra: 237,665/3,692; số lần thử API bổ sung: 3. Có nhịp nghỉ 9 giây giữa câu để phù hợp quota 15 request/phút; nhịp nghỉ đó không nằm trong thời gian từng câu.
+Gemini `gemini-3.5-flash-lite`, temperature 0.2, maxToolRounds 8. Token vào/ra **111,391 / 2,458**, số lần thử API bổ sung: 0. Nghỉ 9 giây giữa câu, nằm ngoài thời gian từng câu. Đây là một lượt đo mỗi cấu hình; không suy ra transport hay model luôn tốt hơn.
 
-Điểm tự động là kiểm tra tool, tham số yêu cầu và giá trị kết quả, không phải thước đo đầy đủ cho độ đúng ngữ nghĩa. Codex đã đọc lại đủ 24 câu trả lời Gemini và đối chiếu nội dung với câu hỏi/kết quả đầy đủ, đặc biệt lý do từng sinh viên ở K12/K13 và ba section bị cấm thi ở K15; kết quả ghi trong `manual-checks.md`. Đây là kiểm tra nội dung của lượt chạy đã lưu, không phải xác nhận do Khoa ký duyệt. Log giữ nguyên cả retry và lỗi nếu có; không tự điền kết quả cho câu chưa chạy.
+Các con số **24/24**, median 2.8515 s và token 237,665/3,692 chỉ thuộc `historical/`, không còn là kết quả bộ dùng chung hiện tại. Không sửa log lịch sử để biến thành lượt đo 15 câu.
 
-## Nguồn dùng cho bản trình bày
+## Những phần đã đối chiếu
 
-- Học vụ: `main` tại `2c4110ab6ff60e84e386ace7f0d158bf0ab4a0e2`.
-- Finance: PR #2 tại `530d5da97e12a9ecaece0fd4e7066dec8c888621`, chạy từ checkout riêng. **Finance đã được kiểm thử nhưng chưa merge vào main.** HR/conduct của snapshot đó khác main, nên các phép tính finance dùng trọn bộ CSV tương ứng.
-- Hoàng: `phase2/runs/hoang/maxToolRounds-*.jsonl`, `temperature-*.jsonl` và `mcp-academic/docs/experiments.md`.
-- Nhận xét model: `mcp-academic/docs/model-observations.md` và `model-comparison.md`. Đây là kết quả cũ trên bộ 11 câu và máy khác, được phân biệt trong slide.
-- Cải tiến: `phase2/improvements.md`.
+- **K07:** 15 buổi, vắng các tuần 7/9/13. `3/15 = 20%`; điều kiện cấm là `>20%`, nên không cấm thi.
+- **K08:** 15 buổi, vắng các tuần 2/4/13/14. `4/15 ≈ 26.7% >20%`, nên cấm thi. Late/excused không tính là absent.
+- **K12:** IT01 có 10 sinh viên, hai em 2201005 và 2201010 bị cảnh báo. GPA lần lượt 0.63 và 0.38; section vượt ngưỡng lần lượt SEC014/029/037 và SEC029. Conduct 50/60 không tạo lý do rèn luyện kém vì ngưỡng là `<50`.
+- **K06:** 30 lượt học hợp lệ, tổng điểm môn đã làm tròn 220.5; `ROUND(220.5/30,1)=7.4`; 27 đạt nên `27/30=90%`.
+- **K15:** GPA `(3×0+2×1+3×1)/8=0.63`, vắng `14/45=31.1%`, đủ ba section bị cấm, conduct 50 là Average. Đọc lại câu tư vấn để kiểm tra các hạn chế thi không bị bỏ sót.
 
-## Nhận xét và cải tiến
+Excel có **29 chỉ số nguồn cho main**, **26 chỉ số provisional finance**. Manual có 35 phép tính/kiểm tra main và 27 provisional; tổng 62 kết quả khớp đối chiếu. Công thức nguồn, biên vắng và số trung gian được kiểm tra từ CSV; workbook được tính lại và quét lỗi bằng Artifact Tool. Nội dung log hiện tại và bảng lý do được đối chiếu riêng; không đồng nhất điểm tự động với độ đúng toàn bộ câu trả lời.
 
-- Kết quả kiểm tra MCP khớp 55 chỉ số Excel độc lập, gồm cả finance. Cách này giúp phát hiện lỗi nếu tool và oracle của cùng code cùng tính sai.
-- HTTP có thêm chi phí trao đổi cục bộ; một lượt đo chưa đủ kết luận transport nào luôn nhanh hơn.
-- Lưu toàn bộ structured result; không dùng đoạn preview 400 ký tự để chấm JSON.
-- Tắt fallback khi so model, giữ tên model và số lần thử trong log.
-- Thí nghiệm mô tả tool ngắn thật chưa được đo; không coi việc đổi system prompt là đổi schema.
-- Sau khi merge finance và thống nhất dataset, chạy lại đủ 24 câu trên snapshot chung. Qwen 27 tool cần đo ngân sách context lại; không áp số đo 20 tool cũ cho bản này.
+## Cải tiến cách diễn đạt
 
-## Chạy lại các câu hỏi
+Trong lượt main-only đầu, K12 gọi tỷ lệ vắng cao nhất của một section là overall, và K06 gắn đơn vị students cho số lượt học. Đã làm rõ hai nghĩa này trong systemPrompt của cấu hình Khoa rồi chạy lại đủ suite. Lượt cuối ghi đúng maximum section absence rate và graded enrolments. Log/cấu hình trước sửa nằm ở `historical/main-before-clarification/`; không sửa nội dung các log đó. Đây là quan sát trước/sau cho lượt đo này, không phải khẳng định prompt luôn sửa được mọi lỗi.
 
-Cài dependency theo `mcp-academic/docs/setup-guide.md` và giữ API key trong `.env` được Git ignore. Với snapshot đang đo, finance chạy từ checkout riêng tại thư mục cùng cấp repo: `_khoa-rebuild/finance/mcp-academic`. Cấu hình stdio ghi đường dẫn làm việc đó; khi finance đã merge, bỏ trường `cwd` của finance để dùng chung app.
+## Finance chờ ghép dữ liệu
 
-Để lấy đúng bản finance đã đo, chạy một lần từ thư mục gốc repo:
+Các số cũ dùng PR #2 `530d5da`, có T001/conduct khác main. Các sheet F_*, Tuition, Payroll, Scholarships và phần tính finance đều ghi provisional. Conduct 92 ở K10 không được dùng chung với conduct 80 trong kỳ vọng finance cũ như cùng một dataset.
 
-```powershell
-git clone https://github.com/HaHiepThanh/mcp-ts.git ../_khoa-rebuild/finance
-git -C ../_khoa-rebuild/finance checkout 530d5da97e12a9ecaece0fd4e7066dec8c888621
-npm --prefix ../_khoa-rebuild/finance/mcp-academic ci
-```
+Sau khi PR #2 được rebase và merge:
 
-Sau đó thử một câu với cấu hình đã lưu:
+1. Lấy commit main chung đã có finance.
+2. Tính lại K16–K24 từ CSV chung; đổi Excel F_* sang nguồn main và đối chiếu GPA/conduct/section với học vụ.
+3. Cập nhật trạng thái, đáp án và ô Excel của các câu finance rồi mới thêm lại vào `phase2/test-cases.csv` và bản trong thư mục Khoa.
+4. Bật finance trong cấu hình với đường dẫn mặc định trong repo, chạy lại toàn bộ suite và cập nhật slide/Word/bảng so sánh bằng số đo mới.
 
-```powershell
-cd mcp-academic
-npm run chat -- --config ../phase2/runs/khoa/configs/host-stdio.json --ask "How many sections and weekly teaching periods does T001 have in semester 2024-1?"
-```
+Nguồn phần chung bài thuyết trình: `phase2/improvements.md`, `mcp-academic/docs/model-observations.md`, `model-comparison.md`, `experiments.md` và log của Hoàng. So sánh model/tham số của nhóm được phân biệt với lượt đo mới của Khoa.
 
-HTTP cần khởi động academic cổng 3001, utility 3002 từ main và finance 3003 từ snapshot finance, rồi dùng `configs/host-http.json`. Công cụ dựng tệp và file tạm không đưa vào bộ nộp. Các log chứa cấu hình thực, commit nguồn và toàn bộ expected cases để đối chiếu.
-
-## Đối chiếu phần việc của Khoa
-
-| Đầu việc | Bằng chứng / trạng thái |
-| --- | --- |
-| ≥15 câu tiếng Anh và đáp án từ CSV | 24 câu; CSV đúng 5 cột; 55 chỉ số Excel và 24 bài tính từng bước |
-| Chạy Gemini và/hoặc Qwen, chép log | Đã chạy Gemini và hai lượt MCP; ba log đầy đủ trong thư mục này |
-| ≥20 slide, tình huống/cấu hình/kết quả/so sánh/nhận xét/cải tiến | PPT 31 slide, có nguồn trong speaker notes; Word 13 trang lời thuyết trình tiếng Anh |
-| Hoàn thiện quiz-draft và bổ sung tính năng mới | 20 câu trong `questions-phase2.txt`, có đáp án |
-| Đáp án tính tay bằng Excel | Sheet Manual có phép tính và số đầu vào, đối chiếu với 55 chỉ số nguồn; có diễn giải từng bước trong manual-checks.md |
-| Nộp lên Drive | Làm sau theo yêu cầu mới nhất của người dùng |
-| Video | Bỏ theo yêu cầu người dùng |
-
-Chuyển câu hỏi thành case trong `demo/benchmark.ts` là phần Tiến/Hoàng theo phân công. Ghép finance vào main là bước tích hợp của nhóm; bộ Khoa hiện kiểm tra đúng hai snapshot ghi trong log, không tự merge code người khác.
-
-Các tệp được nộp trên GitHub qua PR, không đẩy trực tiếp vào main.
+Nộp qua PR, không đẩy trực tiếp vào main. Drive làm sau theo yêu cầu; không có video. Tiến/Hoàng chuyển 15 ca hiện tại vào `demo/benchmark.ts` theo phân công.

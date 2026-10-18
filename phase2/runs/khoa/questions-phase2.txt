@@ -3,62 +3,63 @@ MCP TypeScript SDK Phase Two
 Choose one answer for each question
 Adapted from phase2/quiz-draft.txt and the new Phase Two features.
 Historical model results refer to the earlier benchmark, not the new Khoa run.
+Finance questions describe the pending feature; the shared benchmark excludes provisional finance data.
 
 Question 1: What is the main job of MCP in this system?
-A. Make every calculation inside the language model
-B. Provide a standard interface for discovering and calling tools
-C. Replace all CSV files with a database
+A. Replace all CSV files with a database
+B. Make every calculation inside the language model
+C. Provide a standard interface for discovering and calling tools
 D. Remove the need for logs
-Answer: B
+Answer: C
 
 Question 2: Which part normally changes when switching from Gemini to Qwen?
-A. Host provider and model configuration
-B. Student identifiers
-C. Course credits
-D. The meaning of every tool
-Answer: A
+A. Course credits
+B. Host provider and model configuration
+C. The meaning of every tool
+D. Student identifiers
+Answer: B
 
 Question 3: Why is model fallback disabled in a fair benchmark?
-A. It removes all retries
-B. It changes the CSV data
+A. It changes the CSV data
+B. It removes all retries
 C. It ensures the intended model produced the measured answers
 D. It disables HTTP
 Answer: C
 
 Question 4: What does the maximum tool round setting control?
-A. The number of student rows
-B. The number of teachers
-C. The number of CSV columns
-D. The maximum tool and result cycles in a turn
-Answer: D
+A. The maximum tool and result cycles in a turn
+B. The number of student rows
+C. The number of teachers
+D. The number of CSV columns
+Answer: A
 
 Question 5: How does a grade join a section?
-A. By room alone
-B. By course semester and the student class
-C. By teacher title alone
+A. By course semester and the student class
+B. By teacher title alone
+C. By room alone
 D. By student name alone
-Answer: B
+Answer: A
 
 Question 6: Which tool shows the weekly schedule of a class?
 A. conduct_score
-B. tuition_status
+B. payroll_summary
 C. class_timetable
-D. payroll_summary
+D. tuition_status
 Answer: C
 
 Question 7: Which model had the lowest median model time in the earlier 11-case comparison run twice per model?
-A. Gemini Flash Lite at 2.7 seconds
-B. Qwen Thinking at 24.4 seconds
-C. All models had the same median
-D. Qwen Instruct at 2.1 seconds
-Answer: D
+A. Qwen Instruct at 2.1 seconds
+B. All models had the same median
+C. Qwen Thinking at 24.4 seconds
+D. Gemini Flash Lite at 2.7 seconds
+Answer: A
 
 Question 8: How did Qwen Thinking compare with Qwen Instruct in that earlier small benchmark?
-A. Both passed 22 of 22 turns, but Thinking took much longer
+A. Instruct could not call tools
 B. Thinking passed twice as many turns
-C. Thinking used no output tokens
-D. Instruct could not call tools
-Answer: A
+C. Both passed 22 of 22 turns, but Thinking took much longer
+D. Thinking used no output tokens
+Answer: C
 
 Question 9: Three absences out of fifteen meetings equal twenty percent. What does the current rule do?
 A. Always ban the student
@@ -70,76 +71,76 @@ Answer: B
 Question 10: Four absences out of fifteen meetings give what result?
 A. Exactly twenty percent and no ban
 B. No attendance information
-C. About twenty six point seven percent and an exam ban
-D. A conduct score of forty
-Answer: C
+C. A conduct score of forty
+D. About twenty six point seven percent and an exam ban
+Answer: D
 
 Question 11: How was the earlier update_grade problem with an unwanted process_score of zero fixed?
-A. Remove all grade updates
-B. Ask the model to guess the old score
+A. Make scores optional so an omitted score keeps its current value
+B. Remove all grade updates
 C. Replace every omitted score with zero
-D. Make scores optional so an omitted score keeps its current value
-Answer: D
+D. Ask the model to guess the old score
+Answer: A
 
 Question 12: What conduct classification applies to a score of fifty?
-A. Average
-B. Weak
-C. Good
-D. Excellent
-Answer: A
-
-Question 13: When does the current risk tool flag a student?
-A. Only when all risk conditions happen together
-B. When any configured GPA absence or conduct risk condition is met
-C. Only when the student owes tuition
-D. Only when every section is missing
-Answer: B
-
-Question 14: What information should an advising briefing combine?
-A. Salary only
-B. GPA only
-C. Transcript attendance and conduct
-D. Teacher title and payroll month only
-Answer: C
-
-Question 15: Where should scholarship eligibility be decided?
-A. In the model guess
-B. In the student name
-C. In PowerPoint
-D. In server code using the configured conditions
+A. Good
+B. Excellent
+C. Weak
+D. Average
 Answer: D
 
-Question 16: How is tuition balance calculated?
-A. Amount due minus amount paid
-B. Amount due plus amount paid
-C. Credits plus conduct
-D. Salary minus GPA
+Question 13: When does the current risk tool flag a student?
+A. When any configured GPA absence or conduct risk condition is met
+B. Only when the student owes tuition
+C. Only when every section is missing
+D. Only when all risk conditions happen together
 Answer: A
 
-Question 17: What should an assistant without finance tools do with a salary question?
-A. Guess from teacher title
-B. Explain that the required finance tool or data is unavailable
-C. Read an unrelated file outside its data folder
-D. Invent a typical salary
+Question 14: What information should an advising briefing combine?
+A. Teacher title and payroll month only
+B. Transcript attendance and conduct
+C. GPA only
+D. Salary only
 Answer: B
+
+Question 15: Where should scholarship eligibility be decided?
+A. In the student name
+B. In the model guess
+C. In server code using the configured conditions
+D. In PowerPoint
+Answer: C
+
+Question 16: How is tuition balance calculated?
+A. Amount due plus amount paid
+B. Salary minus GPA
+C. Credits plus conduct
+D. Amount due minus amount paid
+Answer: D
+
+Question 17: What should an assistant without finance tools do with a salary question?
+A. Invent a typical salary
+B. Read an unrelated file outside its data folder
+C. Guess from teacher title
+D. Explain that the required finance tool or data is unavailable
+Answer: D
 
 Question 18: What must a payroll approval tool do before changing state?
 A. Remove the log
-B. Ignore the user reply
-C. Ask for explicit user confirmation
+B. Ask for explicit user confirmation
+C. Ignore the user reply
 D. Switch to another model
-Answer: C
+Answer: B
 
 Question 19: Why do we check expected answers independently in Excel?
 A. To make every model pass
-B. To replace source data with guesses
-C. To avoid recording errors
-D. To detect a calculation bug that a tool-derived answer key could repeat
-Answer: D
+B. To detect a calculation bug that a tool-derived answer key could repeat
+C. To replace source data with guesses
+D. To avoid recording errors
+Answer: B
 
 Question 20: What is a fair conclusion from one small transport comparison?
-A. Report the observed times and repeat before making a general speed claim
+A. Network conditions never matter
 B. HTTP is always faster
 C. Stdio is always more accurate
-D. Network conditions never matter
-Answer: A
+D. Report the observed times and repeat before making a general speed claim
+Answer: D

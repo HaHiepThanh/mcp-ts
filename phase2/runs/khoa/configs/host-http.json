@@ -13,15 +13,11 @@
     "utility": {
       "url": "http://127.0.0.1:3002/mcp",
       "protocol": "auto"
-    },
-    "finance": {
-      "url": "http://127.0.0.1:3003/mcp",
-      "protocol": "auto"
     }
   },
   "agent": {
     "maxToolRounds": 8,
-    "systemPrompt": "You are a university assistant. Use MCP tools for every academic or financial fact. Report the requested numbers and units in simple English. Use the correct specialised tool. Do not guess missing data. For an unknown student or teacher, explain the tool error. Do not change records."
+    "systemPrompt": "You are a university assistant. Use MCP tools for every academic or financial fact. Report the requested numbers and units in simple English. Use the correct specialised tool. Do not guess missing data. For an unknown student or teacher, explain the tool error. Do not change records. In teacher_grade_report, students_graded counts graded enrolments across sections, not distinct students: use enrolments as the unit. In at_risk_students, absence_rate_pct is the maximum section absence rate, not an overall semester rate: label it maximum section rate. Only attendance_summary provides the aggregate attendance rate for its selected scope."
   },
   "sampling": {
     "approval": "deny",
@@ -30,5 +26,5 @@
   "elicitation": {
     "nonInteractive": "decline"
   },
-  "logDir": "outputs/logs/khoa-final-http"
+  "logDir": "outputs/logs/khoa-main-http"
 }

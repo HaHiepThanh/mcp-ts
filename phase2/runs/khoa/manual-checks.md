@@ -2,7 +2,7 @@
 
 Tài liệu này ghi các bước tính để làm lại và kiểm tra trong `test-reference.xlsx`. Các số đầu vào lấy từ CSV ở hai commit đã ghi trong README, không lấy câu trả lời của LLM làm đáp án. Mỗi mục trỏ tới ô Excel dùng trong `test-cases.csv`.
 
-Phần đối chiếu nội dung câu trả lời do Codex thực hiện ngày 18-10-2026; không thay chữ ký hay xác nhận kiểm tra tay của Khoa. Workbook có sheet Manual ghi phép tính số học và sheet Answers tính từ nguồn CSV. Các công thức được tính lại bằng Artifact Tool, không gọi đó là kiểm tra tự động trong Microsoft Excel.
+Đã đối chiếu các phép tính từ CSV và đọc lại câu trả lời trong log, gồm biên K07/K08 và lý do từng sinh viên ở K12. Workbook có sheet Manual ghi phép tính số học và sheet Answers tính từ nguồn CSV. Các công thức được tính lại bằng Artifact Tool, không gọi đó là kiểm tra tự động trong Microsoft Excel.
 
 ## Quy tắc chung
 
@@ -10,6 +10,10 @@ Phần đối chiếu nội dung câu trả lời do Codex thực hiện ngày 1
 - Chỉ dùng dòng điểm hợp lệ; không cộng dòng sai khóa ngoại, thiếu điểm, ngoài miền hoặc trùng lượt học. Mỗi dòng nối section bằng course + semester + class của sinh viên.
 - Tỷ lệ vắng = absent / số buổi. So sánh tỷ lệ chưa làm tròn với 0.20; chỉ làm tròn phần trăm để hiển thị.
 - Học vụ dùng các sheet không có tiền tố F_. Finance dùng F_Teachers, F_Sections, F_Conduct tương ứng PR #2. Không trộn hai nguồn conduct/giảng viên.
+
+## Phạm vi
+
+K01–K15 là bộ dùng chung trên main. K16–K24 chỉ là kỳ vọng tạm của PR finance, được đánh dấu provisional trong finance-pending.csv và cột scope của Excel. Không đưa các số finance vào benchmark chung trước khi PR #2 rebase/merge và tính lại từ dataset chung.
 
 ## Các phép tính theo câu hỏi
 
@@ -177,7 +181,7 @@ For 2201005 in 2024-1, course credits are 3 + 2 + 3 = 8. Grade points are 0, 1, 
 | --- | --- | --- |
 | records.0.score | 50 | Answers!C28 |
 
-### K16
+### K16 — PROVISIONAL finance PR2
 
 For student 2201001 in semester 2024-1, how much tuition is due, how much has been paid and what balance remains? Give the payment status.
 
@@ -190,7 +194,7 @@ For 2201001 in 2024-1: amount_due = 8 credits × 1,050,000 VND × (1 − 0%) = 8
 | records.0.balance | 0.0 | Answers!C36 |
 | records.0.status | paid | Answers!C37 |
 
-### K17
+### K17 — PROVISIONAL finance PR2
 
 For student 2201002 in semester 2024-1, how much tuition is due, how much has been paid and what balance remains? Give the payment status.
 
@@ -203,7 +207,7 @@ For 2201002 in 2024-1: amount_due = 8 × 1,050,000 × (1 − 0%) = 8,400,000 VND
 | records.0.balance | 8400000.0 | Answers!C40 |
 | records.0.status | unpaid | Answers!C41 |
 
-### K18
+### K18 — PROVISIONAL finance PR2
 
 For student 2201003 in semester 2024-1, how much tuition is due, how much has been paid and what balance remains? Give the payment status.
 
@@ -216,7 +220,7 @@ For 2201003 in 2024-1: amount_due = 8 × 1,050,000 × (1 − 20%) = 6,720,000 VN
 | records.0.balance | 0.0 | Answers!C44 |
 | records.0.status | paid | Answers!C45 |
 
-### K19
+### K19 — PROVISIONAL finance PR2
 
 How many IT01 students still owe tuition for semester 2024-1, and what is their total outstanding balance?
 
@@ -227,7 +231,7 @@ Join Tuition with Students by student_id, then filter class IT01 and semester 20
 | students_with_balance | 2 | Answers!C49 |
 | total_balance | 16800000.0 | Answers!C50 |
 
-### K20
+### K20 — PROVISIONAL finance PR2
 
 Check whether student 2201001 qualifies for scholarship SCH02 in semester 2024-1. State GPA, conduct, tuition status and the eligibility decision.
 
@@ -239,7 +243,7 @@ Use the finance snapshot conduct score, 80, for 2201001. Shared grade inputs giv
 | conduct_score | 80.0 | Answers!C52 |
 | scholarships.1.eligible | True | Answers!C53 |
 
-### K21
+### K21 — PROVISIONAL finance PR2
 
 Rank the Information Technology candidates for scholarship SCH02 in semester 2024-1. How many are eligible and who is first?
 
@@ -251,7 +255,7 @@ For each Information Technology student, apply the four SCH02 conditions in K20.
 | ranking.0.student_id | 2201016 | Answers!C55 |
 | ranking.0.semester_gpa | 4.0 | Answers!C56 |
 
-### K22
+### K22 — PROVISIONAL finance PR2
 
 Calculate the net teacher pay for T001 in October 2024. Include monthly teaching periods and the overtime bonus.
 
@@ -263,7 +267,7 @@ Use finance teacher T001, a Lecturer with one section of 3 weekly periods. Month
 | overtime_bonus | 0.0 | Answers!C47 |
 | net | 8152000.0 | Answers!C48 |
 
-### K23
+### K23 — PROVISIONAL finance PR2
 
 What is the total net payroll and total teaching periods for the Information Technology faculty in October 2024? Also state the number of teachers.
 
@@ -275,7 +279,7 @@ Select the eight finance teachers in Information Technology for 2024-10. Monthly
 | total_periods | 24 | Answers!C58 |
 | total_net | 75462000.0 | Answers!C59 |
 
-### K24
+### K24 — PROVISIONAL finance PR2
 
 Calculate teacher T999 pay for October 2024. Tell me if the teacher does not exist.
 
@@ -293,7 +297,7 @@ Search F_Teachers for T999. No matching teacher exists. Expected outcome is the 
 | GE101 | 3.8 | 4.3 | ROUND(3.8×0.4 + 4.3×0.6,1) = 4.1 | 1 | 2 |
 | GE102 | 4.2 | 3.8 | ROUND(4.2×0.4 + 3.8×0.6,1) = 4.0 | 1 | 3 |
 
-### Danh sách ứng viên SCH02 — K21
+### Danh sách ứng viên SCH02 — K21, PROVISIONAL
 
 | Hạng | student_id | GPA | Conduct | Nợ học phí | Môn chưa đạt |
 | --- | --- | --- | --- | --- | --- |
@@ -307,7 +311,7 @@ Search F_Teachers for T999. No matching teacher exists. Expected outcome is the 
 | 8 | 2201006 | 3.38 | 87 | 0 | 0 |
 | 9 | 2201001 | 3.25 | 80 | 0 | 0 |
 
-### Cộng lương khoa IT tháng 2024-10 — K23
+### Cộng lương khoa IT tháng 2024-10 — K23, PROVISIONAL
 
 | GV | Tiết tháng | Lương cơ bản | Tiền tiết | Khấu trừ | Lương thực nhận |
 | --- | --- | --- | --- | --- | --- |
@@ -322,9 +326,9 @@ Search F_Teachers for T999. No matching teacher exists. Expected outcome is the 
 
 Tổng thực nhận = 8,152,000 + 8,958,000 + 9,039,000 + 7,518,000 + 11,814,000 + 9,039,000 + 14,230,000 + 6,712,000 = **75,462,000 VND**.
 
-## Đọc lại câu trả lời Gemini
+## Đọc lại câu trả lời Gemini lịch sử
 
-Đã đọc 24 câu trả lời trong `gemini-stdio.jsonl`, so với câu hỏi, dữ liệu và kết quả tool đầy đủ. Phạm vi này là kiểm tra nội dung của lượt chạy cụ thể, không phải cam kết model luôn đúng. Giữ nguyên log gốc và các cờ `requiresHumanReview`; không sửa lịch sử thành lời xác nhận của người dùng.
+Đã đọc 24 câu trả lời trong `historical/gemini-stdio.jsonl`, so với câu hỏi, dữ liệu và kết quả tool đầy đủ. Phạm vi này là kiểm tra nội dung của lượt chạy cụ thể, không phải cam kết model luôn đúng. Giữ nguyên log gốc và các cờ `requiresHumanReview`. Phần finance của lần đo cũ vẫn chỉ là provisional.
 
 | Nhóm câu | Nội dung đã đối chiếu | Kết quả |
 | --- | --- | --- |
@@ -345,3 +349,7 @@ Tổng thực nhận = 8,152,000 + 8,958,000 + 9,039,000 + 7,518,000 + 11,814,00
 2. Bấm vào ô C được chỉ ra ở mỗi câu, đọc công thức và lần về sheet nguồn. Dùng các phép tính trong tài liệu này để đối chiếu số trung gian.
 3. Kiểm tra riêng các biên K07, K08, K11 và các khoản tiền K18, K22; không làm tròn trước khi so ngưỡng vắng.
 4. Phần tính tay ở Manual cố định theo snapshot CSV đã ghi. Nếu thay nguồn, cập nhật số đầu vào tính tay rồi đối chiếu với Answers. Nếu tự ký duyệt, chỉ ghi tên/ngày sau khi đã kiểm tra.
+
+## Đối chiếu lượt chạy main hiện tại
+
+Đã đọc lại 15 câu trả lời trong `gemini-stdio.jsonl` sau khi làm rõ cấu hình. K07/K08 đúng biên cấm thi, K12 đủ hai sinh viên và đúng các section/lý do; tỷ lệ 33.3% được gọi là maximum section rate. K06 ghi 30 graded enrolments. K15 giữ GPA 0.63, tỷ lệ tổng 31.1%, ba section bị cấm và conduct Average. Các phần finance phía trên vẫn provisional; log lịch sử không bị ghi lại.
