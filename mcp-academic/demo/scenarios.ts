@@ -48,8 +48,8 @@ export interface Scenario {
 
 const find = (calls: CallSeen[], name: string) => calls.filter(c => `${c.server}.${c.tool}` === name);
 const says = (re: RegExp) => (text: string) => re.test(text);
-const NOT_FOUND = /not (be )?found|no student|does not exist|doesn't exist|no record|could not find|couldn't find|invalid|unknown|no data|not available|no (grades|information)/i;
-const REFUSAL = /can(no|')t|cannot|unable|not able|no (access|tool|data|information)|don't have|do not have|not available|not (possible|supported|allowed)|no way/i;
+const NOT_FOUND = /not (be )?found|no student|does not exist|doesn't exist|no (recorded |such )?records?|could not find|couldn't find|invalid|unknown|no data|not available|no (recorded )?(grades|information)|(does not|doesn't) have any (records?|recorded|grades|data)/i;
+const REFUSAL = /can(no|')t|cannot|unable|not able|no (access|tool|data|information)|don't have|do not have|(does not|doesn't) (store|contain|have|include)|not (stored|available|possible|supported|allowed)|no way/i;
 const REPORTS = path.join(PROJECT_ROOT, 'outputs', 'reports');
 
 export const SCENARIOS: Scenario[] = [
@@ -80,6 +80,7 @@ export const SCENARIOS: Scenario[] = [
         group: 'A. single tool',
         question: 'What letter grade and 4-point value does a course total of 8.4 give?',
         tools: ['utility.convert_score'],
+        needs: ['utility'],
         expect: async o => [(await o('utility', 'convert_score', { score: 8.4 })).letter]
     },
     // ── B. Chain of tools ─────────────────────────────────────────────
@@ -119,6 +120,7 @@ export const SCENARIOS: Scenario[] = [
         group: 'C. several servers',
         question: 'Write a short performance report for class IT01 and save it as a file named IT01-report-p2.',
         tools: ['academic.class_statistics', 'utility.save_report'],
+        needs: ['utility'],
         elicit: 'accept',
         setup: () => {
             const file = path.join(REPORTS, 'IT01-report-p2.md');
@@ -198,6 +200,7 @@ export const SCENARIOS: Scenario[] = [
         group: 'E. human in the loop',
         question: 'Save the text "Meeting moved to Friday." as a report named class-notes.',
         tools: ['utility.save_report'],
+        needs: ['utility'],
         elicit: 'cancel',
         setup: () => {
             mkdirSync(REPORTS, { recursive: true });

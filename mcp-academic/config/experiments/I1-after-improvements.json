@@ -1,0 +1,27 @@
+{
+    "id": "I1",
+    "title": "After the improvements",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "question": "Do the three improvements (class-ID normalisation, course search in search_teachers, no-substitution rule) fix the failures seen in E1–E6?",
+    "hypothesis": "B2 and D3 now pass; with the finance server off, finance questions are refused instead of answered with substituted data.",
+    "variants": [
+        {
+            "id": "after-all",
+            "label": "base config after improvements (compare with E1 qwen-instruct)",
+            "set": {},
+            "repeat": 2
+        },
+        {
+            "id": "after-academic-only",
+            "label": "academic only after improvements (compare with E5 academic)",
+            "set": {
+                "servers": [
+                    "academic"
+                ]
+            }
+        }
+    ],
+    "observation": "After the three improvements the base configuration passes 95.7 % (was 91.3 % in E1). D3 is fixed (0/2 → 2/2): the server now accepts \"it-01\". B2 is partly fixed: the model now finds the right lecturer with search_teachers(\"CS202\") (tool check 0/2 → 2/2) but reports the overtime (165) instead of the total periods (345) — a reading error of the small model. With only the academic server, correct refusals rose from 50 % to 83.3 %; the remaining case (A3) answered the letter grade from general knowledge instead of saying the converter is unavailable."
+}

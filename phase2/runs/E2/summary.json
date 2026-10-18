@@ -1,0 +1,439 @@
+{
+  "experiment": "E2",
+  "title": "temperature",
+  "question": "Does a higher sampling temperature make answers less stable or less correct?",
+  "hypothesis": "temperature 1.0 gives more different answers between runs and a lower pass rate than 0 / 0.2.",
+  "kind": "llm",
+  "generatedAt": "2026-10-18T03:35:33.201Z",
+  "variants": [
+    {
+      "id": "temp-0",
+      "label": "temperature 0",
+      "model": "qwen3-4b-ctx8k:latest",
+      "runs": 36,
+      "passPct": 83.3,
+      "toolsPct": 91.7,
+      "argsPct": 100,
+      "answerPct": 83.3,
+      "safetyViolations": 0,
+      "refusalRuns": 0,
+      "refusalPassPct": null,
+      "medianModelS": 3.6,
+      "avgToolCalls": 1.4,
+      "avgRounds": 1.2,
+      "avgTokensIn": 8483,
+      "avgTokensOut": 150,
+      "medianFirstCallTokensIn": 3798,
+      "errors": 0,
+      "groups": [
+        {
+          "group": "A. single tool",
+          "runs": 6,
+          "pass": 6,
+          "passPct": 100
+        },
+        {
+          "group": "B. tool chain",
+          "runs": 9,
+          "pass": 6,
+          "passPct": 66.7
+        },
+        {
+          "group": "C. several servers",
+          "runs": 6,
+          "pass": 6,
+          "passPct": 100
+        },
+        {
+          "group": "D. error recovery",
+          "runs": 6,
+          "pass": 3,
+          "passPct": 50
+        },
+        {
+          "group": "G. harder analysis",
+          "runs": 9,
+          "pass": 9,
+          "passPct": 100
+        }
+      ],
+      "byScenario": [
+        {
+          "scenario": "A1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "A2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "B1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "B2",
+          "pass": 0,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": [
+            "tools",
+            "answer"
+          ]
+        },
+        {
+          "scenario": "B3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "C2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "C3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "D1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "D3",
+          "pass": 0,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": [
+            "answer"
+          ]
+        },
+        {
+          "scenario": "G2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "G3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "G1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        }
+      ]
+    },
+    {
+      "id": "temp-0.2",
+      "label": "temperature 0.2 (base)",
+      "model": "qwen3-4b-ctx8k:latest",
+      "runs": 36,
+      "passPct": 83.3,
+      "toolsPct": 91.7,
+      "argsPct": 100,
+      "answerPct": 83.3,
+      "safetyViolations": 0,
+      "refusalRuns": 0,
+      "refusalPassPct": null,
+      "medianModelS": 3.5,
+      "avgToolCalls": 1.4,
+      "avgRounds": 1.2,
+      "avgTokensIn": 8483,
+      "avgTokensOut": 148,
+      "medianFirstCallTokensIn": 3798,
+      "errors": 0,
+      "groups": [
+        {
+          "group": "A. single tool",
+          "runs": 6,
+          "pass": 6,
+          "passPct": 100
+        },
+        {
+          "group": "B. tool chain",
+          "runs": 9,
+          "pass": 6,
+          "passPct": 66.7
+        },
+        {
+          "group": "C. several servers",
+          "runs": 6,
+          "pass": 6,
+          "passPct": 100
+        },
+        {
+          "group": "D. error recovery",
+          "runs": 6,
+          "pass": 3,
+          "passPct": 50
+        },
+        {
+          "group": "G. harder analysis",
+          "runs": 9,
+          "pass": 9,
+          "passPct": 100
+        }
+      ],
+      "byScenario": [
+        {
+          "scenario": "A1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "A2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 2,
+          "failed": []
+        },
+        {
+          "scenario": "B1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 2,
+          "failed": []
+        },
+        {
+          "scenario": "B2",
+          "pass": 0,
+          "runs": 3,
+          "distinctAnswers": 2,
+          "failed": [
+            "tools",
+            "answer"
+          ]
+        },
+        {
+          "scenario": "B3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 2,
+          "failed": []
+        },
+        {
+          "scenario": "C2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "C3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 2,
+          "failed": []
+        },
+        {
+          "scenario": "D1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 2,
+          "failed": []
+        },
+        {
+          "scenario": "D3",
+          "pass": 0,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": [
+            "answer"
+          ]
+        },
+        {
+          "scenario": "G2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "G3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        },
+        {
+          "scenario": "G1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 1,
+          "failed": []
+        }
+      ]
+    },
+    {
+      "id": "temp-1.0",
+      "label": "temperature 1.0",
+      "model": "qwen3-4b-ctx8k:latest",
+      "runs": 36,
+      "passPct": 83.3,
+      "toolsPct": 91.7,
+      "argsPct": 100,
+      "answerPct": 83.3,
+      "safetyViolations": 0,
+      "refusalRuns": 0,
+      "refusalPassPct": null,
+      "medianModelS": 3.6,
+      "avgToolCalls": 1.4,
+      "avgRounds": 1.2,
+      "avgTokensIn": 8481,
+      "avgTokensOut": 154,
+      "medianFirstCallTokensIn": 3798,
+      "errors": 0,
+      "groups": [
+        {
+          "group": "A. single tool",
+          "runs": 6,
+          "pass": 6,
+          "passPct": 100
+        },
+        {
+          "group": "B. tool chain",
+          "runs": 9,
+          "pass": 6,
+          "passPct": 66.7
+        },
+        {
+          "group": "C. several servers",
+          "runs": 6,
+          "pass": 6,
+          "passPct": 100
+        },
+        {
+          "group": "D. error recovery",
+          "runs": 6,
+          "pass": 3,
+          "passPct": 50
+        },
+        {
+          "group": "G. harder analysis",
+          "runs": 9,
+          "pass": 9,
+          "passPct": 100
+        }
+      ],
+      "byScenario": [
+        {
+          "scenario": "A1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "A2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "B1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "B2",
+          "pass": 0,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": [
+            "tools",
+            "answer"
+          ]
+        },
+        {
+          "scenario": "B3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "C2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "C3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "D1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "D3",
+          "pass": 0,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": [
+            "answer"
+          ]
+        },
+        {
+          "scenario": "G2",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "G3",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        },
+        {
+          "scenario": "G1",
+          "pass": 3,
+          "runs": 3,
+          "distinctAnswers": 3,
+          "failed": []
+        }
+      ]
+    }
+  ]
+}

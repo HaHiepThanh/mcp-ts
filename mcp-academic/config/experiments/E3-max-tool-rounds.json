@@ -36,5 +36,6 @@
                 "agent.maxToolRounds": 8
             }
         }
-    ]
+    ],
+    "observation": "Confirmed. With 1 tool round every chain scenario (group B) fails (0 %) and the overall rate drops to 73.9 %; 2 rounds give 87 %, 4 and 8 rounds 91.3 %. Single-tool questions (group A) pass at every setting. The model never needed more than 4 rounds here, so 4 is enough for these scenarios; 8 leaves headroom without extra cost (median time 2.3 s at both)."
 }

@@ -77,5 +77,6 @@
                 "era": "modern"
             }
         }
-    ]
+    ],
+    "observation": "Correct in both protocol eras: the server asks the user exactly once; only \"accept\" changes the data; \"decline\" and \"cancel\" end with a clear \"the grade was NOT changed\". A path-traversal file name (\"../../etc/passwd\") is rejected by the input schema before any code runs. One real difference between the eras: when the client refuses sampling, in 2025 the server receives the error and returns isError, but in 2026-07-28 the refusal surfaces as an exception on the CLIENT side (the client answers input requests itself) — our host catches it and returns a tool error to the LLM."
 }

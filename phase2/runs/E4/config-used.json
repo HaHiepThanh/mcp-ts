@@ -1,0 +1,233 @@
+{
+  "experiment": {
+    "id": "E4",
+    "title": "Tool description quality",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 1,
+    "question": "How much does the LLM rely on the tool descriptions written in the MCP server?",
+    "hypothesis": "Terse descriptions (names only) lower the pass rate; misleading descriptions make the model pick the wrong tool.",
+    "variants": [
+      {
+        "id": "full",
+        "label": "full descriptions (base)",
+        "set": {
+          "toolDescriptions": {
+            "mode": "full"
+          }
+        }
+      },
+      {
+        "id": "terse",
+        "label": "terse: tool name only, no parameter descriptions",
+        "set": {
+          "toolDescriptions": {
+            "mode": "terse"
+          }
+        }
+      },
+      {
+        "id": "misleading",
+        "label": "misleading: 3 pairs of descriptions swapped",
+        "set": {
+          "toolDescriptions": {
+            "mode": "misleading",
+            "swap": [
+              [
+                "academic.calculate_gpa",
+                "academic.get_transcript"
+              ],
+              [
+                "academic.teacher_workload",
+                "academic.class_timetable"
+              ],
+              [
+                "finance.tuition_status",
+                "finance.check_scholarship_eligibility"
+              ]
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "resolved": {
+    "full": {
+      "$comment": "Base configuration of every phase-2 experiment: Qwen3 4B Instruct (8k context, Ollama), temperature 0.2, maxToolRounds 8, full tool descriptions, all 3 servers over stdio. Each experiment changes ONE of these.",
+      "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3-4b-ctx8k:latest",
+        "temperature": 0.2
+      },
+      "mcpServers": {
+        "academic": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/academic/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "utility": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/utility/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "finance": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/finance/main.ts"
+          ],
+          "protocol": "auto"
+        }
+      },
+      "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+      },
+      "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+      },
+      "elicitation": {
+        "nonInteractive": "decline"
+      },
+      "logDir": "outputs/logs",
+      "toolDescriptions": {
+        "mode": "full"
+      }
+    },
+    "terse": {
+      "$comment": "Base configuration of every phase-2 experiment: Qwen3 4B Instruct (8k context, Ollama), temperature 0.2, maxToolRounds 8, full tool descriptions, all 3 servers over stdio. Each experiment changes ONE of these.",
+      "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3-4b-ctx8k:latest",
+        "temperature": 0.2
+      },
+      "mcpServers": {
+        "academic": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/academic/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "utility": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/utility/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "finance": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/finance/main.ts"
+          ],
+          "protocol": "auto"
+        }
+      },
+      "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+      },
+      "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+      },
+      "elicitation": {
+        "nonInteractive": "decline"
+      },
+      "logDir": "outputs/logs",
+      "toolDescriptions": {
+        "mode": "terse"
+      }
+    },
+    "misleading": {
+      "$comment": "Base configuration of every phase-2 experiment: Qwen3 4B Instruct (8k context, Ollama), temperature 0.2, maxToolRounds 8, full tool descriptions, all 3 servers over stdio. Each experiment changes ONE of these.",
+      "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3-4b-ctx8k:latest",
+        "temperature": 0.2
+      },
+      "mcpServers": {
+        "academic": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/academic/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "utility": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/utility/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "finance": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/finance/main.ts"
+          ],
+          "protocol": "auto"
+        }
+      },
+      "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+      },
+      "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+      },
+      "elicitation": {
+        "nonInteractive": "decline"
+      },
+      "logDir": "outputs/logs",
+      "toolDescriptions": {
+        "mode": "misleading",
+        "swap": [
+          [
+            "academic.calculate_gpa",
+            "academic.get_transcript"
+          ],
+          [
+            "academic.teacher_workload",
+            "academic.class_timetable"
+          ],
+          [
+            "finance.tuition_status",
+            "finance.check_scholarship_eligibility"
+          ]
+        ]
+      }
+    }
+  }
+}

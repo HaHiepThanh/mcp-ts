@@ -1,0 +1,141 @@
+{
+  "experiment": {
+    "id": "I1",
+    "title": "After the improvements",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "question": "Do the three improvements (class-ID normalisation, course search in search_teachers, no-substitution rule) fix the failures seen in E1–E6?",
+    "hypothesis": "B2 and D3 now pass; with the finance server off, finance questions are refused instead of answered with substituted data.",
+    "variants": [
+      {
+        "id": "after-all",
+        "label": "base config after improvements (compare with E1 qwen-instruct)",
+        "set": {},
+        "repeat": 2
+      },
+      {
+        "id": "after-academic-only",
+        "label": "academic only after improvements (compare with E5 academic)",
+        "set": {
+          "servers": [
+            "academic"
+          ]
+        }
+      }
+    ]
+  },
+  "resolved": {
+    "after-all": {
+      "$comment": "Base configuration of every phase-2 experiment: Qwen3 4B Instruct (8k context, Ollama), temperature 0.2, maxToolRounds 8, full tool descriptions, all 3 servers over stdio. Each experiment changes ONE of these.",
+      "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3-4b-ctx8k:latest",
+        "temperature": 0.2
+      },
+      "mcpServers": {
+        "academic": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/academic/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "utility": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/utility/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "finance": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/finance/main.ts"
+          ],
+          "protocol": "auto"
+        }
+      },
+      "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers. Answer only from tool results. If none of the available tools can provide the requested information, say plainly that it is not available — never substitute data from a different tool or guess."
+      },
+      "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+      },
+      "elicitation": {
+        "nonInteractive": "decline"
+      },
+      "logDir": "outputs/logs",
+      "toolDescriptions": {
+        "mode": "full"
+      }
+    },
+    "after-academic-only": {
+      "$comment": "Base configuration of every phase-2 experiment: Qwen3 4B Instruct (8k context, Ollama), temperature 0.2, maxToolRounds 8, full tool descriptions, all 3 servers over stdio. Each experiment changes ONE of these.",
+      "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3-4b-ctx8k:latest",
+        "temperature": 0.2
+      },
+      "mcpServers": {
+        "academic": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/academic/main.ts"
+          ],
+          "protocol": "auto",
+          "disabled": false
+        },
+        "utility": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/utility/main.ts"
+          ],
+          "protocol": "auto",
+          "disabled": true
+        },
+        "finance": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/finance/main.ts"
+          ],
+          "protocol": "auto",
+          "disabled": true
+        }
+      },
+      "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers. Answer only from tool results. If none of the available tools can provide the requested information, say plainly that it is not available — never substitute data from a different tool or guess."
+      },
+      "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+      },
+      "elicitation": {
+        "nonInteractive": "decline"
+      },
+      "logDir": "outputs/logs",
+      "toolDescriptions": {
+        "mode": "full"
+      }
+    }
+  }
+}

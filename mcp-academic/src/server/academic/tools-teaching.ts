@@ -32,9 +32,11 @@ export function registerTeachingTools(server: McpServer, data: AcademicData): vo
         'search_teachers',
         {
             title: 'Search lecturers',
-            description: 'Find lecturers by name or ID (case- and accent-insensitive), optionally by faculty. Returns title, degree and the courses they teach.',
+            description:
+                'Find lecturers by name, teacher ID, or a course they teach (course ID or name, e.g. "CS202" or "Networks"), optionally by faculty. ' +
+                'Returns title, degree and the courses they teach.',
             inputSchema: z.object({
-                keyword: z.string().optional().describe('Part of the name or teacher ID, e.g. "Lan" or "T05"'),
+                keyword: z.string().optional().describe('Part of the name, a teacher ID, or a course ID/name, e.g. "Lan", "T05", "CS202"'),
                 faculty: z.string().optional().describe('Faculty, e.g. "Information Technology"')
             }),
             outputSchema: z.object({
@@ -45,8 +47,12 @@ export function registerTeachingTools(server: McpServer, data: AcademicData): vo
         },
         async ({ keyword, faculty }) => {
             const needle = keyword ? fold(keyword) : undefined;
+            const teaches = (teacherId: string) =>
+                [...data.sections.values()].filter(s => s.teacher_id === teacherId).some(s => fold(s.course_id).includes(needle!) || fold(data.courses.get(s.course_id)!.course_name).includes(needle!));
             const teachers = [...data.teachers.values()]
-                .filter(t => (!needle || fold(t.full_name).includes(needle) || fold(t.teacher_id).includes(needle)) && (!faculty || fold(t.faculty).includes(fold(faculty))))
+                .filter(
+                    t => (!needle || fold(t.full_name).includes(needle) || fold(t.teacher_id).includes(needle) || teaches(t.teacher_id)) && (!faculty || fold(t.faculty).includes(fold(faculty)))
+                )
                 .map(t => ({
                     teacher_id: t.teacher_id,
                     full_name: t.full_name,
@@ -109,7 +115,7 @@ export function registerTeachingTools(server: McpServer, data: AcademicData): vo
             annotations: READ_ONLY
         },
         async ({ class_id, semester }) => {
-            const cls = data.classes().find(c => c.toLowerCase() === class_id.trim().toLowerCase());
+            const cls = data.classes().find(c => data.sameClass(c, class_id));
             if (!cls) return fail(`Unknown class "${class_id}". Known classes: ${data.classes().join(', ')}.`);
             if (!knownSemester(semester)) return badSemester(semester);
             const sessions = [...data.sections.values()]
@@ -199,7 +205,7 @@ export function registerTeachingTools(server: McpServer, data: AcademicData): vo
         },
         async ({ scope, value, semester }) => {
             if (!knownSemester(semester)) return badSemester(semester);
-            const pool = [...data.students.values()].filter(s => (scope === 'class' ? s.class_id.toLowerCase() === value.trim().toLowerCase() : fold(s.faculty).includes(fold(value))));
+            const pool = [...data.students.values()].filter(s => (scope === 'class' ? data.sameClass(s.class_id, value) : fold(s.faculty).includes(fold(value))));
             if (pool.length === 0) return fail(`No students for ${scope} "${value}". Known: ${(scope === 'class' ? data.classes() : data.faculties()).join(', ')}.`);
             const at_risk = pool.flatMap(s => {
                 const gpa = data.gpaOf(s.student_id, semester).gpa;

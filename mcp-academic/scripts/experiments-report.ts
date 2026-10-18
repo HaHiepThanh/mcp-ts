@@ -20,7 +20,7 @@ type Any = any;
 
 const experiments = readdirSync(EXP_DIR)
     .filter(f => f.endsWith('.json'))
-    .sort((a, b) => Number(a.slice(1).split('-')[0]) - Number(b.slice(1).split('-')[0]))
+    .sort((a, b) => a[0].localeCompare(b[0]) || Number(a.slice(1).split('-')[0]) - Number(b.slice(1).split('-')[0]))
     .map(f => JSON.parse(readFileSync(path.join(EXP_DIR, f), 'utf8')) as Experiment);
 
 const md: string[] = [
@@ -31,6 +31,12 @@ const md: string[] = [
         '(Qwen3 4B Instruct via Ollama, 8k context, temperature 0.2, maxToolRounds 8, full tool descriptions, 3 servers over stdio).',
     'A scenario **passes** when every check holds: required tools called, arguments right, answer contains the ground truth from the MCP tools (oracle), ' +
         'no forbidden tool called, side effects verified. Scenarios: `docs/scenarios.md`. Machine: Apple M4 Pro, 24 GB.',
+    '',
+    '> **Method notes (honest record).** E1–E6 ran *before* the improvements of `phase2/improvements.md` (#11–13); I1 re-measures after them. ' +
+        'Two problems in our own test harness were found and fixed while analysing the logs: (1) the accepted grade change of scenario E1 ran before G1 in the same server process, ' +
+        'so G1 was graded against stale ground truth — data-changing scenarios now run last and G1 was re-run for every configuration; ' +
+        '(2) the answer checker missed correct refusals worded "does not have any records" / "does not store" — the patterns were widened and every logged answer was re-graded ' +
+        '(`npm run experiment -- E1 --rejudge`; 4 verdicts changed, all from fail to pass). Model answers were never edited.',
     ''
 ];
 

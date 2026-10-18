@@ -34,5 +34,6 @@
             },
             "repeat": 1
         }
-    ]
+    ],
+    "observation": "All three models answer most scenarios correctly behind the same servers: Gemini 3.5 Flash-Lite 100 % (46/46), Qwen3 4B Thinking 95.7 %, Qwen3 4B Instruct 91.3 %. The local instruct model is the fastest (2.4 s median) but misses two scenarios every time: B2 (searches lecturers by course code, which the tool did not support) and D3 (does not retry after the \"it-01\" error). Thinking fixes those by reasoning longer, at 10× the time (23.9 s) and 12× the output tokens (1,676 vs 135). The gap between models is small because the hard work (numbers, rules) is done by the tools."
 }

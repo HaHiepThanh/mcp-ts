@@ -1,0 +1,10 @@
+{"experiment":"E7","variant":"http-2025","connection":1,"era":"legacy","connectMs":21.1,"connectRequests":2,"callMedianMs":1.96,"at":"2026-10-18T02:40:50.999Z"}
+{"experiment":"E7","variant":"http-2025","connection":2,"era":"legacy","connectMs":3.6,"connectRequests":2,"callMedianMs":1.55,"at":"2026-10-18T02:40:51.034Z"}
+{"experiment":"E7","variant":"http-2025","connection":3,"era":"legacy","connectMs":2.9,"connectRequests":2,"callMedianMs":1.67,"at":"2026-10-18T02:40:51.072Z"}
+{"experiment":"E7","variant":"http-2025","connection":4,"era":"legacy","connectMs":3.2,"connectRequests":2,"callMedianMs":1.37,"at":"2026-10-18T02:40:51.105Z"}
+{"experiment":"E7","variant":"http-2025","connection":5,"era":"legacy","connectMs":2.8,"connectRequests":2,"callMedianMs":1.35,"at":"2026-10-18T02:40:51.137Z"}
+{"experiment":"E7","variant":"http-2025","connection":6,"era":"legacy","connectMs":2.5,"connectRequests":2,"callMedianMs":1.27,"at":"2026-10-18T02:40:51.168Z"}
+{"experiment":"E7","variant":"http-2025","connection":7,"era":"legacy","connectMs":2.7,"connectRequests":2,"callMedianMs":1.27,"at":"2026-10-18T02:40:51.201Z"}
+{"experiment":"E7","variant":"http-2025","connection":8,"era":"legacy","connectMs":2.6,"connectRequests":2,"callMedianMs":1.3,"at":"2026-10-18T02:40:51.231Z"}
+{"experiment":"E7","variant":"http-2025","connection":9,"era":"legacy","connectMs":3.7,"connectRequests":2,"callMedianMs":1.19,"at":"2026-10-18T02:40:51.260Z"}
+{"experiment":"E7","variant":"http-2025","connection":10,"era":"legacy","connectMs":2.3,"connectRequests":2,"callMedianMs":1.19,"at":"2026-10-18T02:40:51.290Z"}

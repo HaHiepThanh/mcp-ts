@@ -42,5 +42,6 @@
                 "llm.temperature": 1.0
             }
         }
-    ]
+    ],
+    "observation": "The hypothesis was only half right. Accuracy did NOT change with temperature (83.3 % at 0, 0.2 and 1.0 — the same two scenarios fail every time). What changed is the wording: at temperature 0 the three runs of a scenario give identical answers (1.0 distinct answer per scenario), at 0.2 1.67, at 1.0 all three differ (3.0). The facts come from the tools, so randomness only affects phrasing. For reproducible demos and logs use temperature 0."
 }

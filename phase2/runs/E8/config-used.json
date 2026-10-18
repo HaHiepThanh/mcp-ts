@@ -1,0 +1,83 @@
+{
+  "experiment": {
+    "id": "E8",
+    "title": "User replies to elicitation / sampling, and path safety",
+    "kind": "interaction",
+    "question": "Does the server behave correctly for every user reply, in both protocol eras?",
+    "hypothesis": "Data changes only on accept; decline / cancel / refused sampling end with a clear message; a path-traversal file name is rejected.",
+    "variants": [
+      {
+        "id": "decline-legacy",
+        "label": "decline · 2025",
+        "set": {
+          "reply": "decline",
+          "era": "legacy"
+        }
+      },
+      {
+        "id": "decline-modern",
+        "label": "decline · 2026",
+        "set": {
+          "reply": "decline",
+          "era": "modern"
+        }
+      },
+      {
+        "id": "cancel-legacy",
+        "label": "cancel · 2025",
+        "set": {
+          "reply": "cancel",
+          "era": "legacy"
+        }
+      },
+      {
+        "id": "cancel-modern",
+        "label": "cancel · 2026",
+        "set": {
+          "reply": "cancel",
+          "era": "modern"
+        }
+      },
+      {
+        "id": "accept-legacy",
+        "label": "accept · 2025",
+        "set": {
+          "reply": "accept",
+          "era": "legacy"
+        }
+      },
+      {
+        "id": "accept-modern",
+        "label": "accept · 2026",
+        "set": {
+          "reply": "accept",
+          "era": "modern"
+        }
+      },
+      {
+        "id": "sampling-denied-legacy",
+        "label": "sampling-denied · 2025",
+        "set": {
+          "reply": "sampling-denied",
+          "era": "legacy"
+        }
+      },
+      {
+        "id": "sampling-denied-modern",
+        "label": "sampling-denied · 2026",
+        "set": {
+          "reply": "sampling-denied",
+          "era": "modern"
+        }
+      },
+      {
+        "id": "path-traversal",
+        "label": "save_report(\"../../etc/passwd\")",
+        "set": {
+          "reply": "path-traversal",
+          "era": "modern"
+        }
+      }
+    ]
+  }
+}

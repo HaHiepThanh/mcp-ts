@@ -1,0 +1,1 @@
+{"experiment":"E8","variant":"sampling-denied-modern","era":"modern","reply":"sampling-denied","elicitationsAsked":0,"isError":true,"thrownOnClient":true,"dataChanged":null,"resultText":"client-side exception: Sampling is disabled by host configuration","ms":2.2,"at":"2026-10-18T02:40:40.805Z"}

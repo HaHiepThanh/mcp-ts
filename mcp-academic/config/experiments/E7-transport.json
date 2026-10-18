@@ -37,5 +37,6 @@
                 "protocol": "2026-07-28"
             }
         }
-    ]
+    ],
+    "observation": "Transport and protocol change milliseconds, not answers. Connecting over stdio takes ~189 ms because the host starts a new Node process; over HTTP the server is already running, so connecting takes 1.4–2.8 ms. The 2026-07-28 protocol needs 1 request to connect (server/discover) instead of 2 (initialize + initialized), which halves the HTTP connect time (2.8 → 1.4 ms). A tool call costs 0.2 ms over stdio and ~1.2 ms over HTTP — negligible next to the 2–3 s the LLM takes."
 }

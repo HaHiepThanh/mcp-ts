@@ -1,0 +1,1 @@
+{"experiment":"E8","variant":"sampling-denied-legacy","era":"legacy","reply":"sampling-denied","elicitationsAsked":0,"isError":true,"thrownOnClient":false,"dataChanged":null,"resultText":"The host did not provide an LLM for sampling (ProtocolError: Sampling is disabled by host configuration).","ms":1.2,"at":"2026-10-18T02:40:40.801Z"}

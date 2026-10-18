@@ -168,7 +168,11 @@ function judge(s: Scenario, log: TurnLog | undefined, expected: (string | number
 }
 
 async function runLlm(exp: Experiment, variants: Variant[], outDir: string, resume: boolean): Promise<void> {
-    const scenarios = SCENARIOS.filter(s => !s.direct && (exp.scenarios === undefined || exp.scenarios === 'all' || exp.scenarios.includes(s.id)));
+    // Scenarios that change server data (an accepted update_grade) run LAST, so they cannot change the ground truth of later scenarios.
+    const changesData = (s: Scenario) => s.elicit === 'accept' && s.tools.includes('academic.update_grade');
+    const scenarios = SCENARIOS.filter(s => !s.direct && (exp.scenarios === undefined || exp.scenarios === 'all' || exp.scenarios.includes(s.id))).sort(
+        (a, b) => Number(changesData(a)) - Number(changesData(b))
+    );
     const { oracle, close } = await makeOracle();
     const expected = new Map<string, (string | number)[]>();
     for (const s of scenarios) expected.set(s.id, s.expect ? await s.expect(oracle) : []);
@@ -261,6 +265,31 @@ async function runLlm(exp: Experiment, variants: Variant[], outDir: string, resu
             await host.hub.close();
         }
     }
+}
+
+/** Re-apply the current scenario checks to logged answers (no LLM call). The side-effect check (verify) cannot be replayed and is kept. */
+async function rejudge(exp: Experiment, outDir: string): Promise<void> {
+    const { oracle, close } = await makeOracle();
+    for (const variant of exp.variants) {
+        const file = path.join(outDir, `${variant.id}.jsonl`);
+        if (!existsSync(file)) continue;
+        const enabled = new Set(Object.entries(resolveConfig(exp, variant).mcpServers).filter(([, s]) => !s.disabled).map(([n]) => n));
+        let changed = 0;
+        const lines = [];
+        for (const line of readFileSync(file, 'utf8').split('\n').filter(Boolean)) {
+            const r = JSON.parse(line) as RunRecord;
+            const s = SCENARIOS.find(x => x.id === r.scenario)!;
+            const want = s.expect ? await s.expect(oracle) : [];
+            const log = { toolCalls: r.toolCalls, answer: r.answer } as unknown as TurnLog;
+            const j = judge(s, log, want, enabled, r.checks.verify, r.error);
+            const pass = Object.values(j.checks).every(Boolean);
+            if (pass !== r.pass) changed++;
+            lines.push(JSON.stringify({ ...r, mode: j.mode, expected: want, missing: j.missing, checks: j.checks, attemptedForbidden: j.attemptedForbidden, pass, rejudgedAt: new Date().toISOString() }));
+        }
+        writeFileSync(file, lines.join('\n') + '\n');
+        console.log(`  ${variant.id}: re-judged ${lines.length} runs, ${changed} verdict(s) changed`);
+    }
+    await close();
 }
 
 // ── kind "transport" (E7) ────────────────────────────────────────────
@@ -431,7 +460,7 @@ export function loadExperiment(id: string): Experiment {
 
 // ── main ─────────────────────────────────────────────────────────────
 if (import.meta.url === `file://${process.argv[1]}`) {
-    const ids = argv.filter(a => /^E\d+$/.test(a));
+    const ids = argv.filter(a => /^[EI]\d+$/.test(a));
     if (ids.length === 0) {
         console.log('Usage: npm run experiment -- E3 [--only variant-id] [--resume] [--summary-only]');
         process.exit(1);
@@ -443,8 +472,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         const only = option('only')?.split(',');
         const variants = only ? exp.variants.filter(v => only.includes(v.id)) : exp.variants;
         const started = performance.now();
-        if (!argv.includes('--summary-only')) {
-            writeFileSync(
+        if (argv.includes('--rejudge')) await rejudge(exp, outDir);
+        else if (!argv.includes('--summary-only')) {
+            if (!argv.includes('--resume')) writeFileSync(
                 path.join(outDir, 'config-used.json'),
                 JSON.stringify({ experiment: exp, resolved: exp.kind === 'llm' ? Object.fromEntries(exp.variants.map(v => [v.id, resolveConfig(exp, v)])) : undefined }, null, 2)
             );

@@ -1,0 +1,202 @@
+{
+  "experiment": {
+    "id": "E1",
+    "title": "LLM model",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 2,
+    "question": "Same MCP servers and scenarios — how much do accuracy and speed depend on the LLM?",
+    "hypothesis": "The harder phase-2 scenarios separate the models on accuracy, not only on speed; the thinking model is much slower.",
+    "variants": [
+      {
+        "id": "gemini-flash-lite",
+        "label": "Gemini 3.5 Flash-Lite (cloud)",
+        "base": "config/host.json",
+        "set": {
+          "llm.model": "gemini-3.5-flash-lite",
+          "llm.temperature": 0.2,
+          "toolDescriptions": {
+            "mode": "full"
+          }
+        },
+        "paceMs": 4000
+      },
+      {
+        "id": "qwen-instruct",
+        "label": "Qwen3 4B Instruct (local)",
+        "set": {}
+      },
+      {
+        "id": "qwen-thinking",
+        "label": "Qwen3 4B Thinking (local, 1 run)",
+        "set": {
+          "llm.model": "qwen3:4b"
+        },
+        "repeat": 1
+      }
+    ]
+  },
+  "resolved": {
+    "gemini-flash-lite": {
+      "$comment": "Chat host config. 'mcpServers' uses the same shape as Claude Desktop / VS Code (command+args for stdio, url for HTTP). 'protocol': auto | legacy | 2026-07-28.",
+      "llm": {
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "temperature": 0.2
+      },
+      "mcpServers": {
+        "academic": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/academic/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "utility": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/utility/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "finance": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/finance/main.ts"
+          ],
+          "protocol": "auto"
+        }
+      },
+      "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+      },
+      "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+      },
+      "elicitation": {
+        "nonInteractive": "decline"
+      },
+      "logDir": "outputs/logs",
+      "toolDescriptions": {
+        "mode": "full"
+      }
+    },
+    "qwen-instruct": {
+      "$comment": "Base configuration of every phase-2 experiment: Qwen3 4B Instruct (8k context, Ollama), temperature 0.2, maxToolRounds 8, full tool descriptions, all 3 servers over stdio. Each experiment changes ONE of these.",
+      "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3-4b-ctx8k:latest",
+        "temperature": 0.2
+      },
+      "mcpServers": {
+        "academic": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/academic/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "utility": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/utility/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "finance": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/finance/main.ts"
+          ],
+          "protocol": "auto"
+        }
+      },
+      "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+      },
+      "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+      },
+      "elicitation": {
+        "nonInteractive": "decline"
+      },
+      "logDir": "outputs/logs",
+      "toolDescriptions": {
+        "mode": "full"
+      }
+    },
+    "qwen-thinking": {
+      "$comment": "Base configuration of every phase-2 experiment: Qwen3 4B Instruct (8k context, Ollama), temperature 0.2, maxToolRounds 8, full tool descriptions, all 3 servers over stdio. Each experiment changes ONE of these.",
+      "llm": {
+        "provider": "openai-compatible",
+        "label": "ollama",
+        "baseUrl": "http://127.0.0.1:11434/v1",
+        "model": "qwen3:4b",
+        "temperature": 0.2
+      },
+      "mcpServers": {
+        "academic": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/academic/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "utility": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/utility/main.ts"
+          ],
+          "protocol": "auto"
+        },
+        "finance": {
+          "command": "node",
+          "args": [
+            "--import",
+            "tsx",
+            "src/server/finance/main.ts"
+          ],
+          "protocol": "auto"
+        }
+      },
+      "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+      },
+      "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+      },
+      "elicitation": {
+        "nonInteractive": "decline"
+      },
+      "logDir": "outputs/logs",
+      "toolDescriptions": {
+        "mode": "full"
+      }
+    }
+  }
+}

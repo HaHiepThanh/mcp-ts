@@ -49,5 +49,6 @@
                 }
             }
         }
-    ]
+    ],
+    "observation": "The strongest effect of all experiments. Removing the descriptions (tool name only) drops the pass rate from 91.3 % to 65.2 % and halves the prompt (3,797 → 2,117 tokens): the model no longer knows which tool or argument format to use (A3, B3, H1 pick the wrong or no tool). Swapping three pairs of descriptions (misleading) gives 73.9 %: the model follows the description, not the tool name — it calls get_transcript when asked for a GPA (A1, D1). The text the server writes is effectively part of the program."
 }

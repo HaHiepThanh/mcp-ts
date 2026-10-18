@@ -271,6 +271,12 @@ export class AcademicData {
         return [...new Set(this.grades.map(g => g.semester))].sort();
     }
 
+    /** Same class whatever the spelling: "it-01", "IT 01" and "it01" all mean IT01 (phase-2 improvement). */
+    sameClass(classId: string, input: string): boolean {
+        const key = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, '');
+        return key(classId) === key(input);
+    }
+
     classes(): string[] {
         return [...new Set([...this.students.values()].map(s => s.class_id))].sort();
     }

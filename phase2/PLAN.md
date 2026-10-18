@@ -3,7 +3,8 @@
 > **Người làm:** nhóm trưởng + Claude, trên nhánh `phase2/core`.
 > **Nhánh `main`** giữ nguyên cho các thành viên khác làm theo `TASKS.md`.
 > **Mục tiêu:** yêu cầu nào của thầy cũng có **bằng chứng chạy lại được bằng 1 lệnh**, có log và có số liệu so sánh.
-> **Trạng thái:** đã duyệt, đang thực hiện trên nhánh `phase2/core`. Mục 12 theo đề xuất: giữ nhóm H, Thinking chạy 1 lần, ghi rõ bộ câu mới.
+> **Trạng thái:** ✅ ĐÃ HOÀN THÀNH P0–P6 trên nhánh `phase2/core` (2026-10-18). Kết quả: `mcp-academic/docs/experiments.md` · log: `phase2/runs/` · slide: `phase2/MCP-TS-SDK-phase2.pptx` · trắc nghiệm: `phase2/quiz-phase2.txt`.
+> Khác plan: tình huống viết bằng TypeScript (`demo/scenarios.ts`) thay vì JSON vì cần hàm oracle; finance có 4 tool (thêm `rank_scholarship_candidates` cho G2) → tổng 22 tool; thêm thí nghiệm I1 đo lại sau cải tiến.
 
 ## 0. Đã chốt
 

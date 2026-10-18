@@ -29,5 +29,6 @@
                 "llm.model": "qwen3-4b-ctx16k:latest"
             }
         }
-    ]
+    ],
+    "observation": "At 4k context Ollama rejects the longer conversations outright (HTTP 400 \"request (4171 tokens) exceeds the available context size (4096)\"): 22 tool definitions already use about 3.8k tokens, so any scenario that needs a second round with tool results overflows (B3, C1 fail; 78.3 %). Single-round questions still work, so the hypothesis \"accuracy collapses\" was too strong. 8k and 16k give identical results (91.3 %) at the same speed — 8k is enough for 22 tools; more tools would need 16k."
 }

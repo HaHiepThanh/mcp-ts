@@ -60,7 +60,7 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
             const matches = [...data.students.values()].filter(
                 s =>
                     (!needle || fold(s.full_name).includes(needle) || s.student_id.includes(needle)) &&
-                    (!class_id || s.class_id.toLowerCase() === class_id.toLowerCase()) &&
+                    (!class_id || data.sameClass(s.class_id, class_id)) &&
                     (!faculty || fold(s.faculty).includes(fold(faculty)))
             );
             const students = matches.slice(0, limit).map(({ student_id, full_name, class_id, faculty }) => ({ student_id, full_name, class_id, faculty }));
@@ -184,7 +184,7 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
             annotations: READ_ONLY
         },
         async ({ class_id, course_id, semester }) => {
-            const members = [...data.students.values()].filter(s => s.class_id.toLowerCase() === class_id.toLowerCase());
+            const members = [...data.students.values()].filter(s => data.sameClass(s.class_id, class_id));
             if (members.length === 0) return fail(`Unknown class "${class_id}". Known classes: ${data.classes().join(', ')}.`);
             if (course_id && !data.courses.has(course_id)) return fail(`Unknown course "${course_id}". Known courses: ${[...data.courses.keys()].join(', ')}.`);
 
@@ -239,7 +239,7 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
         async ({ scope, value, semester, top }, ctx) => {
             if (scope !== 'all' && !value) return fail(`"value" is required when scope is "${scope}".`);
             const pool = [...data.students.values()].filter(s =>
-                scope === 'class' ? s.class_id.toLowerCase() === value!.toLowerCase() : scope === 'faculty' ? fold(s.faculty).includes(fold(value!)) : true
+                scope === 'class' ? data.sameClass(s.class_id, value!) : scope === 'faculty' ? fold(s.faculty).includes(fold(value!)) : true
             );
             if (pool.length === 0) {
                 const known = scope === 'class' ? data.classes() : data.faculties();
