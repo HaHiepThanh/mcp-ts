@@ -72,7 +72,7 @@ B. 9 periods
 C. 27 periods
 D. 45 periods
 Answer: B
-Source: phase2/test-reference.xlsx, Sections; test case P2-08
+Source: phase2/runs/khoa/test-reference.xlsx, Sections; test case P2-08
 
 Question 10: What does students_graded in teacher_grade_report count?
 A. Graded enrolments across the teacher's selected sections, so a student may count more than once
@@ -128,7 +128,7 @@ B. To hide invalid rows
 C. To help detect a business-rule bug shared by the tool output and its tool-derived oracle
 D. To avoid retaining the source data
 Answer: C
-Source: phase2/test-reference.xlsx; phase2/scripts/prepare-reference.py
+Source: phase2/runs/khoa/test-reference.xlsx; phase2/runs/khoa/scripts/prepare-reference.py
 
 Question 17: What should an assistant with only academic and utility servers do when asked for a teacher's salary?
 A. Estimate it from the teacher's title
@@ -136,7 +136,7 @@ B. Explain that the required finance data/tool is unavailable
 C. Ask query_table to read a finance file outside its data directory
 D. Invent a plausible amount
 Answer: B
-Source: phase2/configs/gemini-stdio.json; TASKS.md, least privilege
+Source: phase2/runs/khoa/configs/gemini-stdio.json; TASKS.md, least privilege
 
 Question 18: Where should scholarship eligibility rules be evaluated?
 A. In deterministic server code using GPA, conduct, owed courses and tuition rules
@@ -160,4 +160,4 @@ B. Replace their values with zero
 C. Merge finance code into Khoa's branch without review
 D. Keep their PR snapshot provenance and mark execution on main as skipped
 Answer: D
-Source: phase2/reference-manifest.json; phase2/test-cases.csv
+Source: phase2/runs/khoa/reference-manifest.json; phase2/runs/khoa/test-cases.csv

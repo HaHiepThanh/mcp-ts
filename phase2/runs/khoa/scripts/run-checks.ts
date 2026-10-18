@@ -1,25 +1,25 @@
 /** Khoa's submission runner. Does not alter the team's demo/benchmark.ts or server code.
- * cd mcp-academic; node --import tsx ../phase2/scripts/run-checks.ts [--llm] [--config ../phase2/configs/gemini-stdio.json]
+ * cd mcp-academic; node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts [--llm] [--config ../phase2/runs/khoa/configs/gemini-stdio.json]
  * Each model starts with a fresh conversation for each question. Fallback is disabled.
  */
 import {appendFileSync, readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {spawn, type ChildProcess} from 'node:child_process';
-import {parseCsv} from '../../mcp-academic/src/lib/csv';
-import {loadEnv, PROJECT_ROOT} from '../../mcp-academic/src/lib/env';
-import {loadHostConfig} from '../../mcp-academic/src/host/config';
-import {McpHub} from '../../mcp-academic/src/host/mcp-hub';
-import {ChatHost} from '../../mcp-academic/src/host/host';
-import {GeminiProvider} from '../../mcp-academic/src/host/providers/gemini';
-import {OpenAICompatibleProvider} from '../../mcp-academic/src/host/providers/openai-compatible';
+import {parseCsv} from '../../../../mcp-academic/src/lib/csv';
+import {loadEnv, PROJECT_ROOT} from '../../../../mcp-academic/src/lib/env';
+import {loadHostConfig} from '../../../../mcp-academic/src/host/config';
+import {McpHub} from '../../../../mcp-academic/src/host/mcp-hub';
+import {ChatHost} from '../../../../mcp-academic/src/host/host';
+import {GeminiProvider} from '../../../../mcp-academic/src/host/providers/gemini';
+import {OpenAICompatibleProvider} from '../../../../mcp-academic/src/host/providers/openai-compatible';
 
 loadEnv();
 const root=path.resolve(PROJECT_ROOT,'..');
 const argv=process.argv.slice(2);
 const option=(s:string)=>argv.includes(s)?argv[argv.indexOf(s)+1]:undefined;
 const llm=argv.includes('--llm');
-const configFile=option('--config')??'../phase2/configs/gemini-stdio.json';
+const configFile=option('--config')??'../phase2/runs/khoa/configs/gemini-stdio.json';
 const {config}=loadHostConfig(configFile);
 const label=path.basename(configFile,'.json')+(llm?'-llm':'-tools');
 const dir=path.join(root,'phase2/runs/khoa'); mkdirSync(dir,{recursive:true});
@@ -28,9 +28,9 @@ const stamp=started.replace(/[:.]/g,'-');
 const file=path.join(dir,`${label}-${stamp}.jsonl`);
 const redact=(s:string)=>process.env.GEMINI_API_KEY?s.split(process.env.GEMINI_API_KEY).join('[REDACTED]'):s;
 const log=(x:unknown)=>appendFileSync(file,redact(JSON.stringify(x))+'\n');
-const cases=parseCsv(readFileSync(path.join(root,'phase2/test-cases.csv'),'utf8')).rows;
+const cases=parseCsv(readFileSync(path.join(root,'phase2/runs/khoa/test-cases.csv'),'utf8')).rows;
 const only=option('--only')?.split(',');
-const manifest=JSON.parse(readFileSync(path.join(root,'phase2/reference-manifest.json'),'utf8'));
+const manifest=JSON.parse(readFileSync(path.join(root,'phase2/runs/khoa/reference-manifest.json'),'utf8'));
 // Verify exact source bytes on the current branch, without guessing values from tools.
 for(const source of manifest.sources.filter((s:any)=>s.commit===manifest.base_commit)) {
   const sha=createHash('sha256').update(readFileSync(path.join(root,source.path))).digest('hex');

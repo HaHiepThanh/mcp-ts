@@ -63,7 +63,7 @@ const probe=answers.getRange('A5:E80').values.find(r=>r[0]==='P2-18'&&r[1]==='re
 if(probe?.[2]!==90) throw Error('Recalculation probe failed');
 wb.worksheets.getItem('Conduct').getRange('C5').values=original;
 wb.recalculate();
-await (await SpreadsheetFile.exportXlsx(wb)).save(path.join(repo,'phase2','test-reference.xlsx'));
+await (await SpreadsheetFile.exportXlsx(wb)).save(path.join(repo,'phase2','runs','khoa','test-reference.xlsx'));
 for(const model of ordered) {
   const png=await wb.render({sheetName:model.name,range:`A1:${model.name==='Answers'?'E':'F'}${Math.min(16,model.values.length+4)}`,scale:1.4,format:'png'});
   await fs.writeFile(path.join(build,`sheet-${model.name}.png`),new Uint8Array(await png.arrayBuffer()));

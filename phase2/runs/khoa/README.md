@@ -42,11 +42,11 @@ The first complete HTTP LLM sweep recorded all 31 cases before a harness cleanup
 From `mcp-academic/`, after `npm install` and local `.env` configuration:
 
 ```powershell
-node node_modules/typescript/bin/tsc --noEmit -p ../phase2/tsconfig.json
-node --import tsx ../phase2/scripts/run-checks.ts
-node --import tsx ../phase2/scripts/run-checks.ts --config ../phase2/configs/gemini-http.json --start-http
-node --import tsx ../phase2/scripts/run-checks.ts --llm
-node --import tsx ../phase2/scripts/run-checks.ts --llm --config ../phase2/configs/gemini-http.json --start-http
+node node_modules/typescript/bin/tsc --noEmit -p ../phase2/runs/khoa/tsconfig.json
+node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts
+node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --config ../phase2/runs/khoa/configs/gemini-http.json --start-http
+node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --llm
+node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --llm --config ../phase2/runs/khoa/configs/gemini-http.json --start-http
 ```
 
-Then run `python phase2/scripts/summarize-runs.py` from the repository root. Read `phase2/KHOA-HANDOFF.md` before regenerating references or enabling finance.
+Then run `python phase2/runs/khoa/scripts/summarize-runs.py` from the repository root. Read `phase2/runs/khoa/KHOA-HANDOFF.md` before regenerating references or enabling finance.

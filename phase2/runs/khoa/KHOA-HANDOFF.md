@@ -2,14 +2,16 @@
 
 This branch contains Khoa's validation and delivery artifacts. It changes no application server, generator, existing benchmark, Phase 1 material or another member's experiment report.
 
+All files for this contribution are grouped under `phase2/runs/khoa/`. Raw trace configuration paths reflect the original run location before this reorganization.
+
 ## Deliverables
 
 | Requirement | File | Evidence / limit |
 | --- | --- | --- |
 | At least 15 natural English questions | [test-cases.csv](test-cases.csv) | 31 cases with the required five columns; arguments and exact expected-value subsets are JSON inside `expected_values` |
 | CSV-derived Excel answer key | [test-reference.xlsx](test-reference.xlsx) | 59 formula metrics and independent CSV cross-checks; all agree under Artifact Tool; human review in Microsoft Excel remains pending |
-| Measured runs | [runs/khoa/README.md](runs/khoa/README.md) | Gemini on stdio and HTTP, full traces, provider usage and retry counts; 26/26 direct MCP checks on each transport |
-| Final quiz | [../quiz/questions-phase2.txt](../quiz/questions-phase2.txt) | 20 English questions, four choices and one answer per question; reviewed from the Phase 2 draft and extended for new features |
+| Measured runs | [README.md](README.md) | Gemini on stdio and HTTP, full traces, provider usage and retry counts; 26/26 direct MCP checks on each transport |
+| Final quiz | [questions-phase2.txt](questions-phase2.txt) | 20 English questions, four choices and one answer per question; reviewed from the Phase 2 draft and extended for new features |
 
 Slides, video and their authoring sources were removed from this PR at the user's request. The quiz has **not** been uploaded to Google Drive; no Drive session was connected. Copy it to `team/quiz/` when assembling the team submission. The existing Mac-only `build-submission.sh` was not modified for this Windows task.
 
@@ -52,14 +54,14 @@ After PR #2 is merged, update the pinned source choices and refresh the Excel ke
 
 Start with `npm install` in `mcp-academic/`. Keep the Gemini key in local `.env`, which Git ignores. Never put it in a config, command transcript or committed log. The run configs enable academic and utility only, decline mutations, deny sampling and use a fresh conversation per question. The runner disables Gemini model fallback and captures complete MCP results before the host's display preview truncates them.
 
-Run commands in [runs/khoa/README.md](runs/khoa/README.md). Type-check Khoa's runner with:
+Run commands in [README.md](README.md). Type-check Khoa's runner with:
 
 ```powershell
 cd mcp-academic
-node node_modules/typescript/bin/tsc --noEmit -p ../phase2/tsconfig.json
+node node_modules/typescript/bin/tsc --noEmit -p ../phase2/runs/khoa/tsconfig.json
 ```
 
-To rebuild the independent reference, run `python phase2/scripts/prepare-reference.py` from the repository root. The pinned finance commit must exist locally (`git fetch origin feat/tien-finance` if necessary). Authoring intermediates are kept in a sibling `_khoa-build/`, outside the repository, and must not be committed. Use the bundled Artifact Tool runtime and its documented creation marker before spreadsheet authoring. Copy `build-reference.mjs` into that private folder with a `node_modules` junction to the bundled runtime, then pass the repository root as the first argument. Run `summarize-runs.py` to refresh the measurement reports.
+To rebuild the independent reference, run `python phase2/runs/khoa/scripts/prepare-reference.py` from the repository root. The pinned finance commit must exist locally (`git fetch origin feat/tien-finance` if necessary). Authoring intermediates are kept in a sibling `_khoa-build/`, outside the repository, and must not be committed. Use the bundled Artifact Tool runtime and its documented creation marker before spreadsheet authoring. Copy `build-reference.mjs` into that private folder with a `node_modules` junction to the bundled runtime, then pass the repository root as the first argument. Run `summarize-runs.py` to refresh the measurement reports.
 
 ## Before the team submits
 

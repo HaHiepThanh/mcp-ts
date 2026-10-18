@@ -1,5 +1,0 @@
-{
-  "extends": "../mcp-academic/tsconfig.json",
-  "compilerOptions": {"typeRoots": ["../mcp-academic/node_modules/@types"]},
-  "include": ["scripts/*.ts"]
-}

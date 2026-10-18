@@ -12,7 +12,7 @@ from collections import defaultdict
 from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[4]
 BUILD = ROOT.parent / '_khoa-build'
 BASE = '2c4110ab6ff60e84e386ace7f0d158bf0ab4a0e2'
 FINANCE = '5d72748e7aebbc6af69c18afeafd89a72d3158b1'
@@ -257,8 +257,8 @@ entry['manual_review']='Check GPA, every banned section and each reason against 
 
 manifest=dict(base_commit=BASE,finance_pr=2,finance_commit=FINANCE,finance_status='not merged into main at authoring',as_of='2026-10-18',sources=sources,valid_students=len(st),valid_grades=len(valid),raw_grades=len(data['Grades']),human_excel_review='pending; formulas and independent CSV cross-checks supplied, no claim of manual human calculation')
 (BUILD/'reference.json').write_text(json.dumps(dict(sheets=sheets,cases=cases,manifest=manifest),ensure_ascii=False,indent=2),encoding='utf-8')
-(ROOT/'phase2/reference-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-with (ROOT/'phase2/test-cases.csv').open('w',newline='',encoding='utf-8') as f:
+(ROOT/'phase2/runs/khoa/reference-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+with (ROOT/'phase2/runs/khoa/test-cases.csv').open('w',newline='',encoding='utf-8') as f:
     w=csv.writer(f); w.writerow(['id','question','expected_tools','expected_values','note'])
     for c in cases:
         tools=';'.join('academic.'+x['tool'] if c['snapshot']=='main' else 'finance.'+x['tool'] for x in c['calls'])

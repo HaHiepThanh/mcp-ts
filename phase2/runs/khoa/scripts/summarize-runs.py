@@ -4,7 +4,7 @@ import json
 import statistics
 from pathlib import Path
 
-ROOT=Path(__file__).resolve().parents[2]
+ROOT=Path(__file__).resolve().parents[4]
 DIR=ROOT/'phase2/runs/khoa'
 BUILD=ROOT.parent/'_khoa-build'
 selected={}
@@ -67,11 +67,11 @@ for label,r in selected.items():lines.append(f"- [{r['file']}]({r['file']}) — 
 lines += ['', 'Also retained: `doctor.json`, the 15/15 example-suite summary, S9/S10 outputs, workbook validation and configuration snapshots. `comparison.csv` and `comparison.json` are rebuilt from the selected complete traces, not hand-entered results. The console return code may be 1 when a strict case fails; its recorded failure remains in the report.','',
 'The first complete HTTP LLM sweep recorded all 31 cases before a harness cleanup error (`ChatHost.close` did not exist). Its summary is reconstructed from the unchanged complete case records and marked `recovered_from_complete_cases` in comparison.json. The runner now closes `host.hub` and has a TypeScript check. This cleanup issue did not change recorded model calls, outputs or per-question times.','',
 '## Reproduce','', 'From `mcp-academic/`, after `npm install` and local `.env` configuration:', '', '```powershell',
-'node node_modules/typescript/bin/tsc --noEmit -p ../phase2/tsconfig.json',
-'node --import tsx ../phase2/scripts/run-checks.ts',
-'node --import tsx ../phase2/scripts/run-checks.ts --config ../phase2/configs/gemini-http.json --start-http',
-'node --import tsx ../phase2/scripts/run-checks.ts --llm',
-'node --import tsx ../phase2/scripts/run-checks.ts --llm --config ../phase2/configs/gemini-http.json --start-http',
-'```', '', 'Then run `python phase2/scripts/summarize-runs.py` from the repository root. Read `phase2/KHOA-HANDOFF.md` before regenerating references or enabling finance.']
+'node node_modules/typescript/bin/tsc --noEmit -p ../phase2/runs/khoa/tsconfig.json',
+'node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts',
+'node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --config ../phase2/runs/khoa/configs/gemini-http.json --start-http',
+'node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --llm',
+'node --import tsx ../phase2/runs/khoa/scripts/run-checks.ts --llm --config ../phase2/runs/khoa/configs/gemini-http.json --start-http',
+'```', '', 'Then run `python phase2/runs/khoa/scripts/summarize-runs.py` from the repository root. Read `phase2/runs/khoa/KHOA-HANDOFF.md` before regenerating references or enabling finance.']
 (DIR/'README.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
 print(json.dumps({k:v['summary'] for k,v in selected.items()}))
