@@ -26,7 +26,7 @@ const allRuns = ['E1', 'E2', 'E3', 'E4', 'E5', 'E6'].reduce((a, id) => a + S[id]
     const s = pres.addSlide({ masterName: 'DARK' });
     s.addText('MCP.2502 · PHASE 2', { x: 0.8, y: 1.3, w: 11, h: 0.4, fontSize: 16, bold: true, color: COL.accent, charSpacing: 3, margin: 0, isTextBox: true });
     s.addText('Testing MCP configurations:\nscenarios, parameters, results', { x: 0.8, y: 1.8, w: 11.5, h: 1.9, fontSize: 44, bold: true, color: COL.white, margin: 0, isTextBox: true });
-    s.addText(`3 MCP servers · 22 tools · 24 scenarios · 8 experiments · 27 configurations · ${allRuns} logged LLM runs`, { x: 0.8, y: 3.8, w: 11.5, h: 0.5, fontSize: 20, color: 'C9D3E6', margin: 0, isTextBox: true });
+    s.addText(`3 MCP servers · 22 tools · 24 scenarios · 8 experiments · 32 configurations · ${allRuns} logged LLM runs`, { x: 0.8, y: 3.8, w: 11.5, h: 0.5, fontSize: 20, color: 'C9D3E6', margin: 0, isTextBox: true });
     h.todo(s, 'full names of the 6 members · class · lecturer · date', 0.8, 4.9, 11.7, 1.2);
     s.addNotes('Good morning. In phase 1 we explained the MCP TypeScript SDK and built our servers. In phase 2 we test them: which scenarios we ran, which parameter sets we compared, what the results are, what we observed and what we improved.');
 }
@@ -77,7 +77,7 @@ h.divider('2', 'Test scenarios', '24 scenarios · 8 groups · ground truth from 
 }
 
 // ── 3 · Parameter sets ──
-h.divider('3', 'Parameter sets', '8 experiments · 27 configurations · one parameter changed at a time', 'Third: the parameter sets.');
+h.divider('3', 'Parameter sets', '8 experiments · 32 configurations · one parameter changed at a time', 'Third: the parameter sets.');
 {
     const s = h.content('Method: change ONE parameter, keep everything else', 'Parameter sets', 'Our method is a controlled experiment. The base configuration is Qwen3 4B Instruct running locally, temperature 0.2, at most 8 tool rounds, full tool descriptions, all three servers, stdio. Each experiment is one JSON file that changes exactly one of these and runs every configuration on the same scenarios. E7 and E8 need no LLM — they measure the protocol itself.');
     h.table(s, [
@@ -206,7 +206,7 @@ h.divider('7', 'Logs and reproducibility', 'Every run is written down', 'Finally
     s.addText(
         [
             { text: 'MCP made the system testable: ', options: { bold: true, color: COL.accent } },
-            { text: 'the same 3 servers answered 27 configurations without one line of server code changing.', options: { breakLine: true } },
+            { text: 'the same 3 servers answered all 32 configurations of E1–E8 without one line of server code changing.', options: { breakLine: true } },
             { text: 'What matters most is what the LLM sees: ', options: { bold: true, color: COL.accent } },
             { text: 'tool descriptions, round limit and context window move accuracy by tens of points; transport and protocol move milliseconds.', options: { breakLine: true } },
             { text: 'Safety is a server property: ', options: { bold: true, color: COL.accent } },
@@ -216,7 +216,7 @@ h.divider('7', 'Logs and reproducibility', 'Every run is written down', 'Finally
     );
     s.addText('Questions?', { x: 0.8, y: 5.4, w: 6, h: 0.8, fontSize: 32, bold: true, color: COL.white, margin: 0, isTextBox: true });
     s.addText('github.com/HaHiepThanh/mcp-ts · branch phase2/core · phase2/runs/ (logs) · mcp-academic/docs/experiments.md', { x: 0.8, y: 6.3, w: 11.7, h: 0.5, fontSize: 13, color: 'C9D3E6', margin: 0, isTextBox: true });
-    s.addNotes('To conclude: thanks to MCP the same three servers served 27 configurations without changing server code. The parameters that matter are the ones that change what the model sees. And safety comes from the server design, not from hoping the model behaves. Thank you — questions are welcome.');
+    s.addNotes('To conclude: thanks to MCP the same three servers served 32 configurations without changing server code. The parameters that matter are the ones that change what the model sees. And safety comes from the server design, not from hoping the model behaves. Thank you — questions are welcome.');
 }
 
 pres.writeFile({ fileName: process.argv[2] || path.join(ROOT, 'phase2', 'MCP-TS-SDK-phase2.pptx') }).then(f => console.log('wrote', f));

@@ -11,7 +11,7 @@ Tạo gói nộp: `bash build-submission.sh` → **`phase2/submission/`** + **`p
 | --- | --- | --- |
 | Các tình huống chạy thử | `mcp-academic/docs/scenarios.md` · `mcp-academic/demo/scenarios.ts` | 24 tình huống, 8 nhóm A–H, đáp án chuẩn lấy từ chính các tool MCP (oracle) |
 | Đáp án có đúng không? | [`manual-check.md`](manual-check.md) · `manual_check.py` | Python tính lại độc lập từ CSV; 9/9 giá trị khớp oracle |
-| Các bộ tham số | `mcp-academic/config/experiments/E1…E8.json` · `config/host.experiment.json` | 8 thí nghiệm, 27 cấu hình, mỗi thí nghiệm chỉ đổi 1 tham số |
+| Các bộ tham số | `mcp-academic/config/experiments/E1…E8.json` · `config/host.experiment.json` | 8 thí nghiệm, 32 cấu hình (+ I1 đo lại sau cải tiến), mỗi thí nghiệm chỉ đổi 1 tham số |
 | Kết quả + so sánh + nhận xét | `mcp-academic/docs/experiments.md` | Bảng cho từng thí nghiệm, theo nhóm tình huống, theo từng tình huống, kèm nhận xét |
 | (Cải tiến) | [`improvements.md`](improvements.md) | Cải tiến có bằng chứng trước/sau |
 | Code + data | `mcp-academic/` (3 server, 22 tool) · `mcp-academic/data/sample/` | `npm run experiment -- E3` chạy lại 1 thí nghiệm |
