@@ -21,6 +21,7 @@
         "finance:http": "tsx src/server/finance/main.ts --http --port 3003",
         "chat": "tsx src/host/main.ts",
         "check:vscode": "tsx scripts/check-vscode-config.ts",
+        "check:http": "tsx scripts/check-http.ts",
         "results": "tsx scripts/build-results.ts",
         "compare": "tsx scripts/compare-models.ts",
         "experiment": "tsx scripts/experiment.ts",

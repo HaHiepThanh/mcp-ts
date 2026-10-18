@@ -2,7 +2,7 @@
 
 Làm lần lượt từ trên xuống. Mỗi bước ghi rõ **lệnh**, **kết quả đúng phải ra** và **nếu sai thì sao**. Đánh dấu ☐ → ☑ khi xong.
 
-- Các bước 1–4 **không cần LLM**, mất khoảng 3 phút.
+- Các bước 1–4 **không cần LLM**, mất khoảng 3 phút. Bước 1b hướng dẫn **chạy MCP server** (stdio, HTTP, VS Code).
 - Các bước 5–7 cần Ollama + Qwen, mất khoảng 15 phút.
 - Bước 8 là đối chiếu yêu cầu của thầy.
 
@@ -56,6 +56,64 @@ npm run check:vscode
 ```
 
 **Đúng khi:** `academic` 15 tool, `utility` 3 tool, `finance` 4 tool, tất cả ✔.
+
+---
+
+## 1b. Chạy MCP server (3 cách)
+
+Có **2 kiểu transport**. Bạn **không cần** bật server bằng tay để chat hay chạy thí nghiệm: ở chế độ mặc định (stdio), host tự khởi động server. Phần này để bạn tự thấy từng server chạy và trình bày với thầy.
+
+### Cách A — stdio: host tự bật server (mặc định)
+
+`npm run chat`, `npm run examples`, `npm run experiment` và VS Code đều tự khởi động 3 server như tiến trình con, rồi tự tắt khi xong. Nếu muốn chạy tay một server để xem nó khởi động:
+
+```bash
+npm run academic
+```
+
+**Đúng khi:** in ra `[academic] data: 40 students, 10 courses, 261 grades, 9 skipped rows (…)` rồi **đứng im**. Đứng im là đúng, vì server stdio chờ client gửi tin nhắn qua stdin. Bấm `Ctrl+C` để tắt. Tương tự với `npm run utility`, `npm run finance`.
+
+### Cách B — HTTP: server chạy riêng, nhiều client dùng chung
+
+☐ Mở **3 cửa sổ terminal**, trong thư mục `mcp-academic`, mỗi cửa sổ chạy một lệnh và để nguyên:
+
+```bash
+npm run academic:http
+```
+
+```bash
+npm run utility:http
+```
+
+```bash
+npm run finance:http
+```
+
+**Đúng khi:** mỗi cửa sổ in ra `[academic] listening on http://127.0.0.1:3001/mcp`. Tương tự với `utility` ở cổng 3002 và `finance` ở cổng 3003.
+
+☐ Ở cửa sổ thứ 4, kiểm tra cả 3 server trả lời được:
+
+```bash
+npm run check:http
+```
+
+**Đúng khi:** có 3 dòng ✔, lần lượt là `academic … 15 tools`, `utility … 3 tools`, `finance … 4 tools`, kèm `protocol era modern` và tên từng tool. Nếu server nào chưa bật thì dòng đó hiện ✖ kèm lệnh cần chạy.
+
+> Mở `http://127.0.0.1:3001/mcp` bằng trình duyệt hoặc `curl` sẽ nhận về **405**. Đó là **bình thường**, vì MCP chỉ nhận POST (JSON-RPC), không nhận GET.
+
+☐ Chat qua HTTP, với 3 server đang chạy ở trên (cần LLM, xem bước 5):
+
+```bash
+npm run chat -- --config config/host.http.json
+```
+
+**Đúng khi:** banner liệt kê 3 server `academic`, `utility`, `finance` với transport `http`. Hỏi thử câu A1 ở bước 6 → ra 2.06 Average.
+
+☐ Tắt server: `Ctrl+C` ở từng cửa sổ.
+
+### Cách C — trong VS Code (Copilot Chat)
+
+Mở thư mục `seminar-emt` bằng VS Code → `Cmd+Shift+P` → **MCP: List Servers** → thấy `academic`, `utility`, `finance` → **Start** từng cái. Chi tiết xem `mcp-academic/docs/vscode-guide.md`. Config nằm ở `.vscode/mcp.json`, đây là thứ thầy dặn "show cấu hình MCP".
 
 ---
 
@@ -221,6 +279,8 @@ So với bản đã nộp (`docs/experiments.md` mục E3: 73.9 / 87 / 91.3 / 91
 | Hiện tượng | Xử lý |
 | --- | --- |
 | `Cannot reach http://127.0.0.1:11434` | Chưa bật Ollama (bước 5) |
+| `check:http` báo ✖ / `EADDRINUSE` khi bật server HTTP | Server chưa bật, hoặc cổng 3001–3003 đang bị chiếm bởi lần chạy cũ: `pkill -f "main.ts --http"` rồi bật lại |
+| `npm run academic` đứng im không in gì thêm | Bình thường — server stdio đang chờ client; `Ctrl+C` để thoát |
 | `Model "qwen3-4b-ctx8k:latest" not found` | Tạo 3 model `ctx` theo `phase2/README.md` |
 | `npm run examples` < 16/16 | Mở `outputs/examples/<tên>.log` xem bước nào ✖ |
 | `manual_check.py` có dòng ✖ | Dữ liệu hoặc code tính điểm đã bị sửa: chạy lại `npm run data:sample`, rồi xem `git diff` |
