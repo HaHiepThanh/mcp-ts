@@ -1,10 +1,8 @@
 {
   "test_cases": 31,
   "expected_checks": 60,
-  "slides": 27,
   "quiz_questions": 20,
   "credential_scan": "passed; credential value not logged",
   "workbook_formula_metrics": 59,
-  "application_code_changed": false,
-  "video_bytes": 7850737
+  "application_code_changed": false
 }

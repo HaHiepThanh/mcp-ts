@@ -9,12 +9,9 @@ This branch contains Khoa's validation and delivery artifacts. It changes no app
 | At least 15 natural English questions | [test-cases.csv](test-cases.csv) | 31 cases with the required five columns; arguments and exact expected-value subsets are JSON inside `expected_values` |
 | CSV-derived Excel answer key | [test-reference.xlsx](test-reference.xlsx) | 59 formula metrics and independent CSV cross-checks; all agree under Artifact Tool; human review in Microsoft Excel remains pending |
 | Measured runs | [runs/khoa/README.md](runs/khoa/README.md) | Gemini on stdio and HTTP, full traces, provider usage and retry counts; 26/26 direct MCP checks on each transport |
-| Phase 2 slides | [../slides/MCP-TS-SDK-phase2.pptx](../slides/MCP-TS-SDK-phase2.pptx) | 27 editable slides, nine native tables, narration and source notes |
 | Final quiz | [../quiz/questions-phase2.txt](../quiz/questions-phase2.txt) | 20 English questions, four choices and one answer per question; reviewed from the Phase 2 draft and extended for new features |
-| Backup demo | [../video/demo-phase2.mp4](../video/demo-phase2.mp4) | Narrated evidence replay with five recorded Gemini trace scenes; synthetic English voice, not a live screen recording or Khoa's voice |
-| Video captions and script | [../video/demo-phase2.srt](../video/demo-phase2.srt), [../video/demo-phase2-script.md](../video/demo-phase2-script.md) | Sentence timing is estimated from narration duration and word counts |
 
-The repository paths mirror the requested Drive folders. These files have **not** been uploaded to Google Drive; no Drive session was connected. Copy the three final deliverables to `team/slides/`, `team/quiz/` and `team/video/` when assembling the team submission. The existing Mac-only `build-submission.sh` reads those Drive folders; it was not modified for this Windows task.
+Slides, video and their authoring sources were removed from this PR at the user's request. The quiz has **not** been uploaded to Google Drive; no Drive session was connected. Copy it to `team/quiz/` when assembling the team submission. The existing Mac-only `build-submission.sh` was not modified for this Windows task.
 
 ## What was measured
 
@@ -49,9 +46,7 @@ Tiến/Hoàng can import these independent expectations into `mcp-academic/demo/
 
 Finance references are pinned to [PR #2](https://github.com/HaHiepThanh/mcp-ts/pull/2), commit `5d72748e7aebbc6af69c18afeafd89a72d3158b1`. Its teachers, sections and conduct differ from main. P2-26 through P2-30 cover tuition and teacher-pay values from that **complete** snapshot. They are skipped on main, not counted as passes. They cover two finance tools; scholarship eligibility, scholarship ranking, outstanding tuition and payroll summary still need additional cases after the final integration dataset is agreed.
 
-After PR #2 is merged, update the pinned source choices and refresh the Excel key from the final combined CSVs. Review the joins and thresholds before adding finance capabilities to Khoa's runner. Run the finance questions and the enabled/disabled finance privacy scenarios, then refresh the reports, slides and video. Do not merely remove the skip or reuse finance values with main's HR records.
-
-The slides contain three feature slides each for Phú, Hoàng and Tiến, assembled from code/data. No separate slide contributions from those members were supplied during this session. Thiện can revise the editable layout and the team can perform its normal final technical review.
+After PR #2 is merged, update the pinned source choices and refresh the Excel key from the final combined CSVs. Review the joins and thresholds before adding finance capabilities to Khoa's runner. Run the finance questions and the enabled/disabled finance privacy scenarios, then refresh the reports. Do not merely remove the skip or reuse finance values with main's HR records.
 
 ## Reproduction
 
@@ -64,17 +59,13 @@ cd mcp-academic
 node node_modules/typescript/bin/tsc --noEmit -p ../phase2/tsconfig.json
 ```
 
-To rebuild the independent reference, run `python phase2/scripts/prepare-reference.py` from the repository root. The pinned finance commit must exist locally (`git fetch origin feat/tien-finance` if necessary). Authoring intermediates are kept in a sibling `_khoa-build/`, outside the repository, and must not be committed. Use the bundled Artifact Tool runtime and its documented creation marker before spreadsheet/presentation authoring. Copy `build-reference.mjs` and `build-slides.mjs` into that private folder with a `node_modules` junction to the bundled runtime, then pass the repository root as the first argument.
-
-`build-slides.mjs` also needs `KHOA_PRESENTATION_SKILL`, `KHOA_RUNTIME_PYTHON` and `RUNTIME_NODE_MODULES` pointing to the local presentation skill and bundled runtime. These are local tool paths, not application settings. Its finalizer receipt stays private. It checks package structure, geometry, fonts, native tables and re-import. Every rendered slide was visually inspected. The deck was not opened in Microsoft PowerPoint during this task.
-
-Then run `summarize-runs.py`, `prepare-slides.py`, `build-slides.mjs`, `prepare-video.py`, `narrate-video.ps1` and `encode-video.py` in that order, following their headers. The video scripts need Pillow, Windows System.Speech and a temporary imageio-ffmpeg installation in `_khoa-build/video-tools/`. They do not change installed application dependencies. No slide/video regeneration requires the API key.
+To rebuild the independent reference, run `python phase2/scripts/prepare-reference.py` from the repository root. The pinned finance commit must exist locally (`git fetch origin feat/tien-finance` if necessary). Authoring intermediates are kept in a sibling `_khoa-build/`, outside the repository, and must not be committed. Use the bundled Artifact Tool runtime and its documented creation marker before spreadsheet authoring. Copy `build-reference.mjs` into that private folder with a `node_modules` junction to the bundled runtime, then pass the repository root as the first argument. Run `summarize-runs.py` to refresh the measurement reports.
 
 ## Before the team submits
 
 - Khoa reviews and signs off the Excel calculations and semantic answer completeness.
 - Tiến/Hoàng consume the cases in the shared benchmark and complete finance coverage after integration.
-- Thiện and Khoa review the deck presentation; Tiến performs the team's technical review.
-- The team uploads the final slide, quiz and video files to its Drive folders.
+- Tiến performs the team's technical review.
+- The team uploads the final quiz to its Drive folder.
 
 These are documented review/dependency steps, not fabricated completed actions.
