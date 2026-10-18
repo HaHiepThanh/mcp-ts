@@ -40,13 +40,22 @@ Scores are on the 10-point scale; each course total becomes a letter **A/B/C/D/F
 | Tool | `rank_students` | Top N by GPA in a class/faculty/school — reports **progress** |
 | Tool | `update_grade` | Changes a grade after the user confirms — **elicitation** |
 | Tool | `generate_student_feedback` | Feedback paragraph written by the host's LLM — **sampling** |
+| Tool | `attendance_summary` | Total sessions, absence rate, and exam eligibility (Phase 2) |
+| Tool | `conduct_score` | Conduct score (0–100) and evaluation classification (Phase 2) |
+| Tool | `at_risk_students` | Multimodal evaluation for academic probation: GPA + absence + conduct (Phase 2) |
+| Tool | `search_teachers` | Search teachers by keyword, faculty, and academic title (Phase 2) |
+| Tool | `class_timetable` | Weekly schedule of sections for a class in a semester (Phase 2) |
+| Tool | `teacher_workload` | Total assigned sections and teaching periods per week (Phase 2) |
+| Tool | `teacher_grade_report` | Course pass rates and average scores for a teacher (Phase 2) |
 | Tool | `list_tables` / `describe_table` / `query_table` | Generic tools for **any** CSV (backup-domain plan) |
 | Resource | `academic://rules/grading` | Grading rules (markdown) |
 | Resource | `academic://reports/data-quality` | Rows skipped while loading, with reasons |
 | Resource template | `academic://tables/{table}` | Raw CSV of a table (listable, completable) |
 | Resource template | `academic://students/{student_id}` | Student profile + GPA per semester (completable, **subscribable**: updated when `update_grade` changes it) |
+| Resource template | `academic://teachers/{teacher_id}` | Teacher profile, assigned sections, and teaching load (Phase 2) |
 | Prompt | `class_report(class_id, semester?)` | Report template, both arguments autocomplete |
 | Prompt | `study_advice(student_id)` | Advice template embedding the student-profile resource |
+| Prompt | `advisor_meeting(student_id)` | Comprehensive briefing aggregating transcript, attendance, and conduct (Phase 2) |
 
 The same code serves **both protocol eras**: 2025 clients (`initialize` handshake, e.g. Claude Desktop) and 2026-07-28 clients (`server/discover`). Server→client requests use `elicitInput`/`requestSampling` on 2025 connections and `return inputRequired(...)` on 2026 ones — see [`src/lib/interaction.ts`](src/lib/interaction.ts).
 

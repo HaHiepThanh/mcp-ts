@@ -5,7 +5,9 @@
     "tables": {
         "students": "students.csv",
         "courses": "courses.csv",
-        "grades": "grades.csv"
+        "grades": "grades.csv",
+        "teachers": "teachers.csv",
+        "sections": "sections.csv"
     },
     "cacheHints": {
         "tools/list": { "ttlMs": 60000, "cacheScope": "public" },

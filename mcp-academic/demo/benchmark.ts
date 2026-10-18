@@ -117,5 +117,55 @@ export const CASES: BenchmarkCase[] = [
         question: 'Write short encouraging feedback for student 2201010.',
         tools: ['academic.generate_student_feedback'],
         answer: text => text.length > 80
+    },
+    // ── Hoàng's Phase 2 Benchmark Cases ────────────────────────────────
+    {
+        id: 'attendance-summary',
+        category: 'attendance check',
+        question: 'What is the attendance summary and absence rate of student 2201001?',
+        tools: ['academic.attendance_summary'],
+        args: calls => find(calls, 'academic.attendance_summary').some(c => c.args.student_id === '2201001'),
+        expect: async o => [(await o('academic', 'attendance_summary', { student_id: '2201001' })).absence_rate_pct]
+    },
+    {
+        id: 'conduct-score',
+        category: 'conduct score evaluation',
+        question: 'What is the average conduct score and grade for student 2201002?',
+        tools: ['academic.conduct_score'],
+        args: calls => find(calls, 'academic.conduct_score').some(c => c.args.student_id === '2201002'),
+        expect: async o => [(await o('academic', 'conduct_score', { student_id: '2201002' })).average_score]
+    },
+    {
+        id: 'at-risk-class',
+        category: 'multimodal evaluation',
+        question: 'Which students in class IT01 are at risk of probation or failure?',
+        tools: ['academic.at_risk_students'],
+        args: calls => find(calls, 'academic.at_risk_students').some(c => (c.args.class_id as string)?.toUpperCase() === 'IT01'),
+        expect: async o => [(await o('academic', 'at_risk_students', { class_id: 'IT01' })).at_risk_count]
+    },
+    // ── Phú's Phase 2 Benchmark Cases ──────────────────────────────────
+    {
+        id: 'search-teachers',
+        category: 'teacher lookup',
+        question: 'Find the teacher named Lan in Information Technology faculty and give me their teacher ID.',
+        tools: ['academic.search_teachers'],
+        args: calls => find(calls, 'academic.search_teachers').some(c => c.args.keyword === 'Lan'),
+        expect: async o => [(await o('academic', 'search_teachers', { keyword: 'Lan' })).teachers[0].teacher_id]
+    },
+    {
+        id: 'class-timetable',
+        category: 'schedule lookup',
+        question: 'What is the timetable and list of courses for class IT01 in semester 2024-1?',
+        tools: ['academic.class_timetable'],
+        args: calls => find(calls, 'academic.class_timetable').some(c => (c.args.class_id as string)?.toUpperCase() === 'IT01' && c.args.semester === '2024-1'),
+        expect: async o => [(await o('academic', 'class_timetable', { class_id: 'IT01', semester: '2024-1' })).total_sections]
+    },
+    {
+        id: 'teacher-workload',
+        category: 'teaching workload',
+        question: 'How many sections and teaching periods per week does teacher T002 have in semester 2025-1?',
+        tools: ['academic.teacher_workload'],
+        args: calls => find(calls, 'academic.teacher_workload').some(c => c.args.teacher_id === 'T002' && c.args.semester === '2025-1'),
+        expect: async o => [(await o('academic', 'teacher_workload', { teacher_id: 'T002', semester: '2025-1' })).total_periods_per_week]
     }
 ];

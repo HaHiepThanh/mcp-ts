@@ -1,0 +1,21 @@
+teacher_id,full_name,faculty,title,degree,hire_date,email
+T001,Đỗ Mai My,Information Technology,Professor,MSc,2018-05-01,my.t001@example.edu.vn
+T002,Võ Quốc Khoa,Information Technology,Associate Professor,PhD,2016-07-01,khoa.t002@example.edu.vn
+T003,Đặng Mai Linh,Information Technology,Associate Professor,PhD,2012-10-01,linh.t003@example.edu.vn
+T004,Đỗ Bảo My,Information Technology,Associate Professor,MSc,2016-10-01,my.t004@example.edu.vn
+T005,Nguyễn Ngọc Trang,Information Technology,Senior Lecturer,MSc,2017-08-01,trang.t005@example.edu.vn
+T006,Hoàng Bảo Lan,Information Technology,Senior Lecturer,MSc,2017-12-01,lan.t006@example.edu.vn
+T007,Hoàng Mai Hương,Information Technology,Associate Professor,MSc,2014-03-01,huong.t007@example.edu.vn
+T008,Bùi Đức Nam,Information Technology,Lecturer,MSc,2013-07-01,nam.t008@example.edu.vn
+T009,Huỳnh Hoàng Hải,Information Technology,Lecturer,PhD,2017-08-01,hai.t009@example.edu.vn
+T010,Lê Bảo Hương,Information Technology,Professor,MSc,2013-11-01,huong.t010@example.edu.vn
+T011,Hoàng Minh Bình,Business Administration,Senior Lecturer,MSc,2012-11-01,binh.t011@example.edu.vn
+T012,Phạm Văn Nam,Business Administration,Lecturer,MSc,2010-06-01,nam.t012@example.edu.vn
+T013,Nguyễn Quốc Phúc,Business Administration,Professor,PhD,2014-11-01,phuc.t013@example.edu.vn
+T014,Võ Quốc Hải,Business Administration,Senior Lecturer,MSc,2017-11-01,hai.t014@example.edu.vn
+T015,Đỗ Ngọc Linh,Business Administration,Professor,MSc,2011-02-01,linh.t015@example.edu.vn
+T016,Đặng Đức Tuấn,Business Administration,Associate Professor,MSc,2010-07-01,tuan.t016@example.edu.vn
+T017,Đỗ Ngọc Linh,Business Administration,Associate Professor,PhD,2013-03-01,linh.t017@example.edu.vn
+T018,Bùi Thu Anh,Business Administration,Professor,MSc,2011-10-01,anh.t018@example.edu.vn
+T019,Phạm Văn Cường,Business Administration,Senior Lecturer,PhD,2012-07-01,cuong.t019@example.edu.vn
+T020,Võ Hoàng Hải,Business Administration,Professor,MSc,2011-01-01,hai.t020@example.edu.vn

@@ -84,4 +84,48 @@ export function registerAcademicPrompts(server: McpServer, data: AcademicData): 
             };
         }
     );
+
+    server.registerPrompt(
+        'advisor_meeting',
+        {
+            title: 'Advisor meeting briefing',
+            description: 'Comprehensive advisor meeting preparation briefing aggregating transcript, attendance, and conduct history',
+            argsSchema: z.object({
+                student_id: completable(z.string().describe('Student ID, e.g. "2201005"'), value =>
+                    [...data.students.keys()].filter(id => id.startsWith(value)).slice(0, 20)
+                )
+            })
+        },
+        ({ student_id }) => {
+            const student = data.students.get(student_id);
+            const profile = student
+                ? JSON.stringify({ ...student, cumulative: data.gpaOf(student_id) }, null, 2)
+                : JSON.stringify({ error: `Unknown student ${student_id}` });
+
+            return {
+                messages: [
+                    {
+                        role: 'user' as const,
+                        content: {
+                            type: 'resource' as const,
+                            resource: { uri: `academic://students/${student_id}`, mimeType: 'application/json', text: profile }
+                        }
+                    },
+                    {
+                        role: 'user' as const,
+                        content: {
+                            type: 'text' as const,
+                            text:
+                                `Prepare a structured 1-on-1 advisor meeting briefing for student ${student_id}.\n` +
+                                'Use the tools:\n' +
+                                '1. get_transcript to evaluate academic progress and failed courses.\n' +
+                                '2. attendance_summary to check absence rates and exam eligibility.\n' +
+                                '3. conduct_score to inspect extracurricular/behavioural standing.\n\n' +
+                                'Provide a 4-part summary: Academic Health, Attendance & Exam Status, Conduct Evaluation, and Action Plan for the Advisor.'
+                        }
+                    }
+                ]
+            };
+        }
+    );
 }

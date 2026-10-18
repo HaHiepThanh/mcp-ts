@@ -91,6 +91,101 @@ for (const cls of CLASSES) {
     }
 }
 
+// ── Teachers & Sections (Phú's schema as required dependencies) ──────
+const TEACHER_TITLES = ['Lecturer', 'Senior Lecturer', 'Associate Professor', 'Professor'] as const;
+const TEACHER_DEGREES = ['MSc', 'PhD'] as const;
+const teachers: Record<string, unknown>[] = [];
+
+for (let i = 1; i <= 20; i++) {
+    const gender = random() < 0.5 ? 'Male' : 'Female';
+    const family = pick(FAMILY);
+    const given = pick(GIVEN[gender]);
+    const faculty = i <= 10 ? 'Information Technology' : 'Business Administration';
+    const title = pick([...TEACHER_TITLES]);
+    const degree = pick([...TEACHER_DEGREES]);
+    const teacher_id = `T${String(i).padStart(3, '0')}`;
+    teachers.push({
+        teacher_id,
+        full_name: `${family} ${pick(MIDDLE[gender])} ${given}`,
+        faculty,
+        title,
+        degree,
+        hire_date: `201${Math.floor(random() * 9)}-${String(1 + Math.floor(random() * 12)).padStart(2, '0')}-01`,
+        email: `${ASCII(given)}.${teacher_id.toLowerCase()}@example.edu.vn`
+    });
+}
+
+// Sections: section_id, course_id, semester, class_id, teacher_id, room, weekday, start_period, periods
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const sections: Record<string, unknown>[] = [];
+const sectionMap = new Map<string, string>(); // "course_id|semester|class_id" -> section_id
+let secCounter = 1;
+
+for (const cls of CLASSES) {
+    const facultyTeachers = teachers.filter(t => t.faculty === cls.faculty);
+    for (const [semester, courseIds] of Object.entries(PLAN[cls.faculty])) {
+        for (const course_id of courseIds) {
+            const section_id = `SEC${String(secCounter++).padStart(3, '0')}`;
+            const teacher = pick(facultyTeachers);
+            sections.push({
+                section_id,
+                course_id,
+                semester,
+                class_id: cls.class_id,
+                teacher_id: teacher.teacher_id,
+                room: `${cls.class_id.slice(0, 2)}-${100 + Math.floor(random() * 20)}`,
+                weekday: pick(WEEKDAYS),
+                start_period: 1 + Math.floor(random() * 6),
+                periods: 3
+            });
+            sectionMap.set(`${course_id}|${semester}|${cls.class_id}`, section_id);
+        }
+    }
+}
+
+// ── Hoàng's dataset: Conduct & Attendance ─────────────────────────────
+const SEMESTERS = ['2024-1', '2024-2', '2025-1'];
+const conduct: Record<string, unknown>[] = [];
+
+for (const student of students) {
+    const sId = String(student.student_id);
+    const isWeak = Number(sId.slice(-3)) % 5 === 0;
+    for (const sem of SEMESTERS) {
+        const base = isWeak ? 40 + random() * 25 : 68 + random() * 28;
+        conduct.push({
+            student_id: sId,
+            semester: sem,
+            score: Math.round(Math.min(100, Math.max(0, base)))
+        });
+    }
+}
+
+const WEEKS = 15;
+const attendance: Record<string, unknown>[] = [];
+
+for (const section of sections) {
+    const enrolledStudents = students.filter(s => s.class_id === section.class_id);
+    for (const st of enrolledStudents) {
+        const sId = String(st.student_id);
+        const isWeak = Number(sId.slice(-3)) % 5 === 0;
+        for (let week = 1; week <= WEEKS; week++) {
+            const r = random();
+            let status: 'present' | 'absent' | 'late' | 'excused';
+            if (isWeak) {
+                status = r < 0.28 ? 'absent' : r < 0.35 ? 'late' : r < 0.40 ? 'excused' : 'present';
+            } else {
+                status = r < 0.05 ? 'absent' : r < 0.09 ? 'late' : r < 0.12 ? 'excused' : 'present';
+            }
+            attendance.push({
+                student_id: sId,
+                section_id: section.section_id,
+                week,
+                status
+            });
+        }
+    }
+}
+
 // Deliberately invalid rows — the server must detect and skip them (see README_data.md).
 const injectedStudents = [{ ...students[0], full_name: 'Duplicate Row' }];
 const injectedGrades = [
@@ -108,6 +203,10 @@ const write = (file: string, rows: Record<string, unknown>[]) => writeFileSync(p
 write('students.csv', [...students, ...injectedStudents]);
 write('courses.csv', COURSES);
 write('grades.csv', [...grades, ...injectedGrades]);
+write('teachers.csv', teachers);
+write('sections.csv', sections);
+write('conduct.csv', conduct);
+write('attendance.csv', attendance);
 
 const firstInjectedLine = grades.length + 2;
 writeFileSync(
@@ -121,6 +220,10 @@ Replace with the team's real data in \`data/real/\` and point \`config/academic.
 | students.csv | ${students.length} (+1 injected) | student_id, full_name, gender, date_of_birth, class_id, faculty, enrollment_year, email |
 | courses.csv | ${COURSES.length} | course_id, course_name, credits, faculty |
 | grades.csv | ${grades.length} (+${injectedGrades.length} injected) | student_id, course_id, semester, process_score, final_score |
+| teachers.csv | ${teachers.length} | teacher_id, full_name, faculty, title, degree, hire_date, email |
+| sections.csv | ${sections.length} | section_id, course_id, semester, class_id, teacher_id, room, weekday, start_period, periods |
+| conduct.csv | ${conduct.length} | student_id, semester, score |
+| attendance.csv | ${attendance.length} | student_id, section_id, week, status |
 
 Every 5th student in each class is a weak student; their F grades are retaken in semester 2025-1.
 
@@ -138,4 +241,6 @@ Every 5th student in each class is a weak student; their F grades are retaken in
 `
 );
 
-console.log(`Sample data written to ${path.relative(PROJECT_ROOT, dir)}: ${students.length} students, ${COURSES.length} courses, ${grades.length} grades`);
+console.log(
+    `Sample data written to ${path.relative(PROJECT_ROOT, dir)}: ${students.length} students, ${COURSES.length} courses, ${grades.length} grades, ${teachers.length} teachers, ${sections.length} sections, ${conduct.length} conduct, ${attendance.length} attendance`
+);

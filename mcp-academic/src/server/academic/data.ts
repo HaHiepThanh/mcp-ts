@@ -36,6 +36,28 @@ export interface GradeRecord {
     final_score: number;
 }
 
+export interface Teacher {
+    teacher_id: string;
+    full_name: string;
+    faculty: string;
+    title: string;
+    degree: string;
+    hire_date: string;
+    email: string;
+}
+
+export interface Section {
+    section_id: string;
+    course_id: string;
+    semester: string;
+    class_id: string;
+    teacher_id: string;
+    room: string;
+    weekday: string;
+    start_period: number;
+    periods: number;
+}
+
 export interface DataIssue {
     table: string;
     line: number;
@@ -46,7 +68,13 @@ export interface DataIssue {
 export interface AcademicConfig {
     dataDir: string;
     gradingConfig: string;
-    tables: { students: string; courses: string; grades: string };
+    tables: {
+        students: string;
+        courses: string;
+        grades: string;
+        teachers?: string;
+        sections?: string;
+    };
     /** Freshness hints attached to cacheable results (2026-07-28, SEP-2549). */
     cacheHints?: Record<string, { ttlMs: number; cacheScope: 'public' | 'private' }>;
 }
@@ -58,6 +86,8 @@ export class AcademicData {
     readonly students = new Map<string, Student>();
     readonly courses = new Map<string, Course>();
     readonly grades: GradeRecord[] = [];
+    readonly teachers = new Map<string, Teacher>();
+    readonly sections = new Map<string, Section>();
     readonly issues: DataIssue[] = [];
     /** Every CSV in dataDir, unvalidated — backs the generic table tools. */
     readonly tables = new Map<string, CsvTable>();
@@ -74,6 +104,12 @@ export class AcademicData {
         this.loadStudents(this.table(tableFiles.students));
         this.loadCourses(this.table(tableFiles.courses));
         this.loadGrades(this.table(tableFiles.grades));
+        if (tableFiles.teachers && this.tables.has(path.basename(tableFiles.teachers, '.csv'))) {
+            this.loadTeachers(this.table(tableFiles.teachers));
+        }
+        if (tableFiles.sections && this.tables.has(path.basename(tableFiles.sections, '.csv'))) {
+            this.loadSections(this.table(tableFiles.sections));
+        }
     }
 
     private table(file: string): CsvTable {
@@ -129,6 +165,42 @@ export class AcademicData {
             if (seen.has(key)) return this.issue('grades', i, 'duplicate grade row (same student, course, semester)', row);
             seen.add(key);
             this.grades.push({ student_id, course_id, semester, process_score, final_score });
+        });
+    }
+
+    private loadTeachers({ rows }: CsvTable): void {
+        rows.forEach((row, i) => {
+            const { teacher_id, full_name, faculty } = row;
+            if (!teacher_id || !full_name || !faculty) {
+                return this.issue('teachers', i, 'missing teacher_id, full_name or faculty', row);
+            }
+            if (this.teachers.has(teacher_id)) {
+                return this.issue('teachers', i, `duplicate teacher_id ${teacher_id}`, row);
+            }
+            this.teachers.set(teacher_id, row as unknown as Teacher);
+        });
+    }
+
+    private loadSections({ rows }: CsvTable): void {
+        rows.forEach((row, i) => {
+            const { section_id, course_id, semester, class_id, teacher_id, start_period, periods } = row;
+            if (!section_id || !course_id || !semester || !class_id || !teacher_id) {
+                return this.issue('sections', i, 'missing required fields in section', row);
+            }
+            if (this.sections.has(section_id)) {
+                return this.issue('sections', i, `duplicate section_id ${section_id}`, row);
+            }
+            if (!this.courses.has(course_id)) {
+                return this.issue('sections', i, `unknown course_id ${course_id}`, row);
+            }
+            if (!this.teachers.has(teacher_id)) {
+                return this.issue('sections', i, `unknown teacher_id ${teacher_id}`, row);
+            }
+            this.sections.set(section_id, {
+                ...(row as unknown as Section),
+                start_period: Number(start_period) || 1,
+                periods: Number(periods) || 3
+            });
         });
     }
 
