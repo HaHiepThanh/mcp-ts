@@ -9,7 +9,8 @@ Bộ nộp làm lại theo phạm vi của Khoa. Không có video. Không sửa 
 | `MCP-TS-SDK-phase2.pptx` | 31 slide thuyết trình toàn bộ Phase 2 bằng tiếng Anh |
 | `MCP-TS-SDK-phase2-script.docx` | Lời nói tiếng Anh dễ hiểu theo từng slide và câu hỏi thường gặp |
 | `test-cases.csv` | 24 câu kiểm thử, đúng 5 cột yêu cầu |
-| `test-reference.xlsx` | 55 đáp án bằng công thức Excel từ CSV, có phép tính trung gian |
+| `test-reference.xlsx` | 55 đáp án từ CSV và sheet Manual ghi 62 phép tính/kiểm tra từng bước cho đủ 24 câu |
+| `manual-checks.md` | 24 bài tính từng bước, bảng ứng viên/lương và đối chiếu nội dung câu trả lời Gemini |
 | `questions-phase2.txt` | 20 câu trắc nghiệm và đáp án |
 | `check-stdio.jsonl`, `check-http.jsonl` | Log kiểm tra trực tiếp MCP, có kết quả đầy đủ |
 | `gemini-stdio.jsonl` | Log chạy Gemini: câu hỏi, tool/args, kết quả, câu trả lời, thời gian, token |
@@ -22,7 +23,9 @@ Bộ nộp làm lại theo phạm vi của Khoa. Không có video. Không sửa 
 
 15 câu học vụ/tư vấn và 9 câu tài chính, bao phủ toàn bộ 4 tool giảng viên, 3 tool điểm danh/rèn luyện/cảnh báo và 6 tool đọc finance. Có tham số hợp lệ, ID sai, học kỳ không có dữ liệu và hai biên vắng 3/15, 4/15 buổi.
 
-Trong CSV, `expected_values` chứa đáp án theo từng tool. `note` chứa tham số, nguồn snapshot và ô Excel đối chiếu. `Answers` là trang đầu workbook: cột C tính bằng công thức, D đối chiếu độc lập từ CSV, E kiểm tra khớp. Các trang sau giữ nguồn và bước tính. Có thể dùng workbook để tự kiểm tra từng phép tính trong Excel; không ghi nhận người dùng đã duyệt tay thay họ.
+Trong CSV, `expected_values` chứa đáp án theo từng tool. `note` chứa tham số, nguồn snapshot và ô Excel đối chiếu. `Answers` là trang đầu workbook: cột C tính bằng công thức từ các sheet CSV, D đối chiếu độc lập, E kiểm tra khớp. Sheet `Manual` ghi riêng các phép tính số học với số đầu vào của snapshot đã chốt, gồm 62 phép tính/kiểm tra cho đủ 24 câu, kể cả lỗi và câu tư vấn. `manual-checks.md` giải thích đầy đủ phép lọc, cộng, chia, so ngưỡng, bảng ứng viên và cộng lương. Nếu đổi snapshot CSV, cần cập nhật các số đầu vào tính tay ở Manual; công thức nguồn ở Answers vẫn tính lại từ các sheet CSV.
+
+Các phép tính do Codex chuẩn bị và kiểm tra chéo từ CSV, không ghi rằng Khoa đã ký duyệt. Workbook được tính lại và kiểm tra lỗi bằng Artifact Tool; không gọi đó là kiểm tra tự động trong Microsoft Excel. Việc cài add-in không phải điều kiện nộp của đề.
 
 ## Chạy đo thật ngày 18 tháng 10 năm 2026
 
@@ -36,7 +39,7 @@ Môi trường Windows, Node.js 24.18.0. Dữ liệu sample giả; ngày tài ch
 
 Gemini: `gemini-3.5-flash-lite`, temperature 0.2, maxToolRounds 8, hội thoại mới mỗi câu, tắt fallback. Tổng token vào/ra: 237,665/3,692; số lần thử API bổ sung: 3. Có nhịp nghỉ 9 giây giữa câu để phù hợp quota 15 request/phút; nhịp nghỉ đó không nằm trong thời gian từng câu.
 
-Điểm là kiểm tra tool, tham số yêu cầu và giá trị kết quả, không phải thước đo đầy đủ cho độ đúng ngữ nghĩa. Các câu tư vấn và lý do cảnh báo vẫn cần đọc nội dung. Log giữ nguyên cả retry và lỗi nếu có; không tự điền kết quả cho câu chưa chạy.
+Điểm tự động là kiểm tra tool, tham số yêu cầu và giá trị kết quả, không phải thước đo đầy đủ cho độ đúng ngữ nghĩa. Codex đã đọc lại đủ 24 câu trả lời Gemini và đối chiếu nội dung với câu hỏi/kết quả đầy đủ, đặc biệt lý do từng sinh viên ở K12/K13 và ba section bị cấm thi ở K15; kết quả ghi trong `manual-checks.md`. Đây là kiểm tra nội dung của lượt chạy đã lưu, không phải xác nhận do Khoa ký duyệt. Log giữ nguyên cả retry và lỗi nếu có; không tự điền kết quả cho câu chưa chạy.
 
 ## Nguồn dùng cho bản trình bày
 
@@ -76,4 +79,18 @@ npm run chat -- --config ../phase2/runs/khoa/configs/host-stdio.json --ask "How 
 
 HTTP cần khởi động academic cổng 3001, utility 3002 từ main và finance 3003 từ snapshot finance, rồi dùng `configs/host-http.json`. Công cụ dựng tệp và file tạm không đưa vào bộ nộp. Các log chứa cấu hình thực, commit nguồn và toàn bộ expected cases để đối chiếu.
 
-Các tệp đã đưa lên GitHub qua PR; chưa upload Google Drive. Không có video theo yêu cầu.
+## Đối chiếu phần việc của Khoa
+
+| Đầu việc | Bằng chứng / trạng thái |
+| --- | --- |
+| ≥15 câu tiếng Anh và đáp án từ CSV | 24 câu; CSV đúng 5 cột; 55 chỉ số Excel và 24 bài tính từng bước |
+| Chạy Gemini và/hoặc Qwen, chép log | Đã chạy Gemini và hai lượt MCP; ba log đầy đủ trong thư mục này |
+| ≥20 slide, tình huống/cấu hình/kết quả/so sánh/nhận xét/cải tiến | PPT 31 slide, có nguồn trong speaker notes; Word 13 trang lời thuyết trình tiếng Anh |
+| Hoàn thiện quiz-draft và bổ sung tính năng mới | 20 câu trong `questions-phase2.txt`, có đáp án |
+| Đáp án tính tay bằng Excel | Sheet Manual có phép tính và số đầu vào, đối chiếu với 55 chỉ số nguồn; có diễn giải từng bước trong manual-checks.md |
+| Nộp lên Drive | Làm sau theo yêu cầu mới nhất của người dùng |
+| Video | Bỏ theo yêu cầu người dùng |
+
+Chuyển câu hỏi thành case trong `demo/benchmark.ts` là phần Tiến/Hoàng theo phân công. Ghép finance vào main là bước tích hợp của nhóm; bộ Khoa hiện kiểm tra đúng hai snapshot ghi trong log, không tự merge code người khác.
+
+Các tệp được nộp trên GitHub qua PR, không đẩy trực tiếp vào main.
