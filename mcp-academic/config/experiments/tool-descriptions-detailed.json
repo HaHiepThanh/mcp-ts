@@ -1,0 +1,25 @@
+{
+    "$comment": "Experiment 1: Detailed tool descriptions (production default)",
+    "llm": {
+        "provider": "gemini",
+        "model": "gemini-3.5-flash-lite",
+        "temperature": 0.2
+    },
+    "mcpServers": {
+        "academic": {
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/academic/main.ts"],
+            "protocol": "auto"
+        },
+        "utility": {
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/utility/main.ts"],
+            "protocol": "auto"
+        }
+    },
+    "agent": {
+        "maxToolRounds": 4,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact from the MCP tools."
+    },
+    "logDir": "outputs/logs"
+}

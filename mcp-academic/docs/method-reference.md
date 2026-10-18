@@ -24,7 +24,7 @@ Every example saves its real calls and results to `outputs/examples/<example>.js
 
 | Method | Input | Output | Notes / errors | Example |
 | --- | --- | --- | --- | --- |
-| `server.registerTool(name, config, handler)` | `config`: `{ title?, description, inputSchema? (Zod object), outputSchema?, annotations? }` · `handler(args, ctx)` returns `{ content[], structuredContent?, isError? }` | `RegisteredTool` | Arguments failing `inputSchema` → **result** with `isError: true` (handler not run). `structuredContent` failing `outputSchema` → `isError: true`. Annotations are hints only | S2 |
+| `server.registerTool(name, config, handler)` | `config`: `{ title?, description, inputSchema? (Zod object), outputSchema?, annotations? }` · `handler(args, ctx)` returns `{ content[], structuredContent?, isError? }` | `RegisteredTool` | Arguments failing `inputSchema` → **result** with `isError: true` (handler not run). `structuredContent` failing `outputSchema` → `isError: true`. Annotations are hints only. Includes domain tools (`search_students`, `attendance_summary`, `conduct_score`, `at_risk_students`, `search_teachers`, `class_timetable`, `teacher_workload`, `teacher_grade_report`, etc.) | S2, S9, S10 |
 | `RegisteredTool.disable()` / `.enable()` | — | `void` | Hidden from / back in `tools/list`; calling a disabled tool fails. Sends `notifications/tools/list_changed` | S3 |
 | `RegisteredTool.update(changes)` | `{ description?, callback?, paramsSchema?, ... }` | `void` | Sends `list_changed` | S3 |
 | `RegisteredTool.remove()` | — | `void` | Later calls → `ProtocolError -32602 Tool … not found` | S3 |
@@ -34,7 +34,7 @@ Every example saves its real calls and results to `outputs/examples/<example>.js
 | Method | Input | Output | Notes / errors | Example |
 | --- | --- | --- | --- | --- |
 | `server.registerResource(name, uri, metadata, read)` | fixed `uri` string · `metadata`: `{ title?, description?, mimeType? }` · `read(uri)` → `{ contents: [{ uri, mimeType?, text \| blob }] }` | `RegisteredResource` | Appears in `resources/list` | S4 |
-| `server.registerResource(name, new ResourceTemplate(pattern, { list, complete? }), metadata, read)` | `pattern` e.g. `academic://students/{student_id}` · `list`: callback or `undefined` · `complete`: `{ variable: value => string[] }` · `read(uri, variables)` | `RegisteredResourceTemplate` | `list: undefined` → readable but not listed. Throw `ResourceNotFoundError` → client gets `ProtocolError -32602` | S4 |
+| `server.registerResource(name, new ResourceTemplate(pattern, { list, complete? }), metadata, read)` | `pattern` e.g. `academic://students/{student_id}` or `academic://teachers/{teacher_id}` | `list`: callback or `undefined` · `complete`: `{ variable: value => string[] }` · `read(uri, variables)` | `RegisteredResourceTemplate` | `list: undefined` → readable but not listed. Throw `ResourceNotFoundError` → client gets `ProtocolError -32602` | S4 |
 | `server.server.sendResourceUpdated({ uri })` | resource URI | `Promise<void>` | 2025: only to connections that subscribed (server keeps the set). 2026 on stdio: routed to matching listen streams | C3 |
 
 ### Prompts and completion

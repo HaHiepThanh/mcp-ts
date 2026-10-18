@@ -437,4 +437,639 @@ export function registerAcademicTools(server: McpServer, data: AcademicData, era
             return structured({ table, total_matches: matches.length, returned: rows.length, rows });
         }
     );
+
+    // ── Hoàng's Phase 2 Tools ──────────────────────────────────────────
+
+    // ── attendance_summary ─────────────────────────────────────────────
+    server.registerTool(
+        'attendance_summary',
+        {
+            title: 'Attendance summary',
+            description:
+                'Summary of attendance for a student (across all or one semester) or for a specific course section. ' +
+                `Calculates total sessions, presents, absences, lates, excused, and per-section absence rates with exam ban status (> ${(data.rules.attendance.maxAbsenceRatio * 100).toFixed(0)}% absences).`,
+            inputSchema: z.object({
+                student_id: z.string().optional().describe('Student ID, e.g. "2201001"'),
+                section_id: z.string().optional().describe('Section ID, e.g. "SEC001"'),
+                semester: semester.optional()
+            }),
+            outputSchema: z.object({
+                student_id: z.string().optional(),
+                section_id: z.string().optional(),
+                semester: z.string().optional(),
+                total_sessions: z.number(),
+                present: z.number(),
+                absent: z.number(),
+                late: z.number(),
+                excused: z.number(),
+                absence_rate_pct: z.number(),
+                banned_from_exam: z.boolean().describe('True if student is banned in any enrolled section'),
+                banned_sections: z.array(z.string()).describe('List of section IDs where student is banned from exam'),
+                sections: z.array(
+                    z.object({
+                        section_id: z.string(),
+                        course_id: z.string().optional(),
+                        total: z.number(),
+                        counted_absent: z.number(),
+                        absence_rate_pct: z.number(),
+                        banned_from_exam: z.boolean()
+                    })
+                )
+            }),
+            annotations: READ_ONLY
+        },
+        async ({ student_id, section_id, semester: sem }) => {
+            if (!student_id && !section_id) return fail('Must specify at least student_id or section_id.');
+            if (student_id && !findStudent(student_id)) return notFound(student_id);
+
+            const attendanceTable = data.tables.get('attendance');
+            if (!attendanceTable) return fail('attendance.csv not found in dataset. Run: npm run data:sample');
+
+            const sectionTable = data.tables.get('sections');
+
+            let rows = attendanceTable.rows;
+            if (student_id) rows = rows.filter(r => r['student_id'] === student_id);
+            if (section_id) rows = rows.filter(r => r['section_id'] === section_id);
+
+            if (sem && sectionTable) {
+                const validSectionIds = new Set(sectionTable.rows.filter(s => s['semester'] === sem).map(s => s['section_id']));
+                rows = rows.filter(r => validSectionIds.has(r['section_id']));
+            }
+
+            if (rows.length === 0) {
+                return fail(`No attendance records found for ${student_id ? `student ${student_id}` : ''} ${section_id ? `section ${section_id}` : ''}${sem ? ` in semester ${sem}` : ''}.`);
+            }
+
+            const present = rows.filter(r => r['status'] === 'present').length;
+            const absent = rows.filter(r => r['status'] === 'absent').length;
+            const late = rows.filter(r => r['status'] === 'late').length;
+            const excused = rows.filter(r => r['status'] === 'excused').length;
+            const total = rows.length;
+
+            const countedStatuses: string[] = data.rules.attendance.countedStatuses;
+            const maxAbsenceRatio: number = data.rules.attendance.maxAbsenceRatio;
+
+            // Group rows by section to evaluate exam ban per section
+            const bySectionMap = new Map<string, Record<string, string>[]>();
+            for (const r of rows) {
+                const secId = r['section_id'];
+                if (!bySectionMap.has(secId)) bySectionMap.set(secId, []);
+                bySectionMap.get(secId)!.push(r);
+            }
+
+            const sectionSummaries = [];
+            const bannedSections: string[] = [];
+
+            for (const [secId, sRows] of bySectionMap.entries()) {
+                const sTotal = sRows.length;
+                const sCountedAbsent = sRows.filter(r => countedStatuses.includes(r['status'])).length;
+                const sRate = sTotal > 0 ? Math.round((sCountedAbsent / sTotal) * 1000) / 10 : 0;
+                const sBanned = (sCountedAbsent / sTotal) > maxAbsenceRatio;
+
+                if (sBanned) bannedSections.push(secId);
+
+                const secObj = data.sections.get(secId);
+                sectionSummaries.push({
+                    section_id: secId,
+                    course_id: secObj?.course_id,
+                    total: sTotal,
+                    counted_absent: sCountedAbsent,
+                    absence_rate_pct: sRate,
+                    banned_from_exam: sBanned
+                });
+            }
+
+            const totalCountedAbsent = rows.filter(r => countedStatuses.includes(r['status'])).length;
+            const overallAbsenceRate = total > 0 ? Math.round((totalCountedAbsent / total) * 1000) / 10 : 0;
+
+            return structured({
+                student_id,
+                section_id,
+                semester: sem,
+                total_sessions: total,
+                present,
+                absent,
+                late,
+                excused,
+                absence_rate_pct: overallAbsenceRate,
+                banned_from_exam: bannedSections.length > 0,
+                banned_sections: bannedSections,
+                sections: sectionSummaries
+            });
+        }
+    );
+
+    // ── conduct_score ──────────────────────────────────────────────────
+    server.registerTool(
+        'conduct_score',
+        {
+            title: 'Conduct score',
+            description:
+                'Returns the behavioural and extracurricular conduct score and classification for a student (0–100 scale). ' +
+                `Classified into: ${data.rules.conduct.grades.map(g => `${g.label}(≥${g.minScore})`).join(', ')}.`,
+            inputSchema: z.object({
+                student_id: studentId,
+                semester: semester.optional()
+            }),
+            outputSchema: z.object({
+                student_id: z.string(),
+                full_name: z.string(),
+                class_id: z.string(),
+                records: z.array(
+                    z.object({
+                        semester: z.string(),
+                        score: z.number(),
+                        grade: z.string()
+                    })
+                ),
+                average_score: z.number()
+            }),
+            annotations: READ_ONLY
+        },
+        async ({ student_id, semester: sem }) => {
+            const student = findStudent(student_id);
+            if (!student) return notFound(student_id);
+
+            const conductTable = data.tables.get('conduct');
+            if (!conductTable) return fail('conduct.csv not found in dataset. Run: npm run data:sample');
+
+            const rows = conductTable.rows.filter(
+                r => r['student_id'] === student_id && (!sem || r['semester'] === sem)
+            );
+
+            if (rows.length === 0) return fail(`No conduct records for student ${student_id}${sem ? ` in semester ${sem}` : ''}.`);
+
+            const gradesList = data.rules.conduct.grades;
+            const fallbackGrade = gradesList[gradesList.length - 1]?.label ?? 'Weak';
+
+            const records = rows.map(r => {
+                const sc = Number(r['score']);
+                const foundGrade = gradesList.find(g => sc >= g.minScore)?.label ?? fallbackGrade;
+                return {
+                    semester: r['semester'],
+                    score: sc,
+                    grade: foundGrade
+                };
+            });
+
+            const avgScore = Math.round((records.reduce((acc, cur) => acc + cur.score, 0) / records.length) * 10) / 10;
+
+            return structured({
+                student_id: student.student_id,
+                full_name: student.full_name,
+                class_id: student.class_id,
+                records,
+                average_score: avgScore
+            });
+        }
+    );
+
+    // ── at_risk_students ───────────────────────────────────────────────
+    server.registerTool(
+        'at_risk_students',
+        {
+            title: 'At risk students identification',
+            description:
+                'Identifies students at risk of academic probation or failure based on multiple criteria: ' +
+                `low cumulative/semester GPA (< ${data.rules.atRisk.lowGpaThreshold}), high absence rate (> ${(data.rules.atRisk.highAbsenceRatio * 100).toFixed(0)}%), or poor conduct score (< ${data.rules.atRisk.lowConductScore}). ` +
+                'Filters by class_id or faculty, optionally for a specific semester.',
+            inputSchema: z.object({
+                class_id: z.string().optional().describe('Class ID, e.g. "IT01"'),
+                faculty: z.string().optional().describe('Faculty name, e.g. "Information Technology"'),
+                semester: semester.optional()
+            }),
+            outputSchema: z.object({
+                filter: z.object({ class_id: z.string().optional(), faculty: z.string().optional(), semester: z.string().optional() }),
+                total_evaluated: z.number(),
+                at_risk_count: z.number(),
+                students: z.array(
+                    z.object({
+                        student_id: z.string(),
+                        full_name: z.string(),
+                        class_id: z.string(),
+                        gpa: z.number().nullable(),
+                        absence_rate_pct: z.number(),
+                        conduct_score: z.number().nullable(),
+                        reasons: z.array(z.string())
+                    })
+                )
+            }),
+            annotations: READ_ONLY
+        },
+        async ({ class_id, faculty, semester: sem }) => {
+            let candidateStudents = [...data.students.values()];
+            if (class_id) candidateStudents = candidateStudents.filter(s => s.class_id.toLowerCase() === class_id.toLowerCase());
+            if (faculty) candidateStudents = candidateStudents.filter(s => s.faculty.toLowerCase() === faculty.toLowerCase());
+
+            if (candidateStudents.length === 0) {
+                return fail(`No students found matching class="${class_id ?? ''}", faculty="${faculty ?? ''}".`);
+            }
+
+            const lowGpaThreshold = data.rules.atRisk.lowGpaThreshold;
+            const highAbsenceRatio = data.rules.atRisk.highAbsenceRatio;
+            const lowConductScore = data.rules.atRisk.lowConductScore;
+            const countedStatuses = data.rules.attendance.countedStatuses;
+
+            const attendanceTable = data.tables.get('attendance');
+            const conductTable = data.tables.get('conduct');
+            const sectionTable = data.tables.get('sections');
+
+            const validSectionIds = sem && sectionTable
+                ? new Set(sectionTable.rows.filter(s => s['semester'] === sem).map(s => s['section_id']))
+                : undefined;
+
+            const atRiskList = [];
+
+            for (const st of candidateStudents) {
+                const reasons: string[] = [];
+                const gpaSummary = data.gpaOf(st.student_id, sem);
+                const gpa = gpaSummary.gpa;
+
+                if (gpa !== null && gpa < lowGpaThreshold) {
+                    reasons.push(`Low GPA: ${gpa.toFixed(2)} (< ${lowGpaThreshold})`);
+                }
+
+                // Attendance evaluated per section
+                let maxSectionAbsenceRate = 0;
+                if (attendanceTable) {
+                    let attRows = attendanceTable.rows.filter(r => r['student_id'] === st.student_id);
+                    if (validSectionIds) {
+                        attRows = attRows.filter(r => validSectionIds.has(r['section_id']));
+                    }
+                    if (attRows.length > 0) {
+                        const secMap = new Map<string, Record<string, string>[]>();
+                        for (const r of attRows) {
+                            const sid = r['section_id'];
+                            if (!secMap.has(sid)) secMap.set(sid, []);
+                            secMap.get(sid)!.push(r);
+                        }
+
+                        for (const [secId, sRows] of secMap.entries()) {
+                            const sTotal = sRows.length;
+                            const sCounted = sRows.filter(r => countedStatuses.includes(r['status'])).length;
+                            const sRatio = sTotal > 0 ? sCounted / sTotal : 0;
+                            const sRatePct = Math.round(sRatio * 1000) / 10;
+                            if (sRatePct > maxSectionAbsenceRate) {
+                                maxSectionAbsenceRate = sRatePct;
+                            }
+                            if (sRatio > highAbsenceRatio) {
+                                reasons.push(`High absence rate in section ${secId}: ${sRatePct}% (> ${(highAbsenceRatio * 100).toFixed(0)}% -> exam ban)`);
+                            }
+                        }
+                    }
+                }
+
+                // Conduct
+                let condScore: number | null = null;
+                if (conductTable) {
+                    const cRows = conductTable.rows.filter(
+                        r => r['student_id'] === st.student_id && (!sem || r['semester'] === sem)
+                    );
+                    if (cRows.length > 0) {
+                        condScore = Math.round((cRows.reduce((acc, cur) => acc + Number(cur['score']), 0) / cRows.length) * 10) / 10;
+                        if (condScore < lowConductScore) {
+                            reasons.push(`Poor conduct score: ${condScore} (< ${lowConductScore})`);
+                        }
+                    }
+                }
+
+                if (reasons.length > 0) {
+                    atRiskList.push({
+                        student_id: st.student_id,
+                        full_name: st.full_name,
+                        class_id: st.class_id,
+                        gpa,
+                        absence_rate_pct: maxSectionAbsenceRate,
+                        conduct_score: condScore,
+                        reasons
+                    });
+                }
+            }
+
+            return structured({
+                filter: { class_id, faculty, semester: sem },
+                total_evaluated: candidateStudents.length,
+                at_risk_count: atRiskList.length,
+                students: atRiskList
+            });
+        }
+    );
+
+    // ── Phú's Phase 2 Tools ────────────────────────────────────────────
+
+    const teacherId = z.string().describe('Teacher ID, e.g. "T001"');
+
+    // ── search_teachers ────────────────────────────────────────────────
+    server.registerTool(
+        'search_teachers',
+        {
+            title: 'Search teachers',
+            description:
+                'Search teachers by keyword (name, ID, or email, accent- and case-insensitive), ' +
+                'optionally filtered by faculty or academic title.',
+            inputSchema: z.object({
+                keyword: z.string().optional().describe('Part of name, ID or email, e.g. "Lan" or "T001"'),
+                faculty: z.string().optional().describe('Faculty name, e.g. "Information Technology"'),
+                title: z.string().optional().describe('Academic title, e.g. "Lecturer" or "Associate Professor"'),
+                limit: z.number().int().min(1).max(50).default(20).describe('Maximum number of teachers to return')
+            }),
+            outputSchema: z.object({
+                total_matches: z.number(),
+                returned: z.number(),
+                teachers: z.array(
+                    z.object({
+                        teacher_id: z.string(),
+                        full_name: z.string(),
+                        faculty: z.string(),
+                        title: z.string(),
+                        degree: z.string(),
+                        email: z.string()
+                    })
+                )
+            }),
+            annotations: READ_ONLY
+        },
+        async ({ keyword, faculty, title, limit }) => {
+            const needle = keyword ? fold(keyword) : undefined;
+            const matches = [...data.teachers.values()].filter(t => {
+                if (needle && !fold(t.full_name).includes(needle) && !fold(t.teacher_id).includes(needle) && !fold(t.email).includes(needle)) {
+                    return false;
+                }
+                if (faculty && t.faculty.toLowerCase() !== faculty.toLowerCase()) return false;
+                if (title && t.title.toLowerCase() !== title.toLowerCase()) return false;
+                return true;
+            });
+
+            const returned = matches.slice(0, limit).map(t => ({
+                teacher_id: t.teacher_id,
+                full_name: t.full_name,
+                faculty: t.faculty,
+                title: t.title,
+                degree: t.degree,
+                email: t.email
+            }));
+
+            return structured({ total_matches: matches.length, returned: returned.length, teachers: returned });
+        }
+    );
+
+    // ── class_timetable ────────────────────────────────────────────────
+    server.registerTool(
+        'class_timetable',
+        {
+            title: 'Class timetable',
+            description: 'Returns the weekly timetable/schedule of course sections for a class in a given semester.',
+            inputSchema: z.object({
+                class_id: z.string().describe('Class ID, e.g. "IT01"'),
+                semester: semester
+            }),
+            outputSchema: z.object({
+                class_id: z.string(),
+                semester: z.string(),
+                total_sections: z.number(),
+                schedule: z.array(
+                    z.object({
+                        section_id: z.string(),
+                        course_id: z.string(),
+                        course_name: z.string(),
+                        teacher_id: z.string(),
+                        teacher_name: z.string(),
+                        room: z.string(),
+                        weekday: z.string(),
+                        start_period: z.number(),
+                        periods: z.number()
+                    })
+                )
+            }),
+            annotations: READ_ONLY
+        },
+        async ({ class_id, semester: sem }) => {
+            const sectionsForClass = [...data.sections.values()].filter(
+                s => s.class_id.toLowerCase() === class_id.toLowerCase() && s.semester === sem
+            );
+
+            if (sectionsForClass.length === 0) {
+                return fail(`No schedule found for class "${class_id}" in semester "${sem}".`);
+            }
+
+            const dayOrder: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
+
+            const schedule = sectionsForClass
+                .sort((a, b) => (dayOrder[a.weekday] ?? 99) - (dayOrder[b.weekday] ?? 99) || a.start_period - b.start_period)
+                .map(s => {
+                    const course = data.courses.get(s.course_id);
+                    const teacher = data.teachers.get(s.teacher_id);
+                    return {
+                        section_id: s.section_id,
+                        course_id: s.course_id,
+                        course_name: course ? course.course_name : s.course_id,
+                        teacher_id: s.teacher_id,
+                        teacher_name: teacher ? teacher.full_name : s.teacher_id,
+                        room: s.room,
+                        weekday: s.weekday,
+                        start_period: s.start_period,
+                        periods: s.periods
+                    };
+                });
+
+            return structured({
+                class_id: class_id.toUpperCase(),
+                semester: sem,
+                total_sections: schedule.length,
+                schedule
+            });
+        }
+    );
+
+    // ── teacher_workload ───────────────────────────────────────────────
+    server.registerTool(
+        'teacher_workload',
+        {
+            title: 'Teacher workload',
+            description:
+                'Computes the teaching workload (number of assigned sections, courses, and total weekly teaching periods) ' +
+                'for a teacher in a specified semester.',
+            inputSchema: z.object({
+                teacher_id: teacherId,
+                semester: semester
+            }),
+            outputSchema: z.object({
+                teacher_id: z.string(),
+                full_name: z.string(),
+                title: z.string(),
+                faculty: z.string(),
+                semester: z.string(),
+                total_sections: z.number(),
+                total_periods_per_week: z.number(),
+                sections: z.array(
+                    z.object({
+                        section_id: z.string(),
+                        course_id: z.string(),
+                        course_name: z.string(),
+                        class_id: z.string(),
+                        weekday: z.string(),
+                        start_period: z.number(),
+                        periods: z.number(),
+                        room: z.string()
+                    })
+                )
+            }),
+            annotations: READ_ONLY
+        },
+        async ({ teacher_id, semester: sem }) => {
+            const teacher = data.teachers.get(teacher_id.trim());
+            if (!teacher) return fail(`Teacher with teacher_id "${teacher_id}" not found.`);
+
+            const assigned = [...data.sections.values()].filter(
+                s => s.teacher_id === teacher.teacher_id && s.semester === sem
+            );
+
+            const totalPeriods = assigned.reduce((sum, s) => sum + s.periods, 0);
+
+            const sectionDetails = assigned.map(s => {
+                const course = data.courses.get(s.course_id);
+                return {
+                    section_id: s.section_id,
+                    course_id: s.course_id,
+                    course_name: course ? course.course_name : s.course_id,
+                    class_id: s.class_id,
+                    weekday: s.weekday,
+                    start_period: s.start_period,
+                    periods: s.periods,
+                    room: s.room
+                };
+            });
+
+            return structured({
+                teacher_id: teacher.teacher_id,
+                full_name: teacher.full_name,
+                title: teacher.title,
+                faculty: teacher.faculty,
+                semester: sem,
+                total_sections: assigned.length,
+                total_periods_per_week: totalPeriods,
+                sections: sectionDetails
+            });
+        }
+    );
+
+    // ── teacher_grade_report ───────────────────────────────────────────
+    server.registerTool(
+        'teacher_grade_report',
+        {
+            title: 'Teacher grade report',
+            description:
+                'Calculates grade metrics for courses/sections taught by a teacher: ' +
+                'number of students graded, average score (10-point scale), pass rate, and grade breakdown. ' +
+                'Optionally filtered by semester.',
+            inputSchema: z.object({
+                teacher_id: teacherId,
+                semester: semester.optional()
+            }),
+            outputSchema: z.object({
+                teacher_id: z.string(),
+                full_name: z.string(),
+                faculty: z.string(),
+                semester: z.string().optional(),
+                sections_taught: z.number(),
+                students_graded: z.number(),
+                overall_average_score: z.number().nullable(),
+                overall_pass_rate_pct: z.number().nullable(),
+                by_section: z.array(
+                    z.object({
+                        section_id: z.string(),
+                        course_id: z.string(),
+                        course_name: z.string(),
+                        class_id: z.string(),
+                        semester: z.string(),
+                        students_count: z.number(),
+                        average_score: z.number(),
+                        pass_rate_pct: z.number()
+                    })
+                )
+            }),
+            annotations: READ_ONLY
+        },
+        async ({ teacher_id, semester: sem }) => {
+            const teacher = data.teachers.get(teacher_id.trim());
+            if (!teacher) return fail(`Teacher with teacher_id "${teacher_id}" not found.`);
+
+            let assigned = [...data.sections.values()].filter(s => s.teacher_id === teacher.teacher_id);
+            if (sem) assigned = assigned.filter(s => s.semester === sem);
+
+            if (assigned.length === 0) {
+                return fail(`No sections found for teacher "${teacher_id}"${sem ? ` in semester ${sem}` : ''}.`);
+            }
+
+            const bySection = [];
+            let totalStudents = 0;
+            let sumTotalScores = 0;
+            let totalPassCount = 0;
+
+            for (const s of assigned) {
+                // Students belonging to class enrolled in course & semester
+                const classStudentIds = new Set(
+                    [...data.students.values()].filter(st => st.class_id === s.class_id).map(st => st.student_id)
+                );
+                const sectionGrades = data.grades.filter(
+                    g => g.course_id === s.course_id && g.semester === s.semester && classStudentIds.has(g.student_id)
+                );
+
+                const course = data.courses.get(s.course_id);
+                if (sectionGrades.length === 0) {
+                    bySection.push({
+                        section_id: s.section_id,
+                        course_id: s.course_id,
+                        course_name: course ? course.course_name : s.course_id,
+                        class_id: s.class_id,
+                        semester: s.semester,
+                        students_count: 0,
+                        average_score: 0,
+                        pass_rate_pct: 0
+                    });
+                    continue;
+                }
+
+                const courseCredits = course?.credits ?? 0;
+                const gradedList = sectionGrades.map(g =>
+                    data.grading.grade(g.course_id, g.semester, courseCredits, g.process_score, g.final_score)
+                );
+                const totals = gradedList.map(g => g.total);
+                const secAvg = totals.length > 0 ? Math.round((totals.reduce((a, b) => a + b, 0) / totals.length) * 10) / 10 : 0;
+                const passCount = gradedList.filter(g => g.passed).length;
+                const passRate = totals.length > 0 ? Math.round((passCount / totals.length) * 1000) / 10 : 0;
+
+                totalStudents += totals.length;
+                sumTotalScores += totals.reduce((a, b) => a + b, 0);
+                totalPassCount += passCount;
+
+                bySection.push({
+                    section_id: s.section_id,
+                    course_id: s.course_id,
+                    course_name: course ? course.course_name : s.course_id,
+                    class_id: s.class_id,
+                    semester: s.semester,
+                    students_count: totals.length,
+                    average_score: secAvg,
+                    pass_rate_pct: passRate
+                });
+            }
+
+            const overallAvg = totalStudents > 0 ? Math.round((sumTotalScores / totalStudents) * 10) / 10 : null;
+            const overallPassRate = totalStudents > 0 ? Math.round((totalPassCount / totalStudents) * 1000) / 10 : null;
+
+            return structured({
+                teacher_id: teacher.teacher_id,
+                full_name: teacher.full_name,
+                faculty: teacher.faculty,
+                semester: sem,
+                sections_taught: assigned.length,
+                students_graded: totalStudents,
+                overall_average_score: overallAvg,
+                overall_pass_rate_pct: overallPassRate,
+                by_section: bySection
+            });
+        }
+    );
 }
+

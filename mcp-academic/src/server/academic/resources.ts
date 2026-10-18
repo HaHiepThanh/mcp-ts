@@ -32,7 +32,13 @@ export function registerAcademicResources(server: McpServer, data: AcademicData)
                     mimeType: 'application/json',
                     text: JSON.stringify(
                         {
-                            loaded: { students: data.students.size, courses: data.courses.size, grades: data.grades.length },
+                            loaded: {
+                                students: data.students.size,
+                                courses: data.courses.size,
+                                grades: data.grades.length,
+                                teachers: data.teachers.size,
+                                sections: data.sections.size
+                            },
                             skipped: data.issues.length,
                             issues: data.issues
                         },
@@ -80,6 +86,33 @@ export function registerAcademicResources(server: McpServer, data: AcademicData)
                 ...student,
                 cumulative: data.gpaOf(student.student_id),
                 by_semester: Object.fromEntries(semesters.map(s => [s, data.gpaOf(student.student_id, s)]))
+            };
+            return { contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(profile, null, 2) }] };
+        }
+    );
+
+    server.registerResource(
+        'teacher-profile',
+        new ResourceTemplate('academic://teachers/{teacher_id}', {
+            list: async () => ({
+                resources: [...data.teachers.values()].map(t => ({
+                    uri: `academic://teachers/${t.teacher_id}`,
+                    name: `${t.full_name} (${t.title})`,
+                    description: `${t.faculty} · ${t.degree}`,
+                    mimeType: 'application/json'
+                }))
+            }),
+            complete: { teacher_id: value => [...data.teachers.keys()].filter(id => id.startsWith(value)) }
+        }),
+        { title: 'Teacher profile', description: 'Faculty, title, degree and assigned courses/sections of a teacher', mimeType: 'application/json' },
+        async (uri, { teacher_id }) => {
+            const teacher = data.teachers.get(String(teacher_id));
+            if (!teacher) throw new ResourceNotFoundError(uri.href, `Unknown teacher "${teacher_id}"`);
+            const assignedSections = [...data.sections.values()].filter(s => s.teacher_id === teacher.teacher_id);
+            const profile = {
+                ...teacher,
+                assigned_sections_count: assignedSections.length,
+                sections: assignedSections
             };
             return { contents: [{ uri: uri.href, mimeType: 'application/json', text: JSON.stringify(profile, null, 2) }] };
         }

@@ -36,6 +36,28 @@ export interface GradeRecord {
     final_score: number;
 }
 
+export interface Teacher {
+    teacher_id: string;
+    full_name: string;
+    faculty: string;
+    title: string;
+    degree: string;
+    hire_date: string;
+    email: string;
+}
+
+export interface Section {
+    section_id: string;
+    course_id: string;
+    semester: string;
+    class_id: string;
+    teacher_id: string;
+    room: string;
+    weekday: string;
+    start_period: number;
+    periods: number;
+}
+
 export interface DataIssue {
     table: string;
     line: number;
@@ -43,10 +65,39 @@ export interface DataIssue {
     row: Record<string, string>;
 }
 
+export interface AcademicRulesConfig {
+    attendance: {
+        maxAbsenceRatio: number;
+        countedStatuses: string[];
+    };
+    conduct: {
+        grades: { label: string; minScore: number }[];
+    };
+    atRisk: {
+        lowGpaThreshold: number;
+        highAbsenceRatio: number;
+        lowConductScore: number;
+    };
+}
+
+export function loadAcademicRules(file = 'config/academic-rules.json'): AcademicRulesConfig {
+    const raw = readFileSync(path.resolve(PROJECT_ROOT, file), 'utf8');
+    const cfg = JSON.parse(raw) as AcademicRulesConfig;
+    cfg.conduct.grades.sort((a, b) => b.minScore - a.minScore);
+    return cfg;
+}
+
 export interface AcademicConfig {
     dataDir: string;
     gradingConfig: string;
-    tables: { students: string; courses: string; grades: string };
+    rulesConfig?: string;
+    tables: {
+        students: string;
+        courses: string;
+        grades: string;
+        teachers?: string;
+        sections?: string;
+    };
     /** Freshness hints attached to cacheable results (2026-07-28, SEP-2549). */
     cacheHints?: Record<string, { ttlMs: number; cacheScope: 'public' | 'private' }>;
 }
@@ -58,6 +109,8 @@ export class AcademicData {
     readonly students = new Map<string, Student>();
     readonly courses = new Map<string, Course>();
     readonly grades: GradeRecord[] = [];
+    readonly teachers = new Map<string, Teacher>();
+    readonly sections = new Map<string, Section>();
     readonly issues: DataIssue[] = [];
     /** Every CSV in dataDir, unvalidated — backs the generic table tools. */
     readonly tables = new Map<string, CsvTable>();
@@ -66,6 +119,7 @@ export class AcademicData {
     constructor(
         readonly dataDir: string,
         readonly grading: Grading,
+        readonly rules: AcademicRulesConfig,
         tableFiles: AcademicConfig['tables']
     ) {
         for (const file of readdirSync(dataDir).filter(f => f.toLowerCase().endsWith('.csv')).sort()) {
@@ -73,6 +127,12 @@ export class AcademicData {
         }
         this.loadStudents(this.table(tableFiles.students));
         this.loadCourses(this.table(tableFiles.courses));
+        if (tableFiles.teachers && this.tables.has(path.basename(tableFiles.teachers, '.csv'))) {
+            this.loadTeachers(this.table(tableFiles.teachers));
+        }
+        if (tableFiles.sections && this.tables.has(path.basename(tableFiles.sections, '.csv'))) {
+            this.loadSections(this.table(tableFiles.sections));
+        }
         this.loadGrades(this.table(tableFiles.grades));
     }
 
@@ -119,6 +179,7 @@ export class AcademicData {
             if (!student_id || !course_id || !semester) return this.issue('grades', i, 'missing student_id, course_id or semester', row);
             if (!this.students.has(student_id)) return this.issue('grades', i, `unknown student_id ${student_id}`, row);
             if (!this.courses.has(course_id)) return this.issue('grades', i, `unknown course_id ${course_id}`, row);
+
             const scores = [row.process_score, row.final_score];
             if (scores.some(s => s === '' || s === undefined)) return this.issue('grades', i, 'missing score', row);
             const [process_score, final_score] = scores.map(Number);
@@ -128,7 +189,55 @@ export class AcademicData {
             const key = `${student_id}|${course_id}|${semester}`;
             if (seen.has(key)) return this.issue('grades', i, 'duplicate grade row (same student, course, semester)', row);
             seen.add(key);
+
+            // Check that grade belongs to a valid section (same course, semester, and student's class)
+            if (this.sections.size > 0) {
+                const student = this.students.get(student_id)!;
+                const hasMatchingSection = [...this.sections.values()].some(
+                    sec => sec.course_id === course_id && sec.semester === semester && sec.class_id === student.class_id
+                );
+                if (!hasMatchingSection) {
+                    return this.issue('grades', i, `no matching section for course ${course_id}, semester ${semester}, class ${student.class_id}`, row);
+                }
+            }
+
             this.grades.push({ student_id, course_id, semester, process_score, final_score });
+        });
+    }
+
+    private loadTeachers({ rows }: CsvTable): void {
+        rows.forEach((row, i) => {
+            const { teacher_id, full_name, faculty } = row;
+            if (!teacher_id || !full_name || !faculty) {
+                return this.issue('teachers', i, 'missing teacher_id, full_name or faculty', row);
+            }
+            if (this.teachers.has(teacher_id)) {
+                return this.issue('teachers', i, `duplicate teacher_id ${teacher_id}`, row);
+            }
+            this.teachers.set(teacher_id, row as unknown as Teacher);
+        });
+    }
+
+    private loadSections({ rows }: CsvTable): void {
+        rows.forEach((row, i) => {
+            const { section_id, course_id, semester, class_id, teacher_id, start_period, periods } = row;
+            if (!section_id || !course_id || !semester || !class_id || !teacher_id) {
+                return this.issue('sections', i, 'missing required fields in section', row);
+            }
+            if (this.sections.has(section_id)) {
+                return this.issue('sections', i, `duplicate section_id ${section_id}`, row);
+            }
+            if (!this.courses.has(course_id)) {
+                return this.issue('sections', i, `unknown course_id ${course_id}`, row);
+            }
+            if (!this.teachers.has(teacher_id)) {
+                return this.issue('sections', i, `unknown teacher_id ${teacher_id}`, row);
+            }
+            this.sections.set(section_id, {
+                ...(row as unknown as Section),
+                start_period: Number(start_period) || 1,
+                periods: Number(periods) || 3
+            });
         });
     }
 
@@ -189,7 +298,12 @@ export function getAcademicData(): AcademicData {
     if (!shared) {
         const config = getAcademicConfig();
         const dataDir = path.resolve(PROJECT_ROOT, process.env.ACADEMIC_DATA_DIR ?? config.dataDir);
-        shared = new AcademicData(dataDir, new Grading(loadGradingConfig(config.gradingConfig)), config.tables);
+        shared = new AcademicData(
+            dataDir,
+            new Grading(loadGradingConfig(config.gradingConfig)),
+            loadAcademicRules(config.rulesConfig ?? 'config/academic-rules.json'),
+            config.tables
+        );
     }
     return shared;
 }

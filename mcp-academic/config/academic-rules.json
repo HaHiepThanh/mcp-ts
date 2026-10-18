@@ -1,0 +1,20 @@
+{
+    "attendance": {
+        "maxAbsenceRatio": 0.20,
+        "countedStatuses": ["absent"]
+    },
+    "conduct": {
+        "grades": [
+            { "label": "Excellent", "minScore": 90 },
+            { "label": "Good", "minScore": 80 },
+            { "label": "Fairly good", "minScore": 65 },
+            { "label": "Average", "minScore": 50 },
+            { "label": "Weak", "minScore": 0 }
+        ]
+    },
+    "atRisk": {
+        "lowGpaThreshold": 2.0,
+        "highAbsenceRatio": 0.20,
+        "lowConductScore": 50
+    }
+}
