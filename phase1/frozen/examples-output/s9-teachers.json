@@ -1,0 +1,387 @@
+{
+  "example": "s9-teachers",
+  "title": "S9 · Lecturers and sections: search_teachers, teacher_workload, class_timetable",
+  "sdkMethods": [
+    "registerTool",
+    "client.callTool"
+  ],
+  "ranAt": "2026-10-19T09:35:17.932Z",
+  "steps": [
+    {
+      "step": "search_teachers · by faculty",
+      "method": "callTool",
+      "params": {
+        "name": "search_teachers",
+        "arguments": {
+          "faculty": "Business Administration"
+        }
+      },
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "total_matches": 5,
+          "teachers": [
+            {
+              "teacher_id": "T06",
+              "full_name": "Đỗ Thị Trang",
+              "faculty": "Business Administration",
+              "title": "Lecturer",
+              "degree": "MSc",
+              "courses": [
+                "BA101",
+                "BA102",
+                "BA201"
+              ]
+            },
+            {
+              "teacher_id": "T07",
+              "full_name": "Bùi Quốc Cường",
+              "faculty": "Business Administration",
+              "title": "Lecturer",
+              "degree": "MSc",
+              "courses": [
+                "BA101",
+                "BA102",
+                "BA202"
+              ]
+            },
+            {
+              "teacher_id": "T08",
+              "full_name": "Phạm Hoàng Dũng",
+              "faculty": "Business Administration",
+              "title": "Senior Lecturer",
+              "degree": "PhD",
+              "courses": [
+                "BA101",
+                "BA102",
+                "BA202"
+              ]
+            },
+            {
+              "teacher_id": "T09",
+              "full_name": "Phạm Mai Lan",
+              "faculty": "Business Administration",
+              "title": "Associate Professor",
+              "degree": "PhD",
+              "courses": [
+                "BA101",
+                "BA201"
+              ]
+            },
+            {
+              "teacher_id": "T10",
+              "full_name": "Nguyễn Hoàng Cường",
+              "faculty": "Business Administration",
+              "title": "Professor",
+              "degree": "PhD",
+              "courses": [
+                "BA102",
+                "BA201"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "search_teachers · by ID (case-insensitive)",
+      "method": "callTool",
+      "params": {
+        "name": "search_teachers",
+        "arguments": {
+          "keyword": "t02"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "total_matches": 1,
+          "teachers": [
+            {
+              "teacher_id": "T02",
+              "full_name": "Phạm Mai Lan",
+              "faculty": "Information Technology",
+              "title": "Lecturer",
+              "degree": "MSc",
+              "courses": [
+                "CS101",
+                "CS102",
+                "CS201",
+                "CS202"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "search_teachers · no match → empty list (not an error)",
+      "method": "callTool",
+      "params": {
+        "name": "search_teachers",
+        "arguments": {
+          "keyword": "Einstein"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "total_matches": 0,
+          "teachers": []
+        }
+      }
+    },
+    {
+      "step": "teacher_workload · over the quota (planted)",
+      "method": "callTool",
+      "params": {
+        "name": "teacher_workload",
+        "arguments": {
+          "teacher_id": "T02",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "teacher_id": "T02",
+          "full_name": "Phạm Mai Lan",
+          "semester": "2025-1",
+          "sections": [
+            {
+              "section_id": "CS101-2025-1-IT01",
+              "course_id": "CS101",
+              "class_id": "IT01",
+              "periods": 45
+            },
+            {
+              "section_id": "CS102-2025-1-IT01",
+              "course_id": "CS102",
+              "class_id": "IT01",
+              "periods": 45
+            },
+            {
+              "section_id": "CS102-2025-1-IT02",
+              "course_id": "CS102",
+              "class_id": "IT02",
+              "periods": 45
+            },
+            {
+              "section_id": "CS201-2025-1-IT01",
+              "course_id": "CS201",
+              "class_id": "IT01",
+              "periods": 60
+            },
+            {
+              "section_id": "CS201-2025-1-IT02",
+              "course_id": "CS201",
+              "class_id": "IT02",
+              "periods": 60
+            },
+            {
+              "section_id": "CS202-2025-1-IT01",
+              "course_id": "CS202",
+              "class_id": "IT01",
+              "periods": 45
+            },
+            {
+              "section_id": "CS202-2025-1-IT02",
+              "course_id": "CS202",
+              "class_id": "IT02",
+              "periods": 45
+            }
+          ],
+          "total_periods": 345,
+          "quota_periods": 180,
+          "overtime_periods": 165
+        }
+      }
+    },
+    {
+      "step": "teacher_workload · normal load",
+      "method": "callTool",
+      "params": {
+        "name": "teacher_workload",
+        "arguments": {
+          "teacher_id": "T07",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "teacher_id": "T07",
+          "full_name": "Bùi Quốc Cường",
+          "semester": "2025-1",
+          "sections": [
+            {
+              "section_id": "BA102-2025-1-BA01",
+              "course_id": "BA102",
+              "class_id": "BA01",
+              "periods": 45
+            },
+            {
+              "section_id": "BA202-2025-1-BA01",
+              "course_id": "BA202",
+              "class_id": "BA01",
+              "periods": 45
+            }
+          ],
+          "total_periods": 90,
+          "quota_periods": 180,
+          "overtime_periods": 0
+        }
+      }
+    },
+    {
+      "step": "teacher_workload · unknown lecturer → isError",
+      "method": "callTool",
+      "params": {
+        "name": "teacher_workload",
+        "arguments": {
+          "teacher_id": "T99",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "No lecturer with teacher_id \"T99\". Use search_teachers to find the right ID."
+      }
+    },
+    {
+      "step": "teacher_workload · bad semester format → rejected by inputSchema",
+      "method": "callTool",
+      "params": {
+        "name": "teacher_workload",
+        "arguments": {
+          "teacher_id": "T02",
+          "semester": "2025"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "Input validation error: Invalid arguments for tool teacher_workload: semester: Semester must look like 2024-1"
+      }
+    },
+    {
+      "step": "class_timetable · IT01, first semester",
+      "method": "callTool",
+      "params": {
+        "name": "class_timetable",
+        "arguments": {
+          "class_id": "IT01",
+          "semester": "2024-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "class_id": "IT01",
+          "semester": "2024-1",
+          "sessions": [
+            {
+              "weekday": "Mon",
+              "start_period": 4,
+              "course_id": "CS101",
+              "course_name": "Introduction to Programming",
+              "room": "C109",
+              "teacher_id": "T01",
+              "teacher_name": "Võ Bảo Vy"
+            },
+            {
+              "weekday": "Tue",
+              "start_period": 1,
+              "course_id": "GE101",
+              "course_name": "English 1",
+              "room": "C109",
+              "teacher_id": "T11",
+              "teacher_name": "Phạm Quốc Long"
+            },
+            {
+              "weekday": "Wed",
+              "start_period": 4,
+              "course_id": "GE102",
+              "course_name": "Calculus",
+              "room": "C106",
+              "teacher_id": "T11",
+              "teacher_name": "Phạm Quốc Long"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "class_timetable · lower-case class ID is accepted",
+      "method": "callTool",
+      "params": {
+        "name": "class_timetable",
+        "arguments": {
+          "class_id": "ba02",
+          "semester": "2024-2"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "class_id": "BA02",
+          "semester": "2024-2",
+          "sessions": [
+            {
+              "weekday": "Wed",
+              "start_period": 10,
+              "course_id": "BA201",
+              "course_name": "Marketing",
+              "room": "B102",
+              "teacher_id": "T10",
+              "teacher_name": "Nguyễn Hoàng Cường"
+            },
+            {
+              "weekday": "Thu",
+              "start_period": 4,
+              "course_id": "BA102",
+              "course_name": "Microeconomics",
+              "room": "A408",
+              "teacher_id": "T06",
+              "teacher_name": "Đỗ Thị Trang"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "class_timetable · semester without data → isError",
+      "method": "callTool",
+      "params": {
+        "name": "class_timetable",
+        "arguments": {
+          "class_id": "IT01",
+          "semester": "2030-1"
+        }
+      },
+      "ok": true,
+      "ms": 1,
+      "result": {
+        "isError": true,
+        "text": "No data for semester \"2030-1\". Known semesters: 2024-1, 2024-2, 2025-1."
+      }
+    }
+  ]
+}

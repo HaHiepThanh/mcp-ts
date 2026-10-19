@@ -6,13 +6,13 @@
     "client.listTools",
     "client.callTool"
   ],
-  "ranAt": "2026-09-21T07:07:08.364Z",
+  "ranAt": "2026-10-19T09:35:13.967Z",
   "steps": [
     {
       "step": "tools/list shows how each config is advertised",
       "method": "listTools",
       "ok": true,
-      "ms": 4,
+      "ms": 5,
       "result": [
         {
           "name": "add",
@@ -128,7 +128,7 @@
         }
       },
       "ok": true,
-      "ms": 7,
+      "ms": 6,
       "result": {
         "_meta": {
           "io.modelcontextprotocol/serverInfo": {
@@ -151,7 +151,7 @@
         "name": "server_time"
       },
       "ok": true,
-      "ms": 2,
+      "ms": 1,
       "result": {
         "_meta": {
           "io.modelcontextprotocol/serverInfo": {
@@ -162,7 +162,7 @@
         "content": [
           {
             "type": "text",
-            "text": "2026-09-21T07:07:08.410Z"
+            "text": "2026-10-19T09:35:14.000Z"
           }
         ]
       }
@@ -334,7 +334,7 @@
         }
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {
         "isError": false,
         "structuredContent": {
@@ -409,7 +409,7 @@
         }
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {
         "isError": false,
         "structuredContent": {
@@ -437,7 +437,7 @@
         }
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {
         "isError": false,
         "structuredContent": {
@@ -476,7 +476,7 @@
         }
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {
         "isError": true,
         "text": "Input validation error: Invalid arguments for tool search_students: limit: Too big: expected number to be <=50"
@@ -552,7 +552,7 @@
         }
       },
       "ok": true,
-      "ms": 4,
+      "ms": 2,
       "result": {
         "isError": false,
         "structuredContent": {
@@ -639,7 +639,7 @@
         }
       },
       "ok": true,
-      "ms": 2,
+      "ms": 3,
       "result": {
         "isError": false,
         "structuredContent": {

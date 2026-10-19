@@ -8,7 +8,7 @@ SDK: ctx.mcpReq.notify (progress), ctx.mcpReq.log, ctx.mcpReq.signal, client.cal
 
 ▶ With onprogress → server sends notifications/progress
   callTool({"name":"rank_students","arguments":{"scope":"all","top":3},"options":{"onprogress":"fn"}})
-  ✔ 9ms → 
+  ✔ 8ms → 
     {
       "progressUpdates": [
         {
@@ -51,7 +51,7 @@ SDK: ctx.mcpReq.notify (progress), ctx.mcpReq.log, ctx.mcpReq.signal, client.cal
 
 ▶ setLoggingLevel("debug") then callTool
   setLoggingLevel + callTool({"level":"debug","name":"query_table","arguments":{"table":"students","filters":[{"column":"class_id","operator":"eq","value":"IT01"}],"limit":1}})
-  ✔ 2ms → 
+  ✔ 1ms → 
     {
       "logMessagesReceived": [
         "info: \"query_table students: 11 of 41 rows match\""
@@ -83,7 +83,7 @@ SDK: ctx.mcpReq.notify (progress), ctx.mcpReq.log, ctx.mcpReq.signal, client.cal
 
 ▶ modern era: abort after 350 ms
   callTool({"name":"recalculate_all_gpas","arguments":{"students":20},"options":{"signal":"AbortSignal"}})
-  ✖ 352ms → SdkError (code REQUEST_TIMEOUT): user pressed Stop
+  ✖ 351ms → SdkError (code REQUEST_TIMEOUT): user pressed Stop
    ℹ server side: stopped after 4/20: SdkError: Connection closed
 
 ✔ 7 steps (2 expected/unexpected errors) — saved outputs/examples/s6-logging-progress-cancel.json

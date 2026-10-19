@@ -1,0 +1,443 @@
+
+══════════════════════════════════════════════════════════════════════════════
+S11 · Finance server: tuition_status, check_scholarship_eligibility, rank_scholarship_candidates, calculate_teacher_pay
+SDK: registerTool, client.listTools, client.callTool
+══════════════════════════════════════════════════════════════════════════════
+
+▶ tools of the finance server
+  listTools()
+  ✔ 3ms → 
+    [
+      {
+        "name": "tuition_status",
+        "readOnly": true
+      },
+      {
+        "name": "check_scholarship_eligibility",
+        "readOnly": true
+      },
+      {
+        "name": "rank_scholarship_candidates",
+        "readOnly": true
+      },
+      {
+        "name": "calculate_teacher_pay",
+        "readOnly": true
+      }
+    ]
+
+── tuition_status ────────────────────────────────────────────────────────────
+
+▶ tuition_status · all semesters, planted debt in 2025-1
+  callTool({"name":"tuition_status","arguments":{"student_id":"2201001"}})
+  ✔ 13ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201001",
+        "full_name": "Bùi Quốc Hải",
+        "currency": "VND",
+        "semesters": [
+          {
+            "semester": "2024-1",
+            "credits_registered": 8,
+            "fee_per_credit": 450000,
+            "discount_pct": 0,
+            "amount_due": 3600000,
+            "amount_paid": 3600000,
+            "outstanding": 0,
+            "due_date": "2024-10-15",
+            "paid_in_full": true
+          },
+          {
+            "semester": "2024-2",
+            "credits_registered": 7,
+            "fee_per_credit": 450000,
+            "discount_pct": 0,
+            "amount_due": 3150000,
+            "amount_paid": 3150000,
+            "outstanding": 0,
+            "due_date": "2025-03-15",
+            "paid_in_full": true
+          },
+          {
+            "semester": "2025-1",
+            "credits_registered": 3,
+            "fee_per_credit": 450000,
+            "discount_pct": 0,
+            "amount_due": 1350000,
+            "amount_paid": 540000,
+            "outstanding": 810000,
+            "due_date": "2025-10-15",
+            "paid_in_full": false
+          }
+        ],
+        "total_outstanding": 810000
+      }
+    }
+
+▶ tuition_status · one semester, paid in full
+  callTool({"name":"tuition_status","arguments":{"student_id":"2201002","semester":"2025-1"}})
+  ✔ 2ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201002",
+        "full_name": "Nguyễn Mai Vy",
+        "currency": "VND",
+        "semesters": [
+          {
+            "semester": "2025-1",
+            "credits_registered": 3,
+            "fee_per_credit": 450000,
+            "discount_pct": 0,
+            "amount_due": 1350000,
+            "amount_paid": 1350000,
+            "outstanding": 0,
+            "due_date": "2025-10-15",
+            "paid_in_full": true
+          }
+        ],
+        "total_outstanding": 0
+      }
+    }
+
+▶ tuition_status · unknown student → isError
+  callTool({"name":"tuition_status","arguments":{"student_id":"9999999"}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "No student with student_id \"9999999\"."
+    }
+
+── check_scholarship_eligibility ─────────────────────────────────────────────
+
+▶ check_scholarship_eligibility · good GPA but tuition not paid → not eligible
+  callTool({"name":"check_scholarship_eligibility","arguments":{"student_id":"2201001","semester":"2025-1","scholarship_id":"MERIT-A"}})
+  ✔ 9ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201001",
+        "full_name": "Bùi Quốc Hải",
+        "semester": "2025-1",
+        "results": [
+          {
+            "scholarship_id": "MERIT-A",
+            "name": "Excellence Scholarship",
+            "amount": 6000000,
+            "eligible": false,
+            "gpa": 3,
+            "conduct": 75,
+            "conditions": [
+              {
+                "condition": "semester GPA",
+                "required": "≥ 3.2",
+                "actual": "3",
+                "ok": false
+              },
+              {
+                "condition": "conduct score",
+                "required": "≥ 80",
+                "actual": "75",
+                "ok": false
+              },
+              {
+                "condition": "no failed course in the semester",
+                "required": "0 F",
+                "actual": "0 F",
+                "ok": true
+              },
+              {
+                "condition": "tuition paid in full",
+                "required": "outstanding = 0",
+                "actual": "outstanding 810,000 VND",
+                "ok": false
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+▶ check_scholarship_eligibility · all scholarships at once
+  callTool({"name":"check_scholarship_eligibility","arguments":{"student_id":"2201002","semester":"2025-1"}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "student_id": "2201002",
+        "full_name": "Nguyễn Mai Vy",
+        "semester": "2025-1",
+        "results": [
+          {
+            "scholarship_id": "MERIT-A",
+            "name": "Excellence Scholarship",
+            "amount": 6000000,
+            "eligible": false,
+            "gpa": 3,
+            "conduct": 84,
+            "conditions": [
+              {
+                "condition": "semester GPA",
+                "required": "≥ 3.2",
+                "actual": "3",
+                "ok": false
+              },
+              {
+                "condition": "conduct score",
+                "required": "≥ 80",
+                "actual": "84",
+                "ok": true
+              },
+              {
+                "condition": "no failed course in the semester",
+                "required": "0 F",
+                "actual": "0 F",
+                "ok": true
+              },
+              {
+                "condition": "tuition paid in full",
+                "required": "outstanding = 0",
+                "actual": "outstanding 0 VND",
+                "ok": true
+              }
+            ]
+          },
+          {
+            "scholarship_id": "MERIT-B",
+            "name": "Good Student Scholarship",
+            "amount": 3000000,
+            "eligible": true,
+            "gpa": 3,
+            "conduct": 84,
+            "conditions": [
+              {
+                "condition": "semester GPA",
+                "required": "≥ 2.8",
+                "actual": "3",
+                "ok": true
+              },
+              {
+                "condition": "conduct score",
+                "required": "≥ 70",
+                "actual": "84",
+                "ok": true
+              },
+              {
+                "condition": "no failed course in the semester",
+                "required": "0 F",
+                "actual": "0 F",
+                "ok": true
+              },
+              {
+                "condition": "tuition paid in full",
+                "required": "outstanding = 0",
+                "actual": "outstanding 0 VND",
+                "ok": true
+              }
+            ]
+          },
+          {
+            "scholarship_id": "NEED",
+            "name": "Support Grant",
+            "amount": 4000000,
+            "eligible": true,
+            "gpa": 3,
+            "conduct": 84,
+            "conditions": [
+              {
+                "condition": "semester GPA",
+                "required": "≥ 2",
+                "actual": "3",
+                "ok": true
+              },
+              {
+                "condition": "conduct score",
+                "required": "≥ 65",
+                "actual": "84",
+                "ok": true
+              },
+              {
+                "condition": "no failed course in the semester",
+                "required": "0 F",
+                "actual": "0 F",
+                "ok": true
+              },
+              {
+                "condition": "tuition paid in full",
+                "required": "outstanding = 0",
+                "actual": "outstanding 0 VND",
+                "ok": true
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+▶ check_scholarship_eligibility · unknown scholarship → isError
+  callTool({"name":"check_scholarship_eligibility","arguments":{"student_id":"2201002","semester":"2025-1","scholarship_id":"GOLD"}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "Unknown scholarship \"GOLD\". Known: MERIT-A (Excellence Scholarship), MERIT-B (Good Student Scholarship), NEED (Support Grant)."
+    }
+
+── rank_scholarship_candidates ───────────────────────────────────────────────
+
+▶ rank_scholarship_candidates · IT faculty, MERIT-A
+  callTool({"name":"rank_scholarship_candidates","arguments":{"faculty":"Information Technology","semester":"2025-1","scholarship_id":"MERIT-A"}})
+  ✔ 2ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "faculty": "Information Technology",
+        "semester": "2025-1",
+        "scholarship_id": "MERIT-A",
+        "slots": 2,
+        "eligible_count": 4,
+        "winners": [
+          {
+            "rank": 1,
+            "student_id": "2201018",
+            "full_name": "Đặng Minh Long",
+            "class_id": "IT02",
+            "gpa": 4,
+            "conduct": 93
+          },
+          {
+            "rank": 2,
+            "student_id": "2201004",
+            "full_name": "Hoàng Văn Tuấn",
+            "class_id": "IT01",
+            "gpa": 4,
+            "conduct": 92
+          }
+        ]
+      }
+    }
+
+▶ rank_scholarship_candidates · BA faculty, MERIT-B
+  callTool({"name":"rank_scholarship_candidates","arguments":{"faculty":"Business Administration","semester":"2025-1","scholarship_id":"MERIT-B"}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "faculty": "Business Administration",
+        "semester": "2025-1",
+        "scholarship_id": "MERIT-B",
+        "slots": 4,
+        "eligible_count": 14,
+        "winners": [
+          {
+            "rank": 1,
+            "student_id": "2202002",
+            "full_name": "Phạm Thị Lan",
+            "class_id": "BA01",
+            "gpa": 4,
+            "conduct": 79
+          },
+          {
+            "rank": 2,
+            "student_id": "2202011",
+            "full_name": "Đặng Văn Nam",
+            "class_id": "BA02",
+            "gpa": 4,
+            "conduct": 79
+          },
+          {
+            "rank": 3,
+            "student_id": "2202019",
+            "full_name": "Võ Hoàng Dũng",
+            "class_id": "BA02",
+            "gpa": 4,
+            "conduct": 77
+          },
+          {
+            "rank": 4,
+            "student_id": "2202004",
+            "full_name": "Hoàng Đức Cường",
+            "class_id": "BA01",
+            "gpa": 3,
+            "conduct": 89
+          }
+        ]
+      }
+    }
+
+▶ rank_scholarship_candidates · unknown faculty → isError
+  callTool({"name":"rank_scholarship_candidates","arguments":{"faculty":"Medicine","semester":"2025-1","scholarship_id":"MERIT-A"}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "Unknown faculty \"Medicine\". Known: Business Administration, Information Technology."
+    }
+
+── calculate_teacher_pay ─────────────────────────────────────────────────────
+
+▶ calculate_teacher_pay · lecturer over the quota → overtime pay
+  callTool({"name":"calculate_teacher_pay","arguments":{"teacher_id":"T02","month":"2025-10"}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "teacher_id": "T02",
+        "full_name": "Phạm Mai Lan",
+        "title": "Lecturer",
+        "month": "2025-10",
+        "semester": "2025-1",
+        "currency": "VND",
+        "base_salary": 9000000,
+        "teaching_periods": 86.25,
+        "rate_per_period": 100000,
+        "teaching_pay": 8625000,
+        "overtime_periods": 41.25,
+        "overtime_pay": 6187500,
+        "bonus": 0,
+        "deductions": 945000,
+        "net_pay": 22867500
+      }
+    }
+
+▶ calculate_teacher_pay · December includes the bonus
+  callTool({"name":"calculate_teacher_pay","arguments":{"teacher_id":"T07","month":"2025-12"}})
+  ✔ 1ms → 
+    {
+      "isError": false,
+      "structuredContent": {
+        "teacher_id": "T07",
+        "full_name": "Bùi Quốc Cường",
+        "title": "Lecturer",
+        "month": "2025-12",
+        "semester": "2025-1",
+        "currency": "VND",
+        "base_salary": 9000000,
+        "teaching_periods": 22.5,
+        "rate_per_period": 100000,
+        "teaching_pay": 2250000,
+        "overtime_periods": 0,
+        "overtime_pay": 0,
+        "bonus": 2000000,
+        "deductions": 945000,
+        "net_pay": 12305000
+      }
+    }
+
+▶ calculate_teacher_pay · month without payroll → isError
+  callTool({"name":"calculate_teacher_pay","arguments":{"teacher_id":"T02","month":"2024-10"}})
+  ✔ 0ms → 
+    {
+      "isError": true,
+      "text": "No payroll for T02 in 2024-10. Payroll months available: 2025-09, 2025-10, 2025-11, 2025-12."
+    }
+
+▶ calculate_teacher_pay · bad month format → rejected by inputSchema
+  callTool({"name":"calculate_teacher_pay","arguments":{"teacher_id":"T02","month":"October"}})
+  ✔ 1ms → 
+    {
+      "isError": true,
+      "text": "Input validation error: Invalid arguments for tool calculate_teacher_pay: month: Month must look like 2025-10"
+    }
+
+✔ 14 steps (0 expected/unexpected errors) — saved outputs/examples/s11-finance.json

@@ -8,7 +8,7 @@ SDK: ctx.mcpReq.elicitInput (2025), ctx.mcpReq.requestSampling (2025), inputRequ
 
 ▶ update_grade · user answers "accept + confirm=true"
   callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-1","process_score":8,"final_score":7.5}})
-  ✔ 8ms → 
+  ✔ 6ms → 
     {
       "questionShownToUser": "Update Computer Networks (CS202, 2030-1) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
       "isError": false,
@@ -64,7 +64,7 @@ SDK: ctx.mcpReq.elicitInput (2025), ctx.mcpReq.requestSampling (2025), inputRequ
 
 ▶ update_grade · user answers "accept + confirm=true"
   callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-5","process_score":8,"final_score":7.5}})
-  ✔ 6ms → 
+  ✔ 5ms → 
     {
       "questionShownToUser": "Update Computer Networks (CS202, 2030-5) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
       "isError": false,
@@ -73,7 +73,7 @@ SDK: ctx.mcpReq.elicitInput (2025), ctx.mcpReq.requestSampling (2025), inputRequ
 
 ▶ update_grade · user answers "accept + confirm=false"
   callTool({"name":"update_grade","arguments":{"student_id":"2201005","course_id":"CS202","semester":"2030-6","process_score":8,"final_score":7.5}})
-  ✔ 4ms → 
+  ✔ 3ms → 
     {
       "questionShownToUser": "Update Computer Networks (CS202, 2030-6) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
       "isError": false,
@@ -102,7 +102,7 @@ SDK: ctx.mcpReq.elicitInput (2025), ctx.mcpReq.requestSampling (2025), inputRequ
 
 ▶ generate_student_feedback · tone=encouraging
   callTool({"name":"generate_student_feedback","arguments":{"student_id":"2201010","tone":"encouraging"}})
-  ✔ 6ms → 
+  ✔ 5ms → 
     {
       "isError": false,
       "text": "Feedback for Trần Đức Phúc (written by mock-llm (replaced by Gemini in M3)):\n\n[mock] Received a 560-character prompt; system: \"You are a supportive academic advisor.\"."

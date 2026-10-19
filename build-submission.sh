@@ -5,7 +5,7 @@
 # Team files on Google Drive (team/slides/*.pptx, team/quiz/questions*.txt, team/data/*.csv) are picked up
 # automatically when they exist; otherwise the drafts in phase1/ and phase2/ are used and flagged.
 # Run from anywhere: bash build-submission.sh
-# Phase 1 is FROZEN: its code, docs and data come from git tag `phase1-freeze` and its example outputs from
+# Phase 1 is FROZEN: its code, docs and data come from git tag `phase1-final` and its example outputs from
 # phase1/frozen/, so phase-2 work never changes the phase-1 package. Only team files (slides, quiz) are refreshed.
 set -euo pipefail
 
@@ -40,10 +40,11 @@ rm -rf "$P1" "$ROOT/phase1/submission.zip"
 mkdir -p "$P1"
 : > "$P1/STATUS.txt"
 FROZEN=$(mktemp -d)
-git -C "$ROOT" archive phase1-freeze mcp-academic | tar -x -C "$FROZEN"
-note "🧊 Code, docs and data from git tag phase1-freeze ($(git -C "$ROOT" rev-list -n1 --abbrev-commit phase1-freeze))" "$P1"
+git -C "$ROOT" archive phase1-final mcp-academic | tar -x -C "$FROZEN"
+note "🧊 Code, docs and data from git tag phase1-final ($(git -C "$ROOT" rev-list -n1 --abbrev-commit phase1-final))" "$P1"
 
-pick_team_file 'slides/*phase1*.pptx' "$P1/01-slides" "" "$P1" "Slides (pptx, 30+ slides)"
+mkdir -p "$P1/01-slides"; cp "$ROOT/phase1/MCP-TS-SDK-phase1.pptx" "$P1/01-slides/"
+note "✅ Slides (pptx, 30+ slides): MCP-TS-SDK-phase1.pptx" "$P1"
 cp "$ROOT/phase1/slides-content.md" "$P1/01-slides/"
 mkdir -p "$P1/02-code"
 rsync -a --exclude 'node_modules/' --exclude 'outputs/' "$FROZEN/mcp-academic/" "$P1/02-code/mcp-academic/"

@@ -9,7 +9,7 @@
     "ProtocolError",
     "SdkError"
   ],
-  "ranAt": "2026-09-21T07:07:12.564Z",
+  "ranAt": "2026-10-19T09:35:18.410Z",
   "taxonomy": [
     {
       "failure": "Handler reports a business error (unknown student)",
@@ -72,7 +72,7 @@
         }
       },
       "ok": false,
-      "ms": 410,
+      "ms": 407,
       "error": {
         "name": "SdkError",
         "code": "REQUEST_TIMEOUT",
@@ -94,7 +94,7 @@
         }
       },
       "ok": true,
-      "ms": 1226,
+      "ms": 1223,
       "result": {
         "text": "Exported 8 batches",
         "progressUpdates": 8
@@ -116,7 +116,7 @@
         }
       },
       "ok": false,
-      "ms": 763,
+      "ms": 762,
       "error": {
         "name": "SdkError",
         "code": "REQUEST_TIMEOUT",
@@ -135,7 +135,7 @@
         "options": {}
       },
       "ok": true,
-      "ms": 1219,
+      "ms": 1213,
       "result": {
         "text": "Exported 8 batches",
         "progressUpdates": 8
@@ -167,7 +167,7 @@
       "step": "Tool name does not exist",
       "method": "classify",
       "ok": true,
-      "ms": 3,
+      "ms": 4,
       "result": {
         "failure": "Tool name does not exist",
         "surfacesAs": "throws ProtocolError (-32602)",
@@ -211,7 +211,7 @@
       "step": "Connection already closed",
       "method": "classify",
       "ok": true,
-      "ms": 4,
+      "ms": 3,
       "result": {
         "failure": "Connection already closed",
         "surfacesAs": "throws Error",
@@ -222,7 +222,7 @@
       "step": "Request timeout",
       "method": "classify",
       "ok": true,
-      "ms": 101,
+      "ms": 102,
       "result": {
         "failure": "Request timeout",
         "surfacesAs": "throws SdkError (REQUEST_TIMEOUT)",

@@ -8,7 +8,7 @@ SDK: client.listen, McpSubscription.honoredFilter / close / closed, client.subsc
 
 ▶ Open a subscription stream for one student profile
   listen({"resourceSubscriptions":["academic://students/2201005"]})
-  ✔ 6ms → 
+  ✔ 5ms → 
     {
       "honoredFilter": {
         "resourceSubscriptions": [
@@ -19,7 +19,7 @@ SDK: client.listen, McpSubscription.honoredFilter / close / closed, client.subsc
 
 ▶ Another client changes a grade
   callTool update_grade({"student_id":"2201005"})
-  ✔ 212ms → 
+  ✔ 213ms → 
     {
       "toolResult": "Grade inserted: CS202 2032-1 → total 9 (A). Cumulative GPA 1 → 1.67.",
       "notificationsReceived": [
@@ -32,7 +32,7 @@ SDK: client.listen, McpSubscription.honoredFilter / close / closed, client.subsc
 
 ▶ subscription.close(), then change again → no notification
   close + callTool()
-  ✔ 237ms → 
+  ✔ 250ms → 
     {
       "toolResult": "Grade inserted: CS202 2032-2 → total 9 (A). Cumulative GPA 1.67 → 1.67.",
       "closedReason": "local",
@@ -43,7 +43,7 @@ SDK: client.listen, McpSubscription.honoredFilter / close / closed, client.subsc
 
 ▶ Change a grade BEFORE subscribing → nothing arrives
   callTool update_grade()
-  ✔ 209ms → 
+  ✔ 211ms → 
     {
       "toolResult": "Grade inserted: CS202 2032-3 → total 9 (A). Cumulative GPA 1 → 1.67.",
       "notificationsReceived": 0
@@ -55,7 +55,7 @@ SDK: client.listen, McpSubscription.honoredFilter / close / closed, client.subsc
 
 ▶ Change a grade AFTER subscribing
   callTool update_grade()
-  ✔ 214ms → 
+  ✔ 233ms → 
     {
       "toolResult": "Grade inserted: CS202 2032-4 → total 9 (A). Cumulative GPA 1.67 → 1.67.",
       "notificationsReceived": [
@@ -68,11 +68,11 @@ SDK: client.listen, McpSubscription.honoredFilter / close / closed, client.subsc
 
 ▶ unsubscribeResource
   unsubscribeResource({"uri":"academic://students/2201005"})
-  ✔ 1ms → {}
+  ✔ 2ms → {}
 
 ▶ Change a grade after unsubscribing → nothing new
   callTool update_grade()
-  ✔ 213ms → 
+  ✔ 224ms → 
     {
       "newNotifications": 0
     }

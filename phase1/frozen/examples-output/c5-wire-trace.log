@@ -6,11 +6,11 @@ SDK: JSON-RPC 2.0, initialize, server/discover, tools/list, tools/call, input_re
 
 ▶ 2025 era: initialize handshake, server pushes elicitation/create mid-call
   trace()
-  ✔ 37ms → 14 frames
+  ✔ 41ms → 14 frames
 
 ▶ 2026-07-28 era: server/discover, tool returns input_required and the client retries
   trace()
-  ✔ 45ms → 13 frames
+  ✔ 34ms → 13 frames
 
 ── 2025 — message sequence ───────────────────────────────────────────────────
    1. client → server  initialize (id 0)

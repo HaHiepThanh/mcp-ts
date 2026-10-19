@@ -8,7 +8,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ tools/list shows how each config is advertised
   listTools()
-  ✔ 4ms → 
+  ✔ 5ms → 
     [
       {
         "name": "add",
@@ -115,7 +115,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ A. inputSchema only
   callTool({"name":"add","arguments":{"a":2,"b":3}})
-  ✔ 7ms → 
+  ✔ 6ms → 
     {
       "_meta": {
         "io.modelcontextprotocol/serverInfo": {
@@ -133,7 +133,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ B. no inputSchema (no arguments)
   callTool({"name":"server_time"})
-  ✔ 2ms → 
+  ✔ 1ms → 
     {
       "_meta": {
         "io.modelcontextprotocol/serverInfo": {
@@ -144,7 +144,7 @@ SDK: registerTool, client.listTools, client.callTool
       "content": [
         {
           "type": "text",
-          "text": "2026-09-21T07:07:08.410Z"
+          "text": "2026-10-19T09:35:14.000Z"
         }
       ]
     }
@@ -266,7 +266,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ calculate_gpa · same student, semester 2024-1 only (F counted)
   callTool({"name":"calculate_gpa","arguments":{"student_id":"2201010","semester":"2024-1"}})
-  ✔ 1ms → 
+  ✔ 2ms → 
     {
       "isError": false,
       "structuredContent": {
@@ -308,7 +308,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ search_students · accent-insensitive keyword
   callTool({"name":"search_students","arguments":{"keyword":"hai"}})
-  ✔ 1ms → 
+  ✔ 2ms → 
     {
       "isError": false,
       "structuredContent": {
@@ -327,7 +327,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ search_students · class filter + limit
   callTool({"name":"search_students","arguments":{"class_id":"IT02","limit":3}})
-  ✔ 1ms → 
+  ✔ 2ms → 
     {
       "isError": false,
       "structuredContent": {
@@ -358,7 +358,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ search_students · limit above max (50) → rejected
   callTool({"name":"search_students","arguments":{"limit":999}})
-  ✔ 1ms → 
+  ✔ 2ms → 
     {
       "isError": true,
       "text": "Input validation error: Invalid arguments for tool search_students: limit: Too big: expected number to be <=50"
@@ -417,7 +417,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ class_statistics · whole class
   callTool({"name":"class_statistics","arguments":{"class_id":"IT01"}})
-  ✔ 4ms → 
+  ✔ 2ms → 
     {
       "isError": false,
       "structuredContent": {
@@ -477,7 +477,7 @@ SDK: registerTool, client.listTools, client.callTool
 
 ▶ rank_students · top 3 of faculty
   callTool({"name":"rank_students","arguments":{"scope":"faculty","value":"Business","top":3}})
-  ✔ 2ms → 
+  ✔ 3ms → 
     {
       "isError": false,
       "structuredContent": {

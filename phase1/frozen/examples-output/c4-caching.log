@@ -11,7 +11,7 @@ SDK: ServerOptions.cacheHints, listTools(params, { cacheMode }), readResource(pa
 
 ▶ A. listTools × 3 (default cacheMode "use")
   listTools → listTools → listTools({"versionNegotiation":{"mode":"auto"}})
-  ✔ 6ms → 
+  ✔ 5ms → 
     {
       "era": "modern",
       "callsMade": 3,
@@ -22,7 +22,7 @@ SDK: ServerOptions.cacheHints, listTools(params, { cacheMode }), readResource(pa
 
 ▶ B. listTools, then cacheMode "refresh"
   listTools → listTools(refresh) → listTools({"versionNegotiation":{"mode":"auto"}})
-  ✔ 4ms → 
+  ✔ 5ms → 
     {
       "era": "modern",
       "callsMade": 3,
@@ -57,7 +57,7 @@ SDK: ServerOptions.cacheHints, listTools(params, { cacheMode }), readResource(pa
 
 ▶ E. listTools × 3
   listTools → listTools → listTools({})
-  ✔ 6ms → 
+  ✔ 8ms → 
     {
       "era": "legacy",
       "callsMade": 3,

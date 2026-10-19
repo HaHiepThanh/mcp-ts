@@ -7,7 +7,7 @@
     "readResource(params, { cacheMode })",
     "ClientOptions.defaultCacheTtlMs"
   ],
-  "ranAt": "2026-09-21T07:07:18.254Z",
+  "ranAt": "2026-10-19T09:35:24.153Z",
   "cacheHints": {
     "tools/list": {
       "ttlMs": 60000,
@@ -78,7 +78,7 @@
         }
       },
       "ok": true,
-      "ms": 6,
+      "ms": 5,
       "result": {
         "era": "modern",
         "callsMade": 3,
@@ -96,7 +96,7 @@
         }
       },
       "ok": true,
-      "ms": 4,
+      "ms": 5,
       "result": {
         "era": "modern",
         "callsMade": 3,
@@ -146,7 +146,7 @@
       "method": "listTools → listTools → listTools",
       "params": {},
       "ok": true,
-      "ms": 6,
+      "ms": 8,
       "result": {
         "era": "legacy",
         "callsMade": 3,
