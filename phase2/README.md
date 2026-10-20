@@ -16,7 +16,7 @@ Tạo gói nộp: `bash build-submission.sh` → **`phase2/submission/`** + **`p
 | (Cải tiến) | [`improvements.md`](improvements.md) | Cải tiến có bằng chứng trước/sau |
 | Code + data | `mcp-academic/` (3 server, 22 tool) · `mcp-academic/data/sample/` | `npm run experiment -- E3` chạy lại 1 thí nghiệm |
 | LOG | [`runs/E1…E8/`](runs/) | Mỗi lượt chạy là 1 dòng JSONL: câu hỏi, tool gọi + tham số, câu trả lời, từng bước kiểm tra, thời gian, token. Kèm `summary.json`, `config-used.json` |
-| pptx 20+ slide | `MCP-TS-SDK-phase2.pptx` | Có note lời thoại |
+| pptx 20+ slide | `MCP-TS-SDK-phase2.pptx` | 24 slide chính + 9 slide phụ lục E1–E8, có speaker notes (nguồn: `slides/notes.json`, sinh bằng `slides/build-deck.js`) · kịch bản và phân công 6 người: [`../docs/phase2-presentation-script.md`](../docs/phase2-presentation-script.md) |
 | txt 10–20 câu trắc nghiệm | `quiz-phase2.txt` | 15 câu, đáp án lấy từ kết quả thí nghiệm |
 
 ## Chạy lại các thí nghiệm
