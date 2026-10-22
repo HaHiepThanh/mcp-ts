@@ -1,5 +1,5 @@
 {
-    "$comment": "Model 2: Qwen3 4B (instruct = answers directly; use --model qwen3:4b for the thinking variant) in Ollama via its OpenAI-compatible API. Start Ollama with OLLAMA_CONTEXT_LENGTH=8192 — the 13 tool definitions alone are ~4.8k tokens.",
+    "$comment": "Model 2: Qwen3 4B (instruct = answers directly; use --model qwen3:4b for the thinking variant) in Ollama via its OpenAI-compatible API. Start Ollama with OLLAMA_CONTEXT_LENGTH=8192 — the 13 tool definitions of academic + utility alone are ~4.8k tokens. `finance` is registered but disabled here: its 7 more tools may not fit in 8k (measure with `npm run budget -- --config config/host.qwen.json --all`, see docs/experiments.md). Set \"disabled\": false to try it.",
     "llm": {
         "provider": "openai-compatible",
         "label": "ollama",
@@ -25,6 +25,16 @@
                 "src/server/utility/main.ts"
             ],
             "protocol": "auto"
+        },
+        "finance": {
+            "command": "node",
+            "args": [
+                "--import",
+                "tsx",
+                "src/server/finance/main.ts"
+            ],
+            "protocol": "auto",
+            "disabled": true
         }
     },
     "agent": {
