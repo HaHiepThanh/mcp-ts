@@ -1,0 +1,66 @@
+{
+  "at": "2026-10-22T15:18:03.526Z",
+  "config": "config\\host.qwen.json",
+  "model": "qwen3:4b-instruct",
+  "contextSize": 8192,
+  "reserve": 1500,
+  "baseline_tokens": 354,
+  "total_tools": 27,
+  "total_estimated": 4565,
+  "total_exact": 3600,
+  "free": 4238,
+  "fits": true,
+  "servers": [
+    {
+      "server": "academic",
+      "tools": 17,
+      "estimated_tokens": 2948,
+      "exact_tokens": 2402,
+      "tool_names": [
+        "academic__search_students",
+        "academic__get_transcript",
+        "academic__calculate_gpa",
+        "academic__class_statistics",
+        "academic__rank_students",
+        "academic__update_grade",
+        "academic__generate_student_feedback",
+        "academic__list_tables",
+        "academic__describe_table",
+        "academic__query_table",
+        "academic__attendance_summary",
+        "academic__conduct_score",
+        "academic__at_risk_students",
+        "academic__search_teachers",
+        "academic__class_timetable",
+        "academic__teacher_workload",
+        "academic__teacher_grade_report"
+      ]
+    },
+    {
+      "server": "utility",
+      "tools": 3,
+      "estimated_tokens": 394,
+      "exact_tokens": 366,
+      "tool_names": [
+        "utility__get_current_time",
+        "utility__convert_score",
+        "utility__save_report"
+      ]
+    },
+    {
+      "server": "finance",
+      "tools": 7,
+      "estimated_tokens": 1225,
+      "exact_tokens": 986,
+      "tool_names": [
+        "finance__tuition_status",
+        "finance__outstanding_tuition",
+        "finance__check_scholarship_eligibility",
+        "finance__rank_scholarship_candidates",
+        "finance__calculate_teacher_pay",
+        "finance__payroll_summary",
+        "finance__approve_payroll"
+      ]
+    }
+  ]
+}

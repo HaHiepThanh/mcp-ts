@@ -1,0 +1,44 @@
+{
+  "at": "2026-10-18T10:46:41.681Z",
+  "config": "config\\host.qwen.json",
+  "model": "qwen3:4b",
+  "contextSize": 8192,
+  "reserve": 1500,
+  "baseline_tokens": 252,
+  "total_tools": 13,
+  "total_estimated": 2144,
+  "total_exact": 1718,
+  "free": 6222,
+  "fits": true,
+  "servers": [
+    {
+      "server": "academic",
+      "tools": 10,
+      "estimated_tokens": 1751,
+      "exact_tokens": 1428,
+      "tool_names": [
+        "academic__search_students",
+        "academic__get_transcript",
+        "academic__calculate_gpa",
+        "academic__class_statistics",
+        "academic__rank_students",
+        "academic__update_grade",
+        "academic__generate_student_feedback",
+        "academic__list_tables",
+        "academic__describe_table",
+        "academic__query_table"
+      ]
+    },
+    {
+      "server": "utility",
+      "tools": 3,
+      "estimated_tokens": 394,
+      "exact_tokens": 367,
+      "tool_names": [
+        "utility__get_current_time",
+        "utility__convert_score",
+        "utility__save_report"
+      ]
+    }
+  ]
+}

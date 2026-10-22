@@ -1,0 +1,37 @@
+{
+    "$comment": "Finance server rules. Edit here — no code change needed. dataDir is relative to mcp-academic/ and is DELIBERATELY not data/sample: the academic server loads every CSV of its own dataDir (query_table), so money data placed there would be readable through the academic server. Override with env FINANCE_DATA_DIR. Teachers, sections and conduct come from the academic data dir (teachers.csv, sections.csv, conduct.csv).",
+    "dataDir": "data/sample-finance",
+    "currency": "VND",
+    "tables": {
+        "tuition": "tuition.csv",
+        "scholarships": "scholarships.csv",
+        "awards": "scholarship_awards.csv",
+        "payroll": "payroll.csv"
+    },
+    "calendar": {
+        "$comment": "Same calendar as config/utility.json: month (1-12) -> semester number; the academic year starts in academicYearStartMonth. Used to turn a payroll month into a semester.",
+        "academicYearStartMonth": 9,
+        "semesterByMonth": { "9": 1, "10": 1, "11": 1, "12": 1, "1": 1, "2": 2, "3": 2, "4": 2, "5": 2, "6": 2, "7": 3, "8": 3 }
+    },
+    "tuition": {
+        "$comment": "Data-quality check: amount_due must equal credits_registered x fee_per_credit x (1 - discount_pct/100) within this tolerance.",
+        "amountToleranceVnd": 1000
+    },
+    "scholarship": {
+        "$comment": "GPA and conduct thresholds live per scholarship in scholarships.csv (min_gpa, min_conduct). These switches add the two other conditions. 'No owed course' = after the best attempt per course up to the semester, no course is still failing.",
+        "requirePaidTuition": true,
+        "requireNoOwedCourses": true
+    },
+    "teaching": {
+        "$comment": "pay = base_salary (payroll.csv) + periods x rate(title) + overtime bonus + bonus - deductions. periods = sum of sections.periods of the teacher in the month's semester x weeksPerMonth. Overtime bonus = periods above standardPeriodsPerMonth x rate x overtimeBonusRatio.",
+        "ratePerPeriodByTitle": {
+            "Lecturer": 120000,
+            "Senior Lecturer": 150000,
+            "Associate Professor": 200000,
+            "Professor": 250000
+        },
+        "weeksPerMonth": 4,
+        "standardPeriodsPerMonth": 24,
+        "overtimeBonusRatio": 0.5
+    }
+}

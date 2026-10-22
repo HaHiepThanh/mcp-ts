@@ -24,7 +24,7 @@ Every example saves its real calls and results to `outputs/examples/<example>.js
 
 | Method | Input | Output | Notes / errors | Example |
 | --- | --- | --- | --- | --- |
-| `server.registerTool(name, config, handler)` | `config`: `{ title?, description, inputSchema? (Zod object), outputSchema?, annotations? }` · `handler(args, ctx)` returns `{ content[], structuredContent?, isError? }` | `RegisteredTool` | Arguments failing `inputSchema` → **result** with `isError: true` (handler not run). `structuredContent` failing `outputSchema` → `isError: true`. Annotations are hints only. Includes domain tools (`search_students`, `attendance_summary`, `conduct_score`, `at_risk_students`, `search_teachers`, `class_timetable`, `teacher_workload`, `teacher_grade_report`, etc.) | S2, S9, S10 |
+| `server.registerTool(name, config, handler)` | `config`: `{ title?, description, inputSchema? (Zod object), outputSchema?, annotations? }` · `handler(args, ctx)` returns `{ content[], structuredContent?, isError? }` | `RegisteredTool` | Arguments failing `inputSchema` → **result** with `isError: true` (handler not run). `structuredContent` failing `outputSchema` → `isError: true`. Annotations are hints only. Includes domain tools (`search_students`, `attendance_summary`, `conduct_score`, `at_risk_students`, `search_teachers`, `class_timetable`, `teacher_workload`, `teacher_grade_report`, etc., and the `finance` tools of section 4) | S2, S9, S10, S11 |
 | `RegisteredTool.disable()` / `.enable()` | — | `void` | Hidden from / back in `tools/list`; calling a disabled tool fails. Sends `notifications/tools/list_changed` | S3 |
 | `RegisteredTool.update(changes)` | `{ description?, callback?, paramsSchema?, ... }` | `void` | Sends `list_changed` | S3 |
 | `RegisteredTool.remove()` | — | `void` | Later calls → `ProtocolError -32602 Tool … not found` | S3 |
@@ -51,9 +51,9 @@ Every example saves its real calls and results to `outputs/examples/<example>.js
 | `ctx.mcpReq.notify({ method: 'notifications/progress', params })` | `{ progressToken, progress, total?, message? }` | `Promise<void>` | Only when the client sent a `progressToken` (`ctx.mcpReq._meta?.progressToken`) | S6 |
 | `ctx.mcpReq.log(level, data)` | `'debug' \| 'info' \| 'warning' \| 'error' …`, any JSON | `Promise<void>` | Needs `capabilities.logging`. **Deprecated** in 2026-07-28 (SEP-2577) | S6 |
 | `ctx.mcpReq.signal` | — | `AbortSignal` | Aborted when the client cancels or disconnects | S6 |
-| `ctx.mcpReq.elicitInput(params)` | `{ mode: 'form', message, requestedSchema }` | `{ action: 'accept' \| 'decline' \| 'cancel', content? }` | **2025 only**. Throws if the client lacks the `elicitation` capability | S7 |
+| `ctx.mcpReq.elicitInput(params)` | `{ mode: 'form', message, requestedSchema }` | `{ action: 'accept' \| 'decline' \| 'cancel', content? }` | **2025 only**. Throws if the client lacks the `elicitation` capability | S7, S11 |
 | `ctx.mcpReq.requestSampling(params)` | `{ messages, systemPrompt?, maxTokens }` | `{ model, role, content }` | **2025 only**. **Deprecated** (SEP-2577) | S7 |
-| `return inputRequired({ inputRequests })` | `{ key: inputRequired.elicit(...) \| inputRequired.createMessage(...) }` | `InputRequiredResult` | **2026 only**. Client answers and retries the call; answers arrive in `ctx.mcpReq.inputResponses`. Missing capability → `ProtocolError -32021` | S7 |
+| `return inputRequired({ inputRequests })` | `{ key: inputRequired.elicit(...) \| inputRequired.createMessage(...) }` | `InputRequiredResult` | **2026 only**. Client answers and retries the call; answers arrive in `ctx.mcpReq.inputResponses`. Missing capability → `ProtocolError -32021` | S7, S11 |
 | `inputResponse(ctx.mcpReq.inputResponses, key)` | response map, key | `{ kind: 'missing' \| 'elicit' \| 'sampling' \| 'roots', ... }` | Reads the retried call's answers | `src/lib/interaction.ts` |
 
 ---
@@ -125,3 +125,19 @@ Every example saves its real calls and results to `outputs/examples/<example>.js
 | Timeout | **throws** `SdkError REQUEST_TIMEOUT` |
 | Pinned era not offered | **throws** `SdkError ERA_NEGOTIATION_FAILED` |
 | Call after `close()` | **throws** `Error: Not connected` |
+
+---
+
+## 4. Tools of the `finance` server (example S11)
+
+Sensitive data (tuition, scholarships, teacher payroll) in a separate server and a separate data folder (`data/sample-finance/`), so a host can leave it out (least privilege). All rules come from [`config/finance.json`](../config/finance.json) and `scholarships.csv`; every number and eligibility result is computed by code. Read-only tools carry `annotations: READ_ONLY`, return `structuredContent` that matches their `outputSchema`, and report business problems as `isError: true` with a hint for the LLM. Arguments failing the schema (bad semester/month format, `limit` out of range) are also `isError: true`.
+
+| Tool | Input | Output (`structuredContent`) | Business errors (`isError: true`) |
+| --- | --- | --- | --- |
+| `tuition_status` | `{ student_id, semester? }` | `{ student_id, full_name, currency, total_balance, records[] }` — each record: `amount_due`, `amount_paid`, `balance`, `status` (`paid`/`partial`/`unpaid`), `overdue`, `due_date`, `paid_date` | unknown student · no tuition record |
+| `outstanding_tuition` | `{ class_id? \| faculty? (exactly one), semester?, limit (1–50, default 10) }` | `{ scope, semester, currency, students_in_scope, students_with_balance, total_balance, overdue_balance, students[] }` | neither or both of class_id / faculty · unknown class or faculty |
+| `check_scholarship_eligibility` | `{ student_id, semester }` | `{ semester_gpa, conduct_score, tuition, owed_courses[], scholarships[] (eligible, already_awarded, failed[]), eligible_for[], notes[] }` — GPA, conduct, tuition fully paid and no owed course | unknown student · semester without grades · no scholarships loaded |
+| `rank_scholarship_candidates` | `{ faculty, semester, scholarship_id, limit }` | `{ scholarship, slots, students_in_faculty, eligible_count, ranking[] (rank, semester_gpa, conduct_score, within_slots, already_awarded) }` — sorted by GPA, then conduct | unknown scholarship / faculty / semester |
+| `calculate_teacher_pay` | `{ teacher_id, month }` | `{ periods, rate_per_period, base_salary, teaching_pay, overtime_periods, overtime_bonus, bonus, deductions, gross, net, status (draft/approved) }` — periods come from the teacher's sections in the month's semester | unknown teacher · no payroll record · no rate for the title · teachers/sections not loaded |
+| `payroll_summary` | `{ month, faculty?, limit (1–100, default 25) }` | `{ teachers, approved, total_periods, total_overtime_bonus, total_gross, total_net, skipped, rows[] }` | no payroll for the month / faculty |
+| `approve_payroll` | `{ teacher_id, month }` | text. **Always asks the user** (elicitation: 2025 push / 2026 `inputRequired`); approval is in memory only, the CSV is never changed | decline / cancel / confirm=false → not approved · already approved → nothing changes · client without `elicitation` → not approved |

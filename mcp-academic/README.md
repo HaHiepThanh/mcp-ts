@@ -10,6 +10,7 @@ Seminar **MCP.2502 — MCP TypeScript SDK (v2)**. An MCP server that exposes uni
 | M3 | `utility` server + chat host (Gemini) | ✅ |
 | M4 | VS Code config, wire trace, docs pack for slides/quiz/demo | ✅ |
 | M5 | Second LLM (Qwen3 4B via Ollama) + model comparison | ✅ |
+| M6 | `finance` server (tuition, scholarships, payroll) + least-privilege and token-budget experiments | in review (PR #2) |
 
 ## Quick start
 
@@ -19,10 +20,14 @@ npm run doctor        # checks Node, MCP SDK, Gemini key, Ollama
 npm run examples      # runs every example → outputs/examples/*.json + *.log
 npm run academic      # academic server over stdio
 npm run academic:http # academic server over Streamable HTTP at http://127.0.0.1:3001/mcp
-npm run chat          # chat with Gemini using both MCP servers (config/host.json)
+npm run finance       # finance server over stdio (npm run finance:http → http://127.0.0.1:3003/mcp)
+npm run chat          # chat with Gemini using the three MCP servers (config/host.json)
 npm run check:vscode  # start the servers exactly as .vscode/mcp.json tells VS Code to
 npm run results       # rebuild docs/results.md from outputs/
 npm run compare       # benchmark every LLM configuration → docs/model-comparison.md
+npm run data:all      # regenerate every sample CSV (data:sample → data:finance)
+npm run budget        # how many tokens the tool definitions use of the LLM context (needs Ollama for exact counts)
+npm run check:finance # finance data vs finance rules: awards eligible? payroll covers every teacher and month?
 ```
 
 Requires Node ≥ 20. API keys live in `.env` (see `.env.example`) and are never committed or synced.
@@ -70,6 +75,22 @@ The same code serves **both protocol eras**: 2025 clients (`initialize` handshak
 
 The two servers do not know about each other — the host's LLM combines them (e.g. statistics from `academic`, then `save_report` from `utility`).
 
+## The `finance` server
+
+Sensitive data — tuition, scholarships, teacher payroll (all fake) — in its own server and its own data folder `data/sample-finance/`, so a host can leave it out (least privilege). Rules (rate per period by title, overtime, scholarship conditions) live in [`config/finance.json`](config/finance.json); eligibility and pay are computed by code, never by the LLM. Teachers, sections and conduct come from the academic dataset. Details of each tool: [`docs/method-reference.md`](docs/method-reference.md) section 4.
+
+| Kind | Name | What it does |
+| --- | --- | --- |
+| Tool | `tuition_status` | Amount due / paid / balance / overdue per semester of one student |
+| Tool | `outstanding_tuition` | Students with unpaid balance in a class **or** a faculty, largest first |
+| Tool | `check_scholarship_eligibility` | Per scholarship: GPA, conduct, tuition paid, no owed course — with the failed conditions |
+| Tool | `rank_scholarship_candidates` | Eligible students of a faculty for one scholarship, ranked, first `slots_per_faculty` within quota |
+| Tool | `calculate_teacher_pay` | Base + periods × rate(title) + overtime bonus + bonus − deductions for one month |
+| Tool | `payroll_summary` | Totals and per-teacher list for a month, optionally one faculty |
+| Tool | `approve_payroll` | Marks a payroll approved after the user confirms — **elicitation** (in memory only) |
+
+Two experiments (see [`docs/experiments.md`](docs/experiments.md)): `config/host.no-finance.json` leaves the server out (does the LLM refuse tuition/payroll questions?), and `npm run budget` measures whether 3 servers fit Qwen's 8k context.
+
 ## The chat host (`src/host/`)
 
 An LLM host that connects to every server in a config file and lets Gemini call their tools.
@@ -84,7 +105,7 @@ you ─▶ host ─▶ Gemini (sees all MCP tools) ─▶ tool calls ─▶ MCP 
 | `npm run chat` | Interactive chat (`/help`, `/tools`, `/resources`, `/attach <uri>`, `/prompts`, `/prompt academic:class_report class_id=IT01`, `/new`, `/exit`) |
 | `npm run chat -- --ask "question"` | One question, then exit |
 | `npm run chat -- --script demo/questions.txt --fresh` | Run a list of questions (demo / batch) |
-| `npm run chat -- --config config/host.http.json` | Same host, servers over HTTP (start `npm run academic:http` and `npm run utility:http` first) |
+| `npm run chat -- --config config/host.http.json` | Same host, servers over HTTP (start `npm run academic:http`, `npm run utility:http` and `npm run finance:http` first) |
 | `npm run chat -- --model gemini-3.8-flash` | Override the model |
 
 - **Configuration** — [`config/host.json`](config/host.json): LLM (`gemini-3.5-flash-lite` by default, newer Flash models as automatic fallback), `mcpServers` in the same shape as Claude Desktop / VS Code, system prompt, max tool rounds, sampling approval (`auto`/`ask`/`deny`), elicitation policy when there is no terminal.
@@ -98,6 +119,9 @@ you ─▶ host ─▶ Gemini (sees all MCP tools) ─▶ tool calls ─▶ MCP 
 | --- | --- | --- |
 | `config/host.json` | Gemini (`gemini-3.5-flash-lite`, cloud) | `src/host/providers/gemini.ts` |
 | `config/host.qwen.json` | Qwen3 4B Instruct in **Ollama**, on this Mac (open weights; `--model qwen3:4b` = thinking variant) | `src/host/providers/openai-compatible.ts` (any OpenAI-compatible endpoint: Ollama, Groq, OpenRouter, OpenAI) |
+| `config/host.qwen-api.json` | Qwen through a **cloud** OpenAI-compatible API (key in `OPENAI_API_KEY` in `.env`); all three servers enabled, no 8k limit | same provider |
+
+On `host.qwen.json` the `finance` server is registered but `"disabled": true`: its 7 extra tools may not fit the 8k context (measure with `npm run budget`, see [`docs/experiments.md`](docs/experiments.md)).
 
 Run Qwen:
 
@@ -109,7 +133,7 @@ npm run chat -- --config config/host.qwen.json                                  
 
 Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the model only).
 
-**Benchmark** — `demo/benchmark.ts` holds 11 questions (single tool, chains, two servers, generic CSV tool, tool error, elicitation arguments, sampling). The ground truth is fetched from the MCP tools themselves, so it follows the dataset. `npm run compare` runs every case on every configuration and writes [`docs/model-comparison.md`](docs/model-comparison.md) plus the full turns in `outputs/benchmarks/`; findings are in [`docs/model-observations.md`](docs/model-observations.md).
+**Benchmark** — `demo/benchmark.ts` holds 11 questions (single tool, chains, two servers, generic CSV tool, tool error, elicitation arguments, sampling) plus 7 `fin-*` cases, one per finance tool; a case with `requires: ['finance']` is skipped for configurations where that server is not enabled (e.g. Qwen). The ground truth is fetched from the MCP tools themselves, so it follows the dataset. `npm run compare` runs every case on every configuration and writes [`docs/model-comparison.md`](docs/model-comparison.md) plus the full turns in `outputs/benchmarks/`; findings are in [`docs/model-observations.md`](docs/model-observations.md).
 
 | Model | Pass (22 turns) | Median model time/turn |
 | --- | --- | --- |
@@ -120,10 +144,10 @@ Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the
 
 ## Using the servers in VS Code
 
-`.vscode/mcp.json` (in `seminar-emt/`, and a copy in `mcp-academic/` if you open that folder instead) registers both servers — the same command lines as `config/host.json`, no code change:
+`.vscode/mcp.json` (in `seminar-emt/`, and a copy in `mcp-academic/` if you open that folder instead) registers the three servers — the same command lines as `config/host.json`, no code change:
 
-1. Open the folder in VS Code → Command Palette → **MCP: List Servers** → start `academic` and `utility`, confirm **Trust**.
-2. Chat view → **Agent** mode → the tool picker lists the 13 tools.
+1. Open the folder in VS Code → Command Palette → **MCP: List Servers** → start `academic`, `utility` and `finance`, confirm **Trust**.
+2. Chat view → **Agent** mode → the tool picker lists the 20 tools.
 3. Prompts: type `/academic.class_report`; resources: **Add Context → MCP Resources**.
 
 `npm run check:vscode` verifies the config without opening VS Code.
@@ -137,6 +161,7 @@ Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the
 | [`results.md`](docs/results.md) | Generated tables: examples, transports, errors, cache, chat latency |
 | [`model-comparison.md`](docs/model-comparison.md) · [`model-observations.md`](docs/model-observations.md) | Benchmark of the LLMs (generated) and what we learned |
 | [`demo-script.md`](docs/demo-script.md) | 8-minute live demo runbook with fallbacks |
+| [`experiments.md`](docs/experiments.md) | Configuration experiments — finance: least privilege (server left out) and token budget (3 servers vs 8k context) |
 | [`vscode-guide.md`](docs/vscode-guide.md) | Step-by-step: the two servers in VS Code Copilot Chat (Vietnamese) |
 | [`setup-guide.md`](docs/setup-guide.md) | Team setup: Node, clone, local Qwen (Ollama) or Gemini key + `.env` (Vietnamese) |
 | [`quiz-facts.md`](docs/quiz-facts.md) | 30 verified facts + distractors for the multiple-choice quiz |
@@ -154,6 +179,7 @@ Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the
 | S6 | `examples/server/s6-logging-progress-cancel.ts` | `ctx.mcpReq.notify/log/signal`, `setLoggingLevel` | with/without progress, 3 log levels, cancel on 2 eras |
 | S7 | `examples/server/s7-elicitation-sampling.ts` | `elicitInput`, `requestSampling`, `inputRequired` | accept/decline/cancel × 2 eras, missing capability |
 | S8 | `examples/server/s8-transports.ts` | `serveStdio`, `createMcpHandler`, client transports | stdio/HTTP × 2 eras, timings, Host/Origin checks |
+| S11 | `examples/server/s11-finance.ts` | `registerTool` (outputSchema), `callTool`, `elicitInput`, `inputRequired` | 7 finance tools × valid / edge / invalid; `approve_payroll` accept / decline / cancel × 2 eras, missing capability |
 | C1 | `examples/client/c1-client-connect.ts` | `new Client`, `connect`, `getProtocolEra`, `getDiscoverResult`, `ping`, `close` | default / auto / pin / `prior`, era mismatches |
 | C2 | `examples/client/c2-request-options-errors.ts` | `timeout`, `onprogress`, `resetTimeoutOnProgress`, `maxTotalTimeout`, `ProtocolError`, `SdkError` | 4 timeout configs + 9-case failure taxonomy |
 | C3 | `examples/client/c3-subscriptions.ts` | `listen`, `subscribeResource`, `unsubscribeResource`, `handler.notify` | 2026 stream (real HTTP server) vs 2025 subscribe, wrong-era calls |
@@ -168,17 +194,21 @@ Every example prints each call (method, parameters, result, time) and saves it t
 
 `data/sample/` is a **temporary, generated** dataset (`npm run data:sample`, deterministic) with 40 students, 10 courses, retakes and 7 deliberately invalid rows. The team's real dataset goes to `data/real/`; switch by editing `dataDir` in [`config/academic.json`](config/academic.json) or setting `ACADEMIC_DATA_DIR`.
 
+`teachers.csv`, `sections.csv` and `conduct.csv` in `data/sample/` come from `generate-sample-data.ts` (`npm run data:sample`). The finance CSVs are in their own folder `data/sample-finance/` (`npm run data:finance`; override with `FINANCE_DATA_DIR`) and are deliberately **not** loaded by the academic server. Run `npm run data:all` to rebuild everything in the right order.
+
 ## Layout
 
 ```
 config/            grading rules, server config (the "MCP configuration" shown in phase 2)
 data/sample/       generated sample CSVs + README_data.md
+data/sample-finance/  generated finance CSVs (tuition, scholarships, awards, payroll) — separate on purpose
 src/lib/           CSV parser, env loader, stdio/HTTP runner, dual-era interaction helpers
 src/server/academic/  data loading & validation, grading, tools, resources, prompts, entry point
 src/server/utility/   time, score conversion, report saving
+src/server/finance/   tuition, scholarships, payroll: data loading & validation, rules (pure functions), tools
 src/host/          chat host: config, Gemini provider, MCP hub, agent loop, terminal UI
 demo/              question list for the live demo
-examples/          _harness.ts + server/ (S1–S8) + client/ (C1–C5) + run-all.ts
+examples/          _harness.ts + server/ (S1–S8, S11) + client/ (C1–C5) + run-all.ts
 docs/              architecture, method reference, results, demo script, quiz facts, team briefs
 .vscode/mcp.json   VS Code MCP configuration (also at the seminar-emt root)
 scripts/           doctor, sample-data generator, smoke server, VS Code config check, results builder

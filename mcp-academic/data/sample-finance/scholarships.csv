@@ -1,0 +1,4 @@
+scholarship_id,name,type,amount,min_gpa,min_conduct,slots_per_faculty
+SCH01,Excellence Scholarship,merit,10000000,3.6,90,2
+SCH02,Merit Scholarship,merit,5000000,3.2,80,4
+SCH03,Student Support Grant,need,4000000,2.5,65,3
