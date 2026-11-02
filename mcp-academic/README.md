@@ -10,7 +10,7 @@ Seminar **MCP.2502 — MCP TypeScript SDK (v2)**. An MCP server that exposes uni
 | M3 | `utility` server + chat host (Gemini) | ✅ |
 | M4 | VS Code config, wire trace, docs pack for slides/quiz/demo | ✅ |
 | M5 | Second LLM (Qwen3 4B via Ollama) + model comparison | ✅ |
-| M6 | `finance` server (tuition, scholarships, payroll) + least-privilege and token-budget experiments | in review (PR #2) |
+| M6 | `finance` server (tuition, scholarships, payroll) + least-privilege and token-budget experiments | ✅ |
 
 ## Quick start
 
@@ -121,7 +121,7 @@ you ─▶ host ─▶ Gemini (sees all MCP tools) ─▶ tool calls ─▶ MCP 
 | `config/host.qwen.json` | Qwen3 4B Instruct in **Ollama**, on this Mac (open weights; `--model qwen3:4b` = thinking variant) | `src/host/providers/openai-compatible.ts` (any OpenAI-compatible endpoint: Ollama, Groq, OpenRouter, OpenAI) |
 | `config/host.qwen-api.json` | Qwen through a **cloud** OpenAI-compatible API (key in `OPENAI_API_KEY` in `.env`); all three servers enabled, no 8k limit | same provider |
 
-On `host.qwen.json` the `finance` server is registered but `"disabled": true`: its 7 extra tools may not fit the 8k context (measure with `npm run budget`, see [`docs/experiments.md`](docs/experiments.md)).
+On `host.qwen.json` the `finance` server is registered but `"disabled": true`: it is off by default on Qwen for least privilege (a Qwen host should not see tuition or payroll unless asked to) and is enabled with `"disabled": false`. It fits the 8k context either way: all 27 tools take 3954 tokens and leave 4238 free (measured with `npm run budget`, see F2 in [`docs/experiments.md`](docs/experiments.md)).
 
 Run Qwen:
 
@@ -147,7 +147,7 @@ Stop it afterwards with Ctrl-C in terminal 1 (`ollama stop qwen3:4b` unloads the
 `.vscode/mcp.json` (in `seminar-emt/`, and a copy in `mcp-academic/` if you open that folder instead) registers the three servers — the same command lines as `config/host.json`, no code change:
 
 1. Open the folder in VS Code → Command Palette → **MCP: List Servers** → start `academic`, `utility` and `finance`, confirm **Trust**.
-2. Chat view → **Agent** mode → the tool picker lists the 20 tools.
+2. Chat view → **Agent** mode → the tool picker lists the 27 tools.
 3. Prompts: type `/academic.class_report`; resources: **Add Context → MCP Resources**.
 
 `npm run check:vscode` verifies the config without opening VS Code.
