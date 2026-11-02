@@ -25,6 +25,7 @@ import { GeminiProvider } from '../src/host/providers/gemini';
 import { OpenAICompatibleProvider } from '../src/host/providers/openai-compatible';
 import type { LlmProvider } from '../src/host/providers/provider';
 import { createAcademicServer } from '../src/server/academic/server';
+import { createFinanceServer } from '../src/server/finance/server';
 import { createUtilityServer } from '../src/server/utility/server';
 
 loadEnv();
@@ -58,12 +59,13 @@ function makeProvider(llm: HostConfig['llm']): LlmProvider {
 async function makeOracle(): Promise<{ oracle: Oracle; close: () => Promise<void> }> {
     const academic = await connectInProcess(createAcademicServer);
     const utility = await connectInProcess(createUtilityServer);
+    const finance = await connectInProcess(createFinanceServer);
+    const clients = { academic: academic.client, utility: utility.client, finance: finance.client };
     const oracle: Oracle = async (server, tool, args) => {
-        const client = server === 'academic' ? academic.client : utility.client;
-        const result = await client.callTool({ name: tool, arguments: args });
+        const result = await clients[server].callTool({ name: tool, arguments: args });
         return result.structuredContent as Record<string, unknown>;
     };
-    return { oracle, close: async () => (await academic.close(), await utility.close()) };
+    return { oracle, close: async () => (await academic.close(), await utility.close(), await finance.close()) };
 }
 
 /** A number matches if any common rounding of it appears in the text (2.06 → "2.06", "2.1"). */
@@ -71,7 +73,11 @@ function contains(text: string, value: string | number): boolean {
     const haystack = text.toLowerCase().normalize('NFC');
     if (typeof value === 'number') {
         const variants = new Set([String(value), value.toFixed(2), value.toFixed(1), Number.isInteger(value) ? `${value}.0` : '']);
-        return [...variants].filter(Boolean).some(v => new RegExp(`(^|[^\\d.])${v.replace('.', '\\.')}(?![\\d])`).test(haystack));
+        // Money: 12345000 may be written 12,345,000 / 12.345.000 / 12 345 000.
+        if (Number.isInteger(value) && Math.abs(value) >= 1000) {
+            for (const separator of [',', '.', ' ', '\u00a0']) variants.add(String(Math.abs(value)).replace(/\B(?=(\d{3})+(?!\d))/g, separator));
+        }
+        return [...variants].filter(Boolean).some(v => new RegExp(`(^|[^\\d.])${v.replace(/\./g, '\\.')}(?![\\d])`).test(haystack));
     }
     const needle = value.toLowerCase().normalize('NFC');
     // Short values ("B", "IT01") must match as a whole word, otherwise any "b" in the text would count.
@@ -107,7 +113,16 @@ interface CaseResult {
 
 const { oracle, close: closeOracle } = await makeOracle();
 const expected = new Map<string, (string | number)[]>();
-for (const c of CASES) expected.set(c.id, c.expect ? await c.expect(oracle) : []);
+// A case whose ground truth cannot be fetched (e.g. finance data not generated yet) is skipped instead of aborting the whole run.
+const skipped = new Set<string>();
+for (const c of CASES) {
+    try {
+        expected.set(c.id, c.expect ? await c.expect(oracle) : []);
+    } catch (error) {
+        skipped.add(c.id);
+        console.log(`⚠ ${c.id}: ground truth unavailable (${(error as Error).message.slice(0, 80)}) — case skipped`);
+    }
+}
 await closeOracle();
 
 const results: CaseResult[] = [];
@@ -156,10 +171,12 @@ for (const variant of reportFile ? [] : selected) {
         continue;
     }
     console.log(`\n▶ ${variant.id} (${host.provider.model})`);
+    const active = new Set(Object.entries(config.mcpServers).filter(([, server]) => !server.disabled).map(([name]) => name));
 
     let quotaFailures = 0;
     runs: for (let run = 1; run <= repeat; run++) {
         for (const c of CASES) {
+            if (skipped.has(c.id) || c.requires?.some(server => !active.has(server))) continue; // server not enabled in this configuration
             if (variant.paceMs) await new Promise(resolve => setTimeout(resolve, variant.paceMs));
             host.newConversation();
             const want = expected.get(c.id) ?? [];

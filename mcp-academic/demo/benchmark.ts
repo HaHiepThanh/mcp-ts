@@ -3,7 +3,7 @@
  * Expected values are NOT hard-coded: `expect` asks the real MCP tools (the "oracle") for the
  * ground truth, so the benchmark stays correct when the dataset changes.
  */
-export type Oracle = (server: 'academic' | 'utility', tool: string, args: Record<string, unknown>) => Promise<Record<string, any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
+export type Oracle = (server: 'academic' | 'utility' | 'finance', tool: string, args: Record<string, unknown>) => Promise<Record<string, any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export interface ToolCallSeen {
     server: string;
@@ -16,6 +16,8 @@ export interface BenchmarkCase {
     id: string;
     category: string;
     question: string;
+    /** Servers that must be enabled in the host config; the case is skipped for configurations without them (e.g. finance on Qwen). */
+    requires?: string[];
     /** Tools ("server.tool") that must be called at least once. */
     tools: string[];
     /** Optional check of the arguments the model chose. */
@@ -167,5 +169,75 @@ export const CASES: BenchmarkCase[] = [
         tools: ['academic.teacher_workload'],
         args: calls => find(calls, 'academic.teacher_workload').some(c => c.args.teacher_id === 'T002' && c.args.semester === '2025-1'),
         expect: async o => [(await o('academic', 'teacher_workload', { teacher_id: 'T002', semester: '2025-1' })).total_periods_per_week]
+    },
+
+    // ── finance server (needs data/sample-finance/ and the teachers/sections/conduct tables) ──
+    // Teacher T001 and the months 2024-10 / 2025-xx come from the generated sample data; update them if teachers.csv changes.
+    {
+        id: 'fin-tuition',
+        category: 'finance · single tool',
+        question: 'How much tuition is student 2201005 supposed to pay for semester 2025-1, and has it been paid?',
+        requires: ['finance'],
+        tools: ['finance.tuition_status'],
+        args: calls => find(calls, 'finance.tuition_status').some(c => c.args.student_id === '2201005' && c.args.semester === '2025-1'),
+        expect: async o => [(await o('finance', 'tuition_status', { student_id: '2201005', semester: '2025-1' })).records[0].amount_due]
+    },
+    {
+        id: 'fin-outstanding',
+        category: 'finance · aggregate',
+        question: 'In the Information Technology faculty, how many students still owe tuition for semester 2025-1, and how much is owed in total?',
+        requires: ['finance'],
+        tools: ['finance.outstanding_tuition'],
+        args: calls => find(calls, 'finance.outstanding_tuition').some(c => c.args.semester === '2025-1' && c.args.class_id === undefined),
+        expect: async o => {
+            const r = await o('finance', 'outstanding_tuition', { faculty: 'Information Technology', semester: '2025-1' });
+            return [r.students_with_balance, r.total_balance];
+        }
+    },
+    {
+        id: 'fin-eligibility',
+        category: 'finance · rules in code',
+        question: 'Which scholarships is student 2201010 eligible for in semester 2024-1? List the scholarship IDs.',
+        requires: ['finance'],
+        tools: ['finance.check_scholarship_eligibility'],
+        args: calls => find(calls, 'finance.check_scholarship_eligibility').some(c => c.args.student_id === '2201010' && c.args.semester === '2024-1'),
+        expect: async o => (await o('finance', 'check_scholarship_eligibility', { student_id: '2201010', semester: '2024-1' })).eligible_for
+    },
+    {
+        id: 'fin-rank',
+        category: 'finance · ranking',
+        question: 'Who are the top 3 candidates for scholarship SCH02 in the Information Technology faculty for semester 2024-2?',
+        requires: ['finance'],
+        tools: ['finance.rank_scholarship_candidates'],
+        args: calls => find(calls, 'finance.rank_scholarship_candidates').some(c => String(c.args.scholarship_id).toUpperCase() === 'SCH02' && c.args.semester === '2024-2'),
+        expect: async o =>
+            (await o('finance', 'rank_scholarship_candidates', { faculty: 'Information Technology', semester: '2024-2', scholarship_id: 'SCH02', limit: 3 })).ranking.map((r: { full_name: string }) => r.full_name)
+    },
+    {
+        id: 'fin-pay',
+        category: 'finance · payroll',
+        question: 'What is the net pay of teacher T001 for 2024-10?',
+        requires: ['finance'],
+        tools: ['finance.calculate_teacher_pay'],
+        args: calls => find(calls, 'finance.calculate_teacher_pay').some(c => c.args.teacher_id === 'T001' && c.args.month === '2024-10'),
+        expect: async o => [(await o('finance', 'calculate_teacher_pay', { teacher_id: 'T001', month: '2024-10' })).net]
+    },
+    {
+        id: 'fin-payroll-summary',
+        category: 'finance · payroll',
+        question: 'What is the total net payroll of the Information Technology faculty for 2024-10?',
+        requires: ['finance'],
+        tools: ['finance.payroll_summary'],
+        args: calls => find(calls, 'finance.payroll_summary').some(c => c.args.month === '2024-10'),
+        expect: async o => [(await o('finance', 'payroll_summary', { month: '2024-10', faculty: 'Information Technology' })).total_net]
+    },
+    {
+        id: 'fin-approve',
+        category: 'finance · destructive tool (declined)',
+        question: 'Approve the payroll of teacher T001 for 2024-10.',
+        requires: ['finance'],
+        tools: ['finance.approve_payroll'],
+        // The host declines the confirmation when there is no terminal, so nothing is approved.
+        args: calls => find(calls, 'finance.approve_payroll').some(c => c.args.teacher_id === 'T001' && c.args.month === '2024-10')
     }
 ];

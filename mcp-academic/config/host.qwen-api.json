@@ -1,0 +1,39 @@
+{
+    "$comment": "Qwen through a CLOUD API (OpenAI-compatible), not local Ollama. The API key is read from the environment variable OPENAI_API_KEY (put it in mcp-academic/.env, never in this file). baseUrl + model below are for Alibaba Cloud Model Studio (DashScope, international); for OpenRouter use https://openrouter.ai/api/v1 and a model id such as qwen/<model-name>. Cloud models have a large context window, so all three servers (academic, utility, finance) are enabled.",
+    "llm": {
+        "provider": "openai-compatible",
+        "label": "qwen-api",
+        "baseUrl": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+        "model": "qwen-plus",
+        "temperature": 0.2
+    },
+    "mcpServers": {
+        "academic": {
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/academic/main.ts"],
+            "protocol": "auto"
+        },
+        "utility": {
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/utility/main.ts"],
+            "protocol": "auto"
+        },
+        "finance": {
+            "command": "node",
+            "args": ["--import", "tsx", "src/server/finance/main.ts"],
+            "protocol": "auto"
+        }
+    },
+    "agent": {
+        "maxToolRounds": 8,
+        "systemPrompt": "You are an academic assistant for a university. Get every fact (students, grades, GPA, statistics, dates) from the MCP tools — never invent or estimate numbers. Prefer one well-chosen tool call over many; call several tools when the question needs them. When a tool returns an error, read it and fix your call. Reply in the language of the user's latest message only: an English question gets an English answer even though names in the data are Vietnamese; a Vietnamese question gets a Vietnamese answer. Be concise and show the key numbers."
+    },
+    "sampling": {
+        "approval": "auto",
+        "maxTokens": 600
+    },
+    "elicitation": {
+        "nonInteractive": "decline"
+    },
+    "logDir": "outputs/logs"
+}
