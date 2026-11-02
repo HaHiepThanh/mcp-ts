@@ -42,7 +42,7 @@ function loadCases(file: string): Case[] {
     if (table.headers.join(',') !== 'id,question,expected_tools,expected_values,note') throw Error('Case CSV must have the five TASKS.md columns, in order.');
     const ids = new Set<string>();
     const cases = table.rows.map(row => {
-        if (!row.id || ids.has(row.id) || !row.question) throw Error(`Missing or duplicate case ID/question: ${row.id}`);
+        if (!/^K\d{2}$/.test(row.id) || ids.has(row.id) || !row.question) throw Error(`Invalid or duplicate case ID/question: ${row.id}`);
         ids.add(row.id);
         const note = noteSchema.parse(JSON.parse(row.note));
         if (note.source !== 'main' || note.status === 'provisional') throw Error(`${row.id}: provisional finance data is excluded. Recompute on shared main after finance merges.`);
@@ -65,8 +65,9 @@ function gitCommit(): string {
     catch { return 'unavailable'; }
 }
 function sourceHashes(): Record<string, string> {
-    const files = readdirSync(path.join(PROJECT_ROOT, 'data/sample')).filter(f => f.endsWith('.csv')).map(f => `data/sample/${f}`);
+    const files = ['data/sample', 'data/sample-finance'].flatMap(dir => existsSync(path.join(PROJECT_ROOT, dir)) ? readdirSync(path.join(PROJECT_ROOT, dir)).filter(f => f.endsWith('.csv')).map(f => `${dir}/${f}`) : []);
     files.push('config/academic-rules.json', 'config/grading.json', 'config/academic.json');
+    if (existsSync(path.join(PROJECT_ROOT, 'config/finance.json'))) files.push('config/finance.json');
     return Object.fromEntries(files.map(file => [file, hash(readFileSync(path.join(PROJECT_ROOT, file), 'utf8').replace(/\r\n/g, '\n'))]));
 }
 async function startHttp(config: HostConfig, children: ChildProcess[]): Promise<void> {
@@ -105,7 +106,7 @@ async function run(configFile: string, llm: boolean, autoHttp: boolean, out: str
     const redact = (s: string): string => Object.entries(process.env).filter(([k, v]) => /(?:API_KEY|TOKEN|SECRET|PASSWORD)$/.test(k) && v && v.length >= 8).reduce((text, [, value]) => text.split(value!).join('[REDACTED]').split(encodeURIComponent(value!)).join('[REDACTED]'), s);
     const log = (data: unknown) => appendFileSync(logFile, redact(JSON.stringify(data)) + '\n');
     const started = new Date().toISOString();
-    log({ kind: 'metadata', started, mode: llm ? 'llm' : 'direct_mcp', scope: 'main dataset only; provisional finance excluded', config: configFile, effectiveConfig: config, configSha256: hash(JSON.stringify(config)), casesFile: path.relative(PROJECT_ROOT, csvFile), casesSha256: hash(readFileSync(csvFile)), runnerSha256: hash(readFileSync(import.meta.filename)), gitCommit: gitCommit(), sourceFiles: sourceHashes(), node: process.version, platform: process.platform, fallback: false, paceMs: llm ? paceMs : 0, expectedCases: cases, grading: 'Required tools/arguments and exact expected values; answerScreenPass only screens value presence, not semantic correctness.' });
+    log({ kind: 'metadata', started, mode: llm ? 'llm' : 'direct_mcp', scope: 'shared main dataset, including merged finance; provisional inputs rejected', financeAsOf: process.env.FINANCE_AS_OF, config: configFile, effectiveConfig: config, configSha256: hash(JSON.stringify(config)), casesFile: path.relative(PROJECT_ROOT, csvFile), casesSha256: hash(readFileSync(csvFile)), runnerSha256: hash(readFileSync(import.meta.filename)), gitCommit: gitCommit(), sourceFiles: sourceHashes(), node: process.version, platform: process.platform, fallback: false, paceMs: llm ? paceMs : 0, expectedCases: cases, grading: 'Required tools/arguments and exact expected values; answerScreenPass only screens value presence, not semantic correctness.' });
     const hub = new McpHub({ onElicit: async () => ({ action: 'decline' }), onSample: async () => { throw Error('Sampling is not used by these read-only cases.'); } });
     const provider = llm ? config.llm.provider === 'gemini' ? new GeminiProvider({ ...config.llm, fallback: false }) : new OpenAICompatibleProvider({ baseUrl: config.llm.baseUrl!, model: config.llm.model!, temperature: config.llm.temperature, label: config.llm.label }) : undefined;
     const host = provider ? new ChatHost(config, provider, { configFile, verbose: false }) : undefined;
@@ -164,11 +165,14 @@ async function run(configFile: string, llm: boolean, autoHttp: boolean, out: str
 }
 async function main(): Promise<void> {
     loadEnv();
-    const allowed = ['--suite', '--llm', '--start-http', '--dry-run', '--cases', '--config', '--only', '--out', '--pace-ms'];
+    const allowed = ['--suite', '--llm', '--start-http', '--dry-run', '--cases', '--config', '--only', '--out', '--pace-ms', '--as-of'];
     for (const a of args.filter(a => a.startsWith('--'))) if (!allowed.includes(a)) throw Error(`Unknown option: ${a}`);
     const csvFile = path.resolve(PROJECT_ROOT, option('--cases') ?? '../phase2/test-cases.csv');
     const cases = loadCases(csvFile);
     if (args.includes('--dry-run')) { console.log(JSON.stringify({ validated: cases.length, ids: cases.map(c => c.id), casesSha256: hash(readFileSync(csvFile)) })); return; }
+    const asOf = option('--as-of') ?? '2026-11-03';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(asOf) || new Date(`${asOf}T00:00:00Z`).toISOString().slice(0, 10) !== asOf) throw Error('--as-of must be a valid YYYY-MM-DD date.');
+    process.env.FINANCE_AS_OF = asOf;
     const paceMs = Number(option('--pace-ms') ?? 9000);
     if (!Number.isFinite(paceMs) || paceMs < 0) throw Error('--pace-ms must be non-negative.');
     const out = path.resolve(PROJECT_ROOT, option('--out') ?? `outputs/khoa/${new Date().toISOString().replace(/[:.]/g, '-')}`);

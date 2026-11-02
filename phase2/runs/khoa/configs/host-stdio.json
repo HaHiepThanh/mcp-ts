@@ -23,6 +23,18 @@
         "src/server/utility/main.ts"
       ],
       "protocol": "auto"
+    },
+    "finance": {
+      "command": "node",
+      "args": [
+        "--import",
+        "tsx",
+        "src/server/finance/main.ts"
+      ],
+      "protocol": "auto",
+      "env": {
+        "FINANCE_AS_OF": "2026-11-03"
+      }
     }
   },
   "agent": {
@@ -36,5 +48,5 @@
   "elicitation": {
     "nonInteractive": "decline"
   },
-  "logDir": "outputs/logs/khoa-main-stdio"
+  "logDir": "outputs/logs/khoa-shared-stdio"
 }

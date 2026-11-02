@@ -3,7 +3,7 @@ MCP TypeScript SDK Phase Two
 Choose one answer for each question
 Adapted from phase2/quiz-draft.txt and the new Phase Two features.
 Historical model results refer to the earlier benchmark, not the new Khoa run.
-Finance questions describe the pending feature; the shared benchmark excludes provisional finance data.
+Finance questions use the merged feature and the shared dataset on main.
 
 Question 1: What is the main job of MCP in this system?
 A. Replace all CSV files with a database

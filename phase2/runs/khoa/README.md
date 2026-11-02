@@ -1,34 +1,32 @@
 # Khoa — Phase 2
 
-Bộ dùng chung hiện tại có **15 câu K01–K15 trên dữ liệu main `2c4110a`**. Chín câu finance K16–K24 được chuyển sang `finance-pending.csv`, đánh dấu **provisional**, chờ PR #2 rebase/merge và tính lại từ dataset chung. Không dùng kết quả hai snapshot làm một benchmark trên main.
+Bộ hiện tại có **24 câu K01–K24 trên cùng main `18f3818`**, sau khi finance PR #2 được merge ngày 02-11-2026. Toàn bộ đáp án finance đã tính lại từ dữ liệu chung. Hai bản `test-cases.csv` giống hệt nhau và giữ đúng 5 cột trong TASKS.md. Tiến/Hoàng có thể dùng bộ này để bổ sung vào `demo/benchmark.ts`.
 
 ## Tệp nộp
 
 | Tệp | Nội dung |
 | --- | --- |
-| `test-cases.csv` | 15 câu tiếng Anh; giống hệt `phase2/test-cases.csv`, để chuyển vào benchmark chung |
-| `finance-pending.csv` | 9 câu finance provisional; chưa chuyển vào benchmark |
-| `test-reference.xlsx` | 21 sheet; Answers và Manual có cột scope main/provisional |
-| `manual-checks.md` | Phép tính từng bước, lý do cảnh báo và đối chiếu câu trả lời |
-| `check-stdio.jsonl`, `check-http.jsonl`, `gemini-stdio.jsonl` | Ba lượt đo mới trên cùng 15 câu main |
-| `comparison.csv` | Kết quả lấy từ ba log mới |
-| `configs/` | Academic + utility, không có finance hay cwd ngoài repo |
-| `historical/` | Log 24 câu, cấu hình và bảng so sánh cũ; giữ nguyên để truy vết hai snapshot |
-| `MCP-TS-SDK-phase2.pptx` | 31 slide; finance ghi provisional, bảng kết quả dùng lượt đo mới |
-| `MCP-TS-SDK-phase2-script.docx` | Lời thuyết trình tiếng Anh khớp từng slide và FAQ |
-| `questions-phase2.txt` | 20 câu trắc nghiệm; đã trộn lựa chọn, 5 đáp án mỗi chữ A/B/C/D |
-
-Runner được commit tại `mcp-academic/scripts/run-khoa-cases.ts`. Không sửa code server, dữ liệu, Phase 1 hay `demo/benchmark.ts` của các bạn khác.
+| `test-cases.csv` | 24 câu tiếng Anh, tham số, kỳ vọng và ô Excel đối chiếu |
+| `test-reference.xlsx` | 18 sheet; 55 chỉ số nguồn và 62 phép kiểm tra Manual |
+| `manual-checks.md` | Phép tính từng câu, bảng ứng viên/lương, đối chiếu nội dung Gemini |
+| `reference-manifest.json` | Commit chung, nguồn và hash CSV/quy tắc |
+| `check-stdio.jsonl`, `check-http.jsonl`, `gemini-stdio.jsonl` | Ba lượt đo mới trên cùng 24 câu |
+| `comparison.csv` | Số đo lấy từ ba log mới |
+| `configs/` | Cấu hình academic + utility + finance từ checkout hiện tại |
+| `MCP-TS-SDK-phase2.pptx` | 31 slide tiếng Anh; số liệu và giới hạn khớp log mới |
+| `MCP-TS-SDK-phase2-script.docx` | Lời thuyết trình tiếng Anh khớp từng slide, kèm FAQ |
+| `questions-phase2.txt` | 20 câu; 5 đáp án mỗi chữ A/B/C/D, không theo chu kỳ |
+| `historical/` | Bằng chứng cũ, giữ nguyên log và cấu hình từng lượt |
 
 ## Chạy lại bằng một lệnh
 
-Cài dependency theo `mcp-academic/docs/setup-guide.md` (`npm ci`), dùng Node ≥20.12 và cấu hình `GEMINI_API_KEY` trong `.env` được Git ignore. Từ `mcp-academic/`:
+Cài dependency theo `mcp-academic/docs/setup-guide.md` bằng `npm ci`, dùng Node ≥20.12. Đặt `GEMINI_API_KEY` trong `.env` được Git ignore. Từ `mcp-academic/`:
 
 ```powershell
 npx tsx scripts/run-khoa-cases.ts --suite
 ```
 
-Lệnh đọc trực tiếp `phase2/test-cases.csv`, chạy MCP stdio, tự mở/đóng HTTP academic cổng 3001 và utility 3002, rồi chạy Gemini stdio. Log được lưu vào thư mục mới `outputs/khoa/<timestamp>/`, đường dẫn được in cuối lệnh. Mỗi lượt có JSONL đầy đủ và `comparison.csv`; không ghi đè bằng chứng đã có. Dừng các server đang chiếm 3001/3002 trước khi chạy suite.
+Runner đọc trực tiếp `phase2/test-cases.csv`, chạy MCP stdio, tự mở/đóng HTTP academic 3001, utility 3002, finance 3003, rồi chạy Gemini stdio. Dừng các server đang chiếm ba cổng này trước khi chạy suite. Không cần checkout hay `cwd` ngoài repo. Log đi vào thư mục mới `outputs/khoa/<timestamp>/`, không ghi đè bằng chứng đã lưu.
 
 Các chế độ riêng:
 
@@ -36,49 +34,42 @@ Các chế độ riêng:
 npx tsx scripts/run-khoa-cases.ts --dry-run
 npx tsx scripts/run-khoa-cases.ts --only K07,K08,K12
 npx tsx scripts/run-khoa-cases.ts --llm
+npx tsx scripts/run-khoa-cases.ts --config ../phase2/runs/khoa/configs/host-http.json --start-http
 ```
 
-`--config <file>` chọn cấu hình khác; `--start-http` tự khởi động HTTP cho lượt chạy riêng; `--out <folder>` chọn thư mục log mới; `--pace-ms` chỉnh thời gian nghỉ giữa câu khi gọi LLM. Runner từ chối CSV provisional, ID trùng/sai cấu trúc và công cụ thay đổi dữ liệu. Không cần checkout finance hay thư mục `_khoa-rebuild` để chạy bộ hiện tại.
+`--cases <file>`, `--config <file>`, `--out <folder>` chọn đầu vào và thư mục log mới. `--pace-ms` chỉnh khoảng nghỉ khi gọi model. Ngày tài chính mặc định cố định `2026-11-03`. `--as-of YYYY-MM-DD` đặt ngày cho HTTP được runner tự mở. Nếu đổi ngày, cần đổi cả `mcpServers.finance.env.FINANCE_AS_OF` trong cấu hình stdio cho khớp; cấu hình server tường minh được ưu tiên hơn môi trường của runner. HTTP bên ngoài cần tự đặt `FINANCE_AS_OF` cùng ngày. Metadata giữ cả ngày runner và effectiveConfig để đối chiếu.
 
-Log giữ hash CSV, runner, cấu hình, các CSV/quy tắc nguồn, commit checkout, tool/args, structured result đầy đủ, câu trả lời, thời gian, token và số lần thử API. Fallback bị tắt, hội thoại mới mỗi câu. `answerScreenPass` chỉ kiểm tra sự xuất hiện của giá trị; không thay cho đọc nội dung. Lượt chạy lỗi/chưa đủ câu có `complete: false` hoặc lỗi tương ứng và exit code khác 0.
+Runner từ chối case provisional, ID sai/trùng, CSV sai cấu trúc và tool thay đổi dữ liệu. Log giữ hash CSV, runner, cấu hình, cả CSV/quy tắc học vụ và finance, commit checkout, ngày tài chính, tool/args, structured result đầy đủ, câu trả lời, thời gian, token và số lần thử API. Fallback tắt, hội thoại mới mỗi câu. Lượt lỗi/chưa đủ câu có `complete: false` hoặc lỗi tương ứng và exit code khác 0. `answerScreenPass` chỉ kiểm tra sự xuất hiện của giá trị; phải đọc riêng nội dung câu trả lời.
 
-## Kết quả mới ngày 18-10-2026
+## Kết quả mới ngày 03-11-2026
 
 | Lượt chạy | Số câu | Qua kiểm tra | Lỗi | Median mỗi câu |
 | --- | --- | --- | --- | --- |
-| MCP stdio | 15 | 15 | 0 | 3 ms |
-| MCP HTTP | 15 | 15 | 0 | 8 ms |
-| Gemini stdio | 15 | 15 | 0 | 2.187 s |
+| MCP stdio | 24 | 24 | 0 | 4 ms |
+| MCP HTTP | 24 | 24 | 0 | 8 ms |
+| Gemini stdio | 24 | 24 | 0 | 2.540 s |
 
-Gemini `gemini-3.5-flash-lite`, temperature 0.2, maxToolRounds 8. Token vào/ra **111,391 / 2,458**, số lần thử API bổ sung: 0. Nghỉ 9 giây giữa câu, nằm ngoài thời gian từng câu. Đây là một lượt đo mỗi cấu hình; không suy ra transport hay model luôn tốt hơn.
+Gemini `gemini-3.5-flash-lite`, temperature 0.2, maxToolRounds 8. Token vào/ra **246,402 / 3,632**, số lần thử API bổ sung **0**. Nghỉ 9 giây giữa câu, ngoài thời gian từng câu. Mỗi cấu hình chỉ có một lượt mới; chưa đủ để kết luận transport/model luôn tốt hơn. Số đo Qwen và thí nghiệm của Hoàng/Tiến trên slide được ghi riêng theo nguồn.
 
-Các con số **24/24**, median 2.8515 s và token 237,665/3,692 chỉ thuộc `historical/`, không còn là kết quả bộ dùng chung hiện tại. Không sửa log lịch sử để biến thành lượt đo 15 câu.
+## Đối chiếu theo review
 
-## Những phần đã đối chiếu
+- **Một dataset:** K10 và K20 cùng conduct **92**. T001 cùng là **Đỗ Mai My, Professor**, có **9 tiết/tuần**. Workbook finance dùng Teachers/Sections/Conduct chung; đã bỏ ba sheet F_* cũ. `finance-pending.csv` chuyển vào lịch sử, chín câu mới chỉ được khôi phục sau khi tính lại.
+- **K07/K08:** vắng 3/15 = 20% chưa cấm thi; 4/15 ≈ 26.7% bị cấm thi. Late/excused không tính absent.
+- **K12:** IT01 có 10 sinh viên, hai em 2201005 và 2201010 bị cảnh báo; GPA 0.63/0.38 và các section vượt ngưỡng được ghi cụ thể. Conduct 50/60 không tạo lý do rèn luyện kém vì ngưỡng là `<50`.
+- **K21:** 5 ứng viên SCH02 đủ điều kiện, đứng đầu **2201019**, GPA 4.00, conduct 95; không đồng nhất số ứng viên với 4 suất học bổng.
+- **K22:** T001 có 36 tiết/tháng, 12 tiết vượt định mức, bonus **1,500,000 VND**, net **24,372,000 VND**.
+- **K23:** khoa IT có 10 giảng viên, 72 tiết, tổng net **126,949,000 VND**.
 
-- **K07:** 15 buổi, vắng các tuần 7/9/13. `3/15 = 20%`; điều kiện cấm là `>20%`, nên không cấm thi.
-- **K08:** 15 buổi, vắng các tuần 2/4/13/14. `4/15 ≈ 26.7% >20%`, nên cấm thi. Late/excused không tính là absent.
-- **K12:** IT01 có 10 sinh viên, hai em 2201005 và 2201010 bị cảnh báo. GPA lần lượt 0.63 và 0.38; section vượt ngưỡng lần lượt SEC014/029/037 và SEC029. Conduct 50/60 không tạo lý do rèn luyện kém vì ngưỡng là `<50`.
-- **K06:** 30 lượt học hợp lệ, tổng điểm môn đã làm tròn 220.5; `ROUND(220.5/30,1)=7.4`; 27 đạt nên `27/30=90%`.
-- **K15:** GPA `(3×0+2×1+3×1)/8=0.63`, vắng `14/45=31.1%`, đủ ba section bị cấm, conduct 50 là Average. Đọc lại câu tư vấn để kiểm tra các hạn chế thi không bị bỏ sót.
+**Khoa đã tự xem sheet Manual và hiểu K07/K08, K12**, theo xác nhận của người dùng ngày 03-11-2026. Đây là xác nhận cho các mục đã xem; không ghi rằng Khoa tự chạy lượt finance mới. Phép tính finance mới được tính lại từ CSV, đối chiếu workbook và kết quả MCP. Workbook được tính lại, quét lỗi bằng Artifact Tool; đã thử đổi conduct 2201001 để xác minh cả đáp án học vụ và finance cùng cập nhật rồi khôi phục đầu vào. Không tuyên bố đã thao tác trực tiếp trong Microsoft Excel.
 
-Excel có **29 chỉ số nguồn cho main**, **26 chỉ số provisional finance**. Manual có 35 phép tính/kiểm tra main và 27 provisional; tổng 62 kết quả khớp đối chiếu. Công thức nguồn, biên vắng và số trung gian được kiểm tra từ CSV; workbook được tính lại và quét lỗi bằng Artifact Tool. Nội dung log hiện tại và bảng lý do được đối chiếu riêng; không đồng nhất điểm tự động với độ đúng toàn bộ câu trả lời.
+Đã đọc đủ 24 câu trả lời Gemini, gồm lý do cảnh báo, tư vấn và finance. K06 ghi đúng graded enrolments; K12 phân biệt maximum section absence rate. K15 nói rõ 31.1% là tỷ lệ vắng dù tiêu đề dùng cụm “Overall Attendance Rate”; khi thuyết trình dùng absence rate. Chi tiết ở `manual-checks.md`.
 
-## Cải tiến cách diễn đạt
+## Bằng chứng cũ
 
-Trong lượt main-only đầu, K12 gọi tỷ lệ vắng cao nhất của một section là overall, và K06 gắn đơn vị students cho số lượt học. Đã làm rõ hai nghĩa này trong systemPrompt của cấu hình Khoa rồi chạy lại đủ suite. Lượt cuối ghi đúng maximum section absence rate và graded enrolments. Log/cấu hình trước sửa nằm ở `historical/main-before-clarification/`; không sửa nội dung các log đó. Đây là quan sát trước/sau cho lượt đo này, không phải khẳng định prompt luôn sửa được mọi lỗi.
+- `historical/` gốc: 24 câu trộn main `2c4110a` và finance `530d5da`, chỉ mô tả hai snapshot cũ.
+- `historical/main-before-clarification/`: lượt 15 câu trước khi làm rõ cách diễn đạt.
+- `historical/main-before-finance-integration/`: lượt 15 câu sau làm rõ, cùng CSV và kỳ vọng finance provisional trước khi ghép dữ liệu.
 
-## Finance chờ ghép dữ liệu
+Không chỉnh nội dung các JSONL lịch sử để biến chúng thành lượt đo mới. Nguồn phần chung bài thuyết trình: `phase2/improvements.md`, `mcp-academic/docs/model-observations.md`, `model-comparison.md`, `experiments.md` và log Hoàng/Tiến. Không sửa server, generator, dữ liệu hay benchmark của các bạn khác trong phần thay đổi của Khoa.
 
-Các số cũ dùng PR #2 `530d5da`, có T001/conduct khác main. Các sheet F_*, Tuition, Payroll, Scholarships và phần tính finance đều ghi provisional. Conduct 92 ở K10 không được dùng chung với conduct 80 trong kỳ vọng finance cũ như cùng một dataset.
-
-Sau khi PR #2 được rebase và merge:
-
-1. Lấy commit main chung đã có finance.
-2. Tính lại K16–K24 từ CSV chung; đổi Excel F_* sang nguồn main và đối chiếu GPA/conduct/section với học vụ.
-3. Cập nhật trạng thái, đáp án và ô Excel của các câu finance rồi mới thêm lại vào `phase2/test-cases.csv` và bản trong thư mục Khoa.
-4. Bật finance trong cấu hình với đường dẫn mặc định trong repo, chạy lại toàn bộ suite và cập nhật slide/Word/bảng so sánh bằng số đo mới.
-
-Nguồn phần chung bài thuyết trình: `phase2/improvements.md`, `mcp-academic/docs/model-observations.md`, `model-comparison.md`, `experiments.md` và log của Hoàng. So sánh model/tham số của nhóm được phân biệt với lượt đo mới của Khoa.
-
-Nộp qua PR, không đẩy trực tiếp vào main. Drive làm sau theo yêu cầu; không có video. Tiến/Hoàng chuyển 15 ca hiện tại vào `demo/benchmark.ts` theo phân công.
+Nộp qua PR, không đẩy trực tiếp main. Drive làm sau; không có video theo phạm vi đã thống nhất.
