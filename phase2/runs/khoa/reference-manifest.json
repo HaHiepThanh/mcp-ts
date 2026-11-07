@@ -1,0 +1,103 @@
+{
+  "shared_main_commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+  "academic_commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+  "finance_commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+  "finance_status": "merged PR #2; recomputed using shared teachers, sections and conduct",
+  "as_of": "2026-11-03",
+  "sources": [
+    {
+      "sheet": "Students",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample/students.csv",
+      "sha256": "661c58db3dcfa896bd338f2a6973f64ec6cbe7c2d57265cec084eabfce077c4d",
+      "rows": 41
+    },
+    {
+      "sheet": "Courses",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample/courses.csv",
+      "sha256": "fc4f363538e2527714c74fbe7d3df320e1d05bbed375ff16ae77491deb14329e",
+      "rows": 10
+    },
+    {
+      "sheet": "Teachers",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample/teachers.csv",
+      "sha256": "62ffb13240023d42e26edbd7d60ff7f35f4412ff31269431119245022648d30e",
+      "rows": 20
+    },
+    {
+      "sheet": "Sections",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample/sections.csv",
+      "sha256": "4f3b1fda0e84a9e95193742fa73fe55d925675db74a9165877d1f9f0638f8e07",
+      "rows": 41
+    },
+    {
+      "sheet": "Grades",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample/grades.csv",
+      "sha256": "fb99d2f7731990a9404c7b0517ebbb8cc26b0af10c40c453effa46cbf96267ce",
+      "rows": 267
+    },
+    {
+      "sheet": "Attendance",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample/attendance.csv",
+      "sha256": "53ce4bf47fb8d2b991c796b6654a55d6c645225fa06a8ef9edde3a8906ab1052",
+      "rows": 3915
+    },
+    {
+      "sheet": "Conduct",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample/conduct.csv",
+      "sha256": "0906931b85b8ae75d0279ac16b0124da8442cbba6869e847eee87aa94cbb832d",
+      "rows": 120
+    },
+    {
+      "sheet": "Tuition",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample-finance/tuition.csv",
+      "sha256": "3f02aafd9c3bd200227e92a07a481732ed98203f22df44a1c0dd00e925750ddb",
+      "rows": 125
+    },
+    {
+      "sheet": "Payroll",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample-finance/payroll.csv",
+      "sha256": "2bf30cce5c1be7709f9b0ef512e13c77854199098745c56d7d720acdf767d411",
+      "rows": 302
+    },
+    {
+      "sheet": "Scholarships",
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/data/sample-finance/scholarships.csv",
+      "sha256": "33cb90a31d0c83b52774a0da18b89023441fd9e6f3772711be9a92f87cb1a1df",
+      "rows": 3
+    },
+    {
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/config/grading.json",
+      "sha256": "59112b440dd65d46436bff69e99a6e5c12e0278a740d6385d7635b3bba6dd01f"
+    },
+    {
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/config/academic-rules.json",
+      "sha256": "b9725ba37cfa0825c8faccb24b23875c95b1148319730e46e6c9ab4d3518a4bb"
+    },
+    {
+      "commit": "18f3818432eb7211466788e51df8eaf3aa168eb8",
+      "path": "mcp-academic/config/finance.json",
+      "sha256": "aded63aff9a21a501a19b13febeb4e912661feb84ae9ded8e332280b4f7792a8"
+    }
+  ],
+  "human_review": {
+    "confirmed_by_user": "2026-11-03",
+    "checked": [
+      "Manual",
+      "K07/K08 absence boundary",
+      "K12 risk reasons"
+    ],
+    "scope": "confirmation for these reviewed academic cases, not a claim that Khoa ran the new finance suite"
+  }
+}

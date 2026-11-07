@@ -1,0 +1,53 @@
+{
+  "$comment": "Chat host config. 'mcpServers' uses the same shape as Claude Desktop / VS Code (command+args for stdio, url for HTTP). 'protocol': auto | legacy | 2026-07-28.",
+  "llm": {
+    "provider": "gemini",
+    "model": "gemini-3.5-flash-lite",
+    "temperature": 0.2
+  },
+  "mcpServers": {
+    "academic": {
+      "command": "node",
+      "args": [
+        "--import",
+        "tsx",
+        "src/server/academic/main.ts"
+      ],
+      "protocol": "auto"
+    },
+    "utility": {
+      "command": "node",
+      "args": [
+        "--import",
+        "tsx",
+        "src/server/utility/main.ts"
+      ],
+      "protocol": "auto"
+    },
+    "finance": {
+      "command": "node",
+      "args": [
+        "--import",
+        "tsx",
+        "src/server/finance/main.ts"
+      ],
+      "cwd": "../../_khoa-rebuild/finance/mcp-academic",
+      "env": {
+        "FINANCE_AS_OF": "2026-10-18"
+      },
+      "protocol": "auto"
+    }
+  },
+  "agent": {
+    "maxToolRounds": 8,
+    "systemPrompt": "You are a university assistant. Use MCP tools for every academic or financial fact. Report the requested numbers and units in simple English. Use the correct specialised tool. Do not guess missing data. For an unknown student or teacher, explain the tool error. Do not change records."
+  },
+  "sampling": {
+    "approval": "deny",
+    "maxTokens": 600
+  },
+  "elicitation": {
+    "nonInteractive": "decline"
+  },
+  "logDir": "outputs/logs/khoa-final-stdio"
+}
