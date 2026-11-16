@@ -8,11 +8,11 @@ SDK: RequestOptions.timeout, RequestOptions.onprogress, RequestOptions.resetTime
 
 ▶ A. timeout 400 ms → times out
   callTool(params, options)({"name":"export_transcripts","arguments":{"batches":8,"delayMs":150},"options":{"timeout":400}})
-  ✖ 410ms → SdkError (code REQUEST_TIMEOUT): Request timed out
+  ✖ 407ms → SdkError (code REQUEST_TIMEOUT): Request timed out
 
 ▶ B. timeout 400 ms + resetTimeoutOnProgress → each update restarts the clock
   callTool(params, options)({"name":"export_transcripts","arguments":{"batches":8,"delayMs":150},"options":{"timeout":400,"resetTimeoutOnProgress":true}})
-  ✔ 1226ms → 
+  ✔ 1223ms → 
     {
       "text": "Exported 8 batches",
       "progressUpdates": 8
@@ -20,11 +20,11 @@ SDK: RequestOptions.timeout, RequestOptions.onprogress, RequestOptions.resetTime
 
 ▶ C. same + maxTotalTimeout 700 ms → hard cap wins
   callTool(params, options)({"name":"export_transcripts","arguments":{"batches":8,"delayMs":150},"options":{"timeout":400,"resetTimeoutOnProgress":true,"maxTotalTimeout":700}})
-  ✖ 763ms → SdkError (code REQUEST_TIMEOUT): Maximum total timeout exceeded
+  ✖ 762ms → SdkError (code REQUEST_TIMEOUT): Maximum total timeout exceeded
 
 ▶ D. default timeout (60 s) → completes
   callTool(params, options)({"name":"export_transcripts","arguments":{"batches":8,"delayMs":150},"options":{}})
-  ✔ 1219ms → 
+  ✔ 1213ms → 
     {
       "text": "Exported 8 batches",
       "progressUpdates": 8
@@ -52,7 +52,7 @@ SDK: RequestOptions.timeout, RequestOptions.onprogress, RequestOptions.resetTime
 
 ▶ Tool name does not exist
   classify()
-  ✔ 3ms → 
+  ✔ 4ms → 
     {
       "failure": "Tool name does not exist",
       "surfacesAs": "throws ProtocolError (-32602)",
@@ -88,7 +88,7 @@ SDK: RequestOptions.timeout, RequestOptions.onprogress, RequestOptions.resetTime
 
 ▶ Connection already closed
   classify()
-  ✔ 4ms → 
+  ✔ 3ms → 
     {
       "failure": "Connection already closed",
       "surfacesAs": "throws Error",
@@ -97,7 +97,7 @@ SDK: RequestOptions.timeout, RequestOptions.onprogress, RequestOptions.resetTime
 
 ▶ Request timeout
   classify()
-  ✔ 101ms → 
+  ✔ 102ms → 
     {
       "failure": "Request timeout",
       "surfacesAs": "throws SdkError (REQUEST_TIMEOUT)",

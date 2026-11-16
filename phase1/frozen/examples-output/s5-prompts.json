@@ -8,7 +8,7 @@
     "client.getPrompt",
     "client.complete (ref/prompt)"
   ],
-  "ranAt": "2026-09-21T07:07:09.225Z",
+  "ranAt": "2026-10-19T09:35:14.820Z",
   "steps": [
     {
       "step": "Prompts and their arguments",
@@ -39,6 +39,22 @@
             {
               "name": "student_id",
               "description": "Student ID, e.g. \"2201005\"",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "advisor_meeting",
+          "title": "Prepare an advisor meeting",
+          "arguments": [
+            {
+              "name": "student_id",
+              "description": "Student ID, e.g. \"2201010\"",
+              "required": true
+            },
+            {
+              "name": "semester",
+              "description": "Semester, e.g. \"2025-1\"",
               "required": true
             }
           ]
@@ -109,7 +125,7 @@
         }
       },
       "ok": true,
-      "ms": 2,
+      "ms": 3,
       "result": [
         {
           "role": "user",
@@ -131,7 +147,7 @@
         "arguments": {}
       },
       "ok": false,
-      "ms": 1,
+      "ms": 2,
       "error": {
         "name": "ProtocolError",
         "code": -32602,
@@ -178,7 +194,7 @@
         }
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {
         "values": [
           "BA01",
@@ -207,7 +223,7 @@
         }
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {
         "values": [],
         "hasMore": false
@@ -227,7 +243,7 @@
         }
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {
         "values": [
           "2202001",

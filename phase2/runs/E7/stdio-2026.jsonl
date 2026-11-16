@@ -1,0 +1,10 @@
+{"experiment":"E7","variant":"stdio-2026","connection":1,"era":"2026-07-28","connectMs":194.9,"connectRequests":1,"callMedianMs":0.24,"at":"2026-10-18T02:40:47.472Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":2,"era":"2026-07-28","connectMs":191.2,"connectRequests":1,"callMedianMs":0.23,"at":"2026-10-18T02:40:47.865Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":3,"era":"2026-07-28","connectMs":190.2,"connectRequests":1,"callMedianMs":0.26,"at":"2026-10-18T02:40:48.251Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":4,"era":"2026-07-28","connectMs":206.9,"connectRequests":1,"callMedianMs":0.22,"at":"2026-10-18T02:40:48.656Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":5,"era":"2026-07-28","connectMs":189.4,"connectRequests":1,"callMedianMs":0.23,"at":"2026-10-18T02:40:49.037Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":6,"era":"2026-07-28","connectMs":184.5,"connectRequests":1,"callMedianMs":0.22,"at":"2026-10-18T02:40:49.411Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":7,"era":"2026-07-28","connectMs":185.2,"connectRequests":1,"callMedianMs":0.24,"at":"2026-10-18T02:40:49.789Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":8,"era":"2026-07-28","connectMs":185.2,"connectRequests":1,"callMedianMs":0.22,"at":"2026-10-18T02:40:50.166Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":9,"era":"2026-07-28","connectMs":188.4,"connectRequests":1,"callMedianMs":0.21,"at":"2026-10-18T02:40:50.553Z"}
+{"experiment":"E7","variant":"stdio-2026","connection":10,"era":"2026-07-28","connectMs":185.4,"connectRequests":1,"callMedianMs":0.24,"at":"2026-10-18T02:40:50.930Z"}

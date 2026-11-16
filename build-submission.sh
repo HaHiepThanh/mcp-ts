@@ -5,7 +5,7 @@
 # Team files on Google Drive (team/slides/*.pptx, team/quiz/questions*.txt, team/data/*.csv) are picked up
 # automatically when they exist; otherwise the drafts in phase1/ and phase2/ are used and flagged.
 # Run from anywhere: bash build-submission.sh
-# Phase 1 is FROZEN: its code, docs and data come from git tag `phase1-freeze` and its example outputs from
+# Phase 1 is FROZEN: its code, docs and data come from git tag `phase1-final` and its example outputs from
 # phase1/frozen/, so phase-2 work never changes the phase-1 package. Only team files (slides, quiz) are refreshed.
 set -euo pipefail
 
@@ -40,10 +40,11 @@ rm -rf "$P1" "$ROOT/phase1/submission.zip"
 mkdir -p "$P1"
 : > "$P1/STATUS.txt"
 FROZEN=$(mktemp -d)
-git -C "$ROOT" archive phase1-freeze mcp-academic | tar -x -C "$FROZEN"
-note "🧊 Code, docs and data from git tag phase1-freeze ($(git -C "$ROOT" rev-list -n1 --abbrev-commit phase1-freeze))" "$P1"
+git -C "$ROOT" archive phase1-final mcp-academic | tar -x -C "$FROZEN"
+note "🧊 Code, docs and data from git tag phase1-final ($(git -C "$ROOT" rev-list -n1 --abbrev-commit phase1-final))" "$P1"
 
-pick_team_file 'slides/*phase1*.pptx' "$P1/01-slides" "" "$P1" "Slides (pptx, 30+ slides)"
+mkdir -p "$P1/01-slides"; cp "$ROOT/phase1/MCP-TS-SDK-phase1.pptx" "$P1/01-slides/"
+note "✅ Slides (pptx, 30+ slides): MCP-TS-SDK-phase1.pptx" "$P1"
 cp "$ROOT/phase1/slides-content.md" "$P1/01-slides/"
 mkdir -p "$P1/02-code"
 rsync -a --exclude 'node_modules/' --exclude 'outputs/' "$FROZEN/mcp-academic/" "$P1/02-code/mcp-academic/"
@@ -68,29 +69,38 @@ rm -rf "$P2" "$ROOT/phase2/submission.zip"
 mkdir -p "$P2"
 : > "$P2/STATUS.txt"
 
-pick_team_file 'slides/*phase2*.pptx' "$P2/01-slides" "" "$P2" "Slides (pptx, 20+ slides)"
+if [[ -f "$ROOT/phase2/MCP-TS-SDK-phase2.pptx" ]]; then
+    mkdir -p "$P2/01-slides"; cp "$ROOT/phase2/MCP-TS-SDK-phase2.pptx" "$P2/01-slides/"
+    note "✅ Slides (pptx, 20+ slides): MCP-TS-SDK-phase2.pptx" "$P2"
+else
+    pick_team_file 'slides/*phase2*.pptx' "$P2/01-slides" "" "$P2" "Slides (pptx, 20+ slides)"
+fi
 copy_code "$P2/02-code"
-note "✅ Code: 02-code/mcp-academic" "$P2"
-mkdir -p "$P2/03-configurations"
+note "✅ Code + data: 02-code/mcp-academic (3 MCP servers, 22 tools; data in data/sample)" "$P2"
+mkdir -p "$P2/03-configurations/experiments"
 cp "$APP"/config/*.json "$P2/03-configurations/"
+cp "$APP"/config/experiments/*.json "$P2/03-configurations/experiments/"
 cp "$ROOT/.vscode/mcp.json" "$P2/03-configurations/vscode-mcp.json"
-note "✅ Configurations: $(ls "$P2/03-configurations" | wc -l | tr -d ' ') files (LLM, servers, transport, grading, cache)" "$P2"
+note "✅ Parameter sets: $(ls "$APP"/config/experiments/*.json | wc -l | tr -d ' ') experiment files (E1–E8 + I1 after improvements) + $(ls "$P2/03-configurations" | grep -c json) host/server configs" "$P2"
 mkdir -p "$P2/04-scenarios"
-cp "$APP/demo/benchmark.ts" "$APP/demo/questions.txt" "$P2/04-scenarios/"
-note "✅ Test scenarios: benchmark.ts (11 cases), demo questions" "$P2"
+cp "$APP/demo/scenarios.ts" "$APP/docs/scenarios.md" "$ROOT/phase2/manual-check.md" "$ROOT/phase2/manual_check.py" "$P2/04-scenarios/"
+note "✅ Test scenarios: 24 scenarios in 8 groups + independent cross-check of the ground truth" "$P2"
 mkdir -p "$P2/05-results"
-for f in model-comparison model-observations results; do cp "$APP/docs/$f.md" "$P2/05-results/"; done
-cp "$APP"/outputs/examples/{s8-transports,c1-client-connect,c2-request-options-errors,c4-caching}.json "$P2/05-results/" 2>/dev/null || true
-note "✅ Results and comparisons: model-comparison.md, results.md, transport/connect/cache measurements" "$P2"
+cp "$APP/docs/experiments.md" "$P2/05-results/"
+for e in "$ROOT"/phase2/runs/[EI]*/; do cp "$e/summary.json" "$P2/05-results/$(basename "$e")-summary.json" 2>/dev/null || true; done
+note "✅ Results and comparisons: experiments.md + one summary.json per experiment" "$P2"
 mkdir -p "$P2/06-logs"
-cp "$APP"/outputs/logs/chat-*.jsonl "$P2/06-logs/" 2>/dev/null || true
-cp "$APP"/outputs/benchmarks/*.json "$P2/06-logs/" 2>/dev/null || true
-rsync -a --exclude 'README.md' "$ROOT/phase2/runs/" "$P2/06-logs/team-runs/" 2>/dev/null || true
-note "✅ Logs: $(ls "$P2/06-logs" | wc -l | tr -d ' ') files (chat turns + benchmark runs)" "$P2"
+rsync -a --exclude 'README.md' "$ROOT/phase2/runs/" "$P2/06-logs/"
+note "✅ Logs: $(cat "$ROOT"/phase2/runs/[EI]*/*.jsonl 2>/dev/null | wc -l | tr -d ' ') logged runs in 06-logs/ (JSONL, one folder per experiment)" "$P2"
 mkdir -p "$P2/07-observations-improvements"
-cp "$ROOT/phase2/improvements.md" "$APP/docs/model-observations.md" "$P2/07-observations-improvements/"
-note "✅ Observations + improvements" "$P2"
-pick_team_file 'quiz/questions*phase2*.txt' "$P2/08-quiz" "$ROOT/phase2/quiz-draft.txt" "$P2" "Multiple-choice quiz (10–20 questions)"
+cp "$ROOT/phase2/improvements.md" "$P2/07-observations-improvements/"
+note "✅ Observations (in experiments.md) + improvements.md" "$P2"
+if [[ -f "$ROOT/phase2/quiz-phase2.txt" ]]; then
+    mkdir -p "$P2/08-quiz"; cp "$ROOT/phase2/quiz-phase2.txt" "$P2/08-quiz/"
+    note "✅ Multiple-choice quiz: quiz-phase2.txt" "$P2"
+else
+    pick_team_file 'quiz/questions*phase2*.txt' "$P2/08-quiz" "$ROOT/phase2/quiz-draft.txt" "$P2" "Multiple-choice quiz (10–20 questions)"
+fi
 cp "$ROOT/phase2/README.md" "$P2/README.md"
 (cd "$ROOT/phase2" && zip -qr submission.zip submission)
 

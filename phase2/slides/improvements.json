@@ -1,0 +1,32 @@
+[
+ {
+  "problem": "D3: \"it-01\" → error, model gave up",
+  "change": "server normalises class IDs",
+  "before": "0/2",
+  "after": "2/2"
+ },
+ {
+  "problem": "B2: search_teachers(\"CS202\") found nobody",
+  "change": "search_teachers also matches courses taught",
+  "before": "tool 0/2",
+  "after": "tool 2/2"
+ },
+ {
+  "problem": "E5: server off → model substituted other data",
+  "change": "system prompt: never substitute, say \"not available\"",
+  "before": "50 % refusals",
+  "after": "83.3 %"
+ },
+ {
+  "problem": "All 23 scenarios (base config)",
+  "change": "#11–13 together",
+  "before": "91.3 %",
+  "after": "95.7 %"
+ },
+ {
+  "problem": "Harness: E1 changed data before G1",
+  "change": "data-changing scenarios run last",
+  "before": "27 false fails",
+  "after": "27/27"
+ }
+]

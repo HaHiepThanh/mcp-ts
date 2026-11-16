@@ -8,43 +8,43 @@
     "StreamableHTTPClientTransport",
     "Client versionNegotiation"
   ],
-  "ranAt": "2026-09-21T07:07:11.257Z",
+  "ranAt": "2026-10-19T09:35:16.827Z",
   "comparison": [
     {
       "transport": "stdio",
       "negotiation": "legacy",
       "era": "legacy",
-      "tools": 10,
-      "connectMs": 181.2,
-      "firstCallMs": 2.9,
-      "avgOf20CallsMs": 0.2
+      "tools": 15,
+      "connectMs": 193.5,
+      "firstCallMs": 3.1,
+      "avgOf20CallsMs": 0.3
     },
     {
       "transport": "stdio",
       "negotiation": "auto",
       "era": "modern",
-      "tools": 10,
-      "connectMs": 184.2,
-      "firstCallMs": 180.8,
+      "tools": 15,
+      "connectMs": 188.9,
+      "firstCallMs": 199.5,
       "avgOf20CallsMs": 0.3
     },
     {
       "transport": "http",
       "negotiation": "legacy",
       "era": "legacy",
-      "tools": 10,
-      "connectMs": 32.2,
+      "tools": 15,
+      "connectMs": 28.8,
       "firstCallMs": 5.6,
-      "avgOf20CallsMs": 2
+      "avgOf20CallsMs": 2.2
     },
     {
       "transport": "http",
       "negotiation": "auto",
       "era": "modern",
-      "tools": 10,
-      "connectMs": 6.4,
+      "tools": 15,
+      "connectMs": 5.3,
       "firstCallMs": 2.4,
-      "avgOf20CallsMs": 1.7
+      "avgOf20CallsMs": 1.8
     }
   ],
   "note": "Timings from one run on the presenter's machine; 20 sequential calculate_gpa calls per row.",
@@ -61,15 +61,15 @@
         ]
       },
       "ok": true,
-      "ms": 196,
+      "ms": 209,
       "result": {
         "transport": "stdio",
         "negotiation": "legacy",
         "era": "legacy",
-        "tools": 10,
-        "connectMs": 181.2,
-        "firstCallMs": 2.9,
-        "avgOf20CallsMs": 0.2
+        "tools": 15,
+        "connectMs": 193.5,
+        "firstCallMs": 3.1,
+        "avgOf20CallsMs": 0.3
       }
     },
     {
@@ -84,14 +84,14 @@
         ]
       },
       "ok": true,
-      "ms": 376,
+      "ms": 400,
       "result": {
         "transport": "stdio",
         "negotiation": "auto",
         "era": "modern",
-        "tools": 10,
-        "connectMs": 184.2,
-        "firstCallMs": 180.8,
+        "tools": 15,
+        "connectMs": 188.9,
+        "firstCallMs": 199.5,
         "avgOf20CallsMs": 0.3
       }
     },
@@ -102,15 +102,15 @@
         "url": "http://127.0.0.1:3911/mcp"
       },
       "ok": true,
-      "ms": 81,
+      "ms": 82,
       "result": {
         "transport": "http",
         "negotiation": "legacy",
         "era": "legacy",
-        "tools": 10,
-        "connectMs": 32.2,
+        "tools": 15,
+        "connectMs": 28.8,
         "firstCallMs": 5.6,
-        "avgOf20CallsMs": 2
+        "avgOf20CallsMs": 2.2
       }
     },
     {
@@ -120,15 +120,15 @@
         "url": "http://127.0.0.1:3911/mcp"
       },
       "ok": true,
-      "ms": 45,
+      "ms": 47,
       "result": {
         "transport": "http",
         "negotiation": "auto",
         "era": "modern",
-        "tools": 10,
-        "connectMs": 6.4,
+        "tools": 15,
+        "connectMs": 5.3,
         "firstCallMs": 2.4,
-        "avgOf20CallsMs": 1.7
+        "avgOf20CallsMs": 1.8
       }
     },
     {

@@ -1,0 +1,42 @@
+{
+  "experiment": "E7",
+  "title": "Transport × protocol era",
+  "question": "How fast is connecting and calling over stdio vs Streamable HTTP, with the 2025 vs 2026-07-28 protocol?",
+  "hypothesis": "HTTP connects faster than stdio (no process start); 2026 needs 1 request to connect instead of 2; tool calls take milliseconds either way.",
+  "kind": "transport",
+  "generatedAt": "2026-10-18T02:40:51.563Z",
+  "variants": [
+    {
+      "id": "stdio-2025",
+      "label": "stdio · 2025 (initialize)",
+      "runs": 10,
+      "connectMedianMs": 189.10000000000002,
+      "callMedianMs": 0.20500000000000002,
+      "connectRequests": 2
+    },
+    {
+      "id": "stdio-2026",
+      "label": "stdio · 2026-07-28 (server/discover)",
+      "runs": 10,
+      "connectMedianMs": 188.9,
+      "callMedianMs": 0.23,
+      "connectRequests": 1
+    },
+    {
+      "id": "http-2025",
+      "label": "HTTP · 2025",
+      "runs": 10,
+      "connectMedianMs": 2.8499999999999996,
+      "callMedianMs": 1.3250000000000002,
+      "connectRequests": 2
+    },
+    {
+      "id": "http-2026",
+      "label": "HTTP · 2026-07-28",
+      "runs": 10,
+      "connectMedianMs": 1.4,
+      "callMedianMs": 1.14,
+      "connectRequests": 1
+    }
+  ]
+}

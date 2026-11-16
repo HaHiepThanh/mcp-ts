@@ -9,7 +9,7 @@
     "tools/call",
     "input_required"
   ],
-  "ranAt": "2026-09-21T07:07:18.537Z",
+  "ranAt": "2026-10-19T09:35:24.417Z",
   "legacy": [
     {
       "n": 1,
@@ -115,7 +115,7 @@
               },
               "outputSchema": "{…JSON Schema…}"
             },
-            "... 8 more"
+            "... 13 more"
           ]
         },
         "jsonrpc": "2.0",
@@ -379,7 +379,7 @@
               },
               "outputSchema": "{…JSON Schema…}"
             },
-            "... 8 more"
+            "... 13 more"
           ],
           "resultType": "complete",
           "ttlMs": 60000,
@@ -598,14 +598,14 @@
       "step": "2025 era: initialize handshake, server pushes elicitation/create mid-call",
       "method": "trace",
       "ok": true,
-      "ms": 37,
+      "ms": 41,
       "result": "14 frames"
     },
     {
       "step": "2026-07-28 era: server/discover, tool returns input_required and the client retries",
       "method": "trace",
       "ok": true,
-      "ms": 45,
+      "ms": 34,
       "result": "13 frames"
     }
   ]

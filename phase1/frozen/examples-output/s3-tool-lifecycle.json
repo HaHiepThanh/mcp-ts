@@ -9,7 +9,7 @@
     "registerTool (after connect)",
     "notifications/tools/list_changed"
   ],
-  "ranAt": "2026-09-21T07:07:08.651Z",
+  "ranAt": "2026-10-19T09:35:14.231Z",
   "listChangedNotifications": 5,
   "steps": [
     {
@@ -105,7 +105,7 @@
       "step": "8. After gpaTool.remove()",
       "method": "listTools",
       "ok": true,
-      "ms": 0,
+      "ms": 1,
       "result": [
         "ping — Health check",
         "get_current_time — Current time"

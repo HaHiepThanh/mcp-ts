@@ -1,0 +1,10 @@
+{"experiment":"E7","variant":"http-2026","connection":1,"era":"2026-07-28","connectMs":4.9,"connectRequests":1,"callMedianMs":1.24,"at":"2026-10-18T02:40:51.323Z"}
+{"experiment":"E7","variant":"http-2026","connection":2,"era":"2026-07-28","connectMs":1.4,"connectRequests":1,"callMedianMs":1.25,"at":"2026-10-18T02:40:51.351Z"}
+{"experiment":"E7","variant":"http-2026","connection":3,"era":"2026-07-28","connectMs":1.2,"connectRequests":1,"callMedianMs":1.15,"at":"2026-10-18T02:40:51.377Z"}
+{"experiment":"E7","variant":"http-2026","connection":4,"era":"2026-07-28","connectMs":1.1,"connectRequests":1,"callMedianMs":1.13,"at":"2026-10-18T02:40:51.403Z"}
+{"experiment":"E7","variant":"http-2026","connection":5,"era":"2026-07-28","connectMs":1.1,"connectRequests":1,"callMedianMs":1.14,"at":"2026-10-18T02:40:51.429Z"}
+{"experiment":"E7","variant":"http-2026","connection":6,"era":"2026-07-28","connectMs":1.8,"connectRequests":1,"callMedianMs":1.09,"at":"2026-10-18T02:40:51.454Z"}
+{"experiment":"E7","variant":"http-2026","connection":7,"era":"2026-07-28","connectMs":1.1,"connectRequests":1,"callMedianMs":1.14,"at":"2026-10-18T02:40:51.480Z"}
+{"experiment":"E7","variant":"http-2026","connection":8,"era":"2026-07-28","connectMs":1.4,"connectRequests":1,"callMedianMs":1.15,"at":"2026-10-18T02:40:51.507Z"}
+{"experiment":"E7","variant":"http-2026","connection":9,"era":"2026-07-28","connectMs":1.8,"connectRequests":1,"callMedianMs":1.11,"at":"2026-10-18T02:40:51.536Z"}
+{"experiment":"E7","variant":"http-2026","connection":10,"era":"2026-07-28","connectMs":1.7,"connectRequests":1,"callMedianMs":1.05,"at":"2026-10-18T02:40:51.563Z"}

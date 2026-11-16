@@ -9,13 +9,13 @@
     "client.readResource",
     "client.complete (ref/resource)"
   ],
-  "ranAt": "2026-09-21T07:07:08.973Z",
+  "ranAt": "2026-10-19T09:35:14.562Z",
   "steps": [
     {
       "step": "Static resources + instances listed by templates",
       "method": "listResources",
       "ok": true,
-      "ms": 4,
+      "ms": 5,
       "result": [
         {
           "uri": "academic://rules/grading",
@@ -28,6 +28,21 @@
           "mimeType": "application/json"
         },
         {
+          "uri": "academic://tables/advisor_notes",
+          "name": "advisor_notes.csv",
+          "mimeType": "text/csv"
+        },
+        {
+          "uri": "academic://tables/attendance",
+          "name": "attendance.csv",
+          "mimeType": "text/csv"
+        },
+        {
+          "uri": "academic://tables/conduct",
+          "name": "conduct.csv",
+          "mimeType": "text/csv"
+        },
+        {
           "uri": "academic://tables/courses",
           "name": "courses.csv",
           "mimeType": "text/csv"
@@ -38,8 +53,18 @@
           "mimeType": "text/csv"
         },
         {
+          "uri": "academic://tables/sections",
+          "name": "sections.csv",
+          "mimeType": "text/csv"
+        },
+        {
           "uri": "academic://tables/students",
           "name": "students.csv",
+          "mimeType": "text/csv"
+        },
+        {
+          "uri": "academic://tables/teachers",
+          "name": "teachers.csv",
           "mimeType": "text/csv"
         }
       ]
@@ -85,12 +110,12 @@
         "uri": "academic://reports/data-quality"
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": [
         {
           "uri": "academic://reports/data-quality",
           "mimeType": "application/json",
-          "text": "{\n  \"loaded\": {\n    \"students\": 40,\n    \"courses\": 10,\n    \"grades\": 261\n  },\n  \"skipped\": 7,\n  \"issues\": [\n    {\n      \"table\": \"students\",\n      \"line\": 42,\n      \"problem\": \"duplicate student_id 2201001\",\n... (85 more lines)"
+          "text": "{\n  \"loaded\": {\n    \"students\": 40,\n    \"courses\": 10,\n    \"grades\": 261\n  },\n  \"skipped\": 9,\n  \"issues\": [\n    {\n      \"table\": \"students\",\n      \"line\": 42,\n      \"problem\": \"duplicate student_id 2201001\",\n... (112 more lines)"
         }
       ]
     },
@@ -101,7 +126,7 @@
         "uri": "academic://tables/courses"
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": [
         {
           "uri": "academic://tables/courses",
@@ -117,7 +142,7 @@
         "uri": "academic://tables/nope"
       },
       "ok": false,
-      "ms": 1,
+      "ms": 2,
       "error": {
         "name": "ProtocolError",
         "code": -32602,
@@ -147,7 +172,7 @@
         "uri": "academic://students/9999999"
       },
       "ok": false,
-      "ms": 1,
+      "ms": 2,
       "error": {
         "name": "ProtocolError",
         "code": -32602,
@@ -245,7 +270,7 @@
         }
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {
         "values": [
           "grades"

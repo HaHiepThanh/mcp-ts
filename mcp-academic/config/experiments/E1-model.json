@@ -1,0 +1,39 @@
+{
+    "id": "E1",
+    "title": "LLM model",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 2,
+    "question": "Same MCP servers and scenarios — how much do accuracy and speed depend on the LLM?",
+    "hypothesis": "The harder phase-2 scenarios separate the models on accuracy, not only on speed; the thinking model is much slower.",
+    "variants": [
+        {
+            "id": "gemini-flash-lite",
+            "label": "Gemini 3.5 Flash-Lite (cloud)",
+            "base": "config/host.json",
+            "set": {
+                "llm.model": "gemini-3.5-flash-lite",
+                "llm.temperature": 0.2,
+                "toolDescriptions": {
+                    "mode": "full"
+                }
+            },
+            "paceMs": 4000
+        },
+        {
+            "id": "qwen-instruct",
+            "label": "Qwen3 4B Instruct (local)",
+            "set": {}
+        },
+        {
+            "id": "qwen-thinking",
+            "label": "Qwen3 4B Thinking (local, 1 run)",
+            "set": {
+                "llm.model": "qwen3:4b"
+            },
+            "repeat": 1
+        }
+    ],
+    "observation": "All three models answer most scenarios correctly behind the same servers: Gemini 3.5 Flash-Lite 100 % (46/46), Qwen3 4B Thinking 95.7 %, Qwen3 4B Instruct 91.3 %. The local instruct model is the fastest (2.4 s median) but misses two scenarios every time: B2 (searches lecturers by course code, which the tool did not support) and D3 (does not retry after the \"it-01\" error). Thinking fixes those by reasoning longer, at 10× the time (23.9 s) and 12× the output tokens (1,676 vs 135). The gap between models is small because the hard work (numbers, rules) is done by the tools."
+}

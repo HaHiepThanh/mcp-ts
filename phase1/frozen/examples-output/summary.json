@@ -1,9 +1,21 @@
 {
-  "ranAt": "2026-09-21T07:07:18.632Z",
+  "ranAt": "2026-10-19T09:35:24.497Z",
   "summary": [
     {
       "group": "server",
       "example": "s1-mcp-server",
+      "ok": true,
+      "seconds": 0.2
+    },
+    {
+      "group": "server",
+      "example": "s10-attendance-conduct",
+      "ok": true,
+      "seconds": 0.3
+    },
+    {
+      "group": "server",
+      "example": "s11-finance",
       "ok": true,
       "seconds": 0.3
     },
@@ -48,6 +60,12 @@
       "example": "s8-transports",
       "ok": true,
       "seconds": 1.1
+    },
+    {
+      "group": "server",
+      "example": "s9-teachers",
+      "ok": true,
+      "seconds": 0.2
     },
     {
       "group": "client",

@@ -1,0 +1,353 @@
+{
+  "example": "s10-attendance-conduct",
+  "title": "S10 · Attendance, conduct, at_risk_students, prompt advisor_meeting",
+  "sdkMethods": [
+    "registerTool",
+    "registerPrompt",
+    "client.callTool",
+    "client.getPrompt"
+  ],
+  "ranAt": "2026-10-19T09:35:13.455Z",
+  "steps": [
+    {
+      "step": "attendance_summary · banned from one exam (planted 4/15 absences)",
+      "method": "callTool",
+      "params": {
+        "name": "attendance_summary",
+        "arguments": {
+          "student_id": "2201010",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 4,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201010",
+          "full_name": "Trần Đức Phúc",
+          "semester": "2025-1",
+          "max_absence_pct": 20,
+          "courses": [
+            {
+              "section_id": "CS102-2025-1-IT01",
+              "course_id": "CS102",
+              "course_name": "Data Structures",
+              "weeks_recorded": 15,
+              "absent": 1,
+              "late": 1,
+              "excused": 0,
+              "absence_pct": 6.7,
+              "exam_banned": false
+            },
+            {
+              "section_id": "CS201-2025-1-IT01",
+              "course_id": "CS201",
+              "course_name": "Databases",
+              "weeks_recorded": 15,
+              "absent": 1,
+              "late": 0,
+              "excused": 0,
+              "absence_pct": 6.7,
+              "exam_banned": false
+            },
+            {
+              "section_id": "CS202-2025-1-IT01",
+              "course_id": "CS202",
+              "course_name": "Computer Networks",
+              "weeks_recorded": 15,
+              "absent": 4,
+              "late": 1,
+              "excused": 0,
+              "absence_pct": 26.7,
+              "exam_banned": true
+            },
+            {
+              "section_id": "GE101-2025-1-IT01",
+              "course_id": "GE101",
+              "course_name": "English 1",
+              "weeks_recorded": 15,
+              "absent": 1,
+              "late": 0,
+              "excused": 0,
+              "absence_pct": 6.7,
+              "exam_banned": false
+            },
+            {
+              "section_id": "GE102-2025-1-IT01",
+              "course_id": "GE102",
+              "course_name": "Calculus",
+              "weeks_recorded": 15,
+              "absent": 1,
+              "late": 0,
+              "excused": 0,
+              "absence_pct": 6.7,
+              "exam_banned": false
+            }
+          ],
+          "banned_courses": [
+            "CS202"
+          ]
+        }
+      }
+    },
+    {
+      "step": "attendance_summary · good attendance",
+      "method": "callTool",
+      "params": {
+        "name": "attendance_summary",
+        "arguments": {
+          "student_id": "2201001",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "student_id": "2201001",
+          "full_name": "Bùi Quốc Hải",
+          "semester": "2025-1",
+          "max_absence_pct": 20,
+          "courses": [
+            {
+              "section_id": "CS202-2025-1-IT01",
+              "course_id": "CS202",
+              "course_name": "Computer Networks",
+              "weeks_recorded": 15,
+              "absent": 1,
+              "late": 1,
+              "excused": 1,
+              "absence_pct": 6.7,
+              "exam_banned": false
+            }
+          ],
+          "banned_courses": []
+        }
+      }
+    },
+    {
+      "step": "attendance_summary · unknown student → isError",
+      "method": "callTool",
+      "params": {
+        "name": "attendance_summary",
+        "arguments": {
+          "student_id": "9999999",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": true,
+        "text": "No student with student_id \"9999999\". Use search_students to find the right ID."
+      }
+    },
+    {
+      "step": "at_risk_students · one class",
+      "method": "callTool",
+      "params": {
+        "name": "at_risk_students",
+        "arguments": {
+          "scope": "class",
+          "value": "IT01",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "scope": "class",
+          "value": "IT01",
+          "semester": "2025-1",
+          "checked": 10,
+          "at_risk": [
+            {
+              "student_id": "2201005",
+              "full_name": "Trần Thị Lan",
+              "class_id": "IT01",
+              "semester_gpa": 1,
+              "conduct": 60,
+              "reasons": [
+                "semester GPA 1 < 2"
+              ]
+            },
+            {
+              "student_id": "2201010",
+              "full_name": "Trần Đức Phúc",
+              "class_id": "IT01",
+              "semester_gpa": 2.27,
+              "conduct": 60,
+              "reasons": [
+                "banned from exam: CS202 (26.7% absent)"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "at_risk_students · whole faculty",
+      "method": "callTool",
+      "params": {
+        "name": "at_risk_students",
+        "arguments": {
+          "scope": "faculty",
+          "value": "Business Administration",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 3,
+      "result": {
+        "isError": false,
+        "structuredContent": {
+          "scope": "faculty",
+          "value": "Business Administration",
+          "semester": "2025-1",
+          "checked": 20,
+          "at_risk": [
+            {
+              "student_id": "2202005",
+              "full_name": "Bùi Thị Hương",
+              "class_id": "BA01",
+              "semester_gpa": 1.67,
+              "conduct": 69,
+              "reasons": [
+                "semester GPA 1.67 < 2",
+                "banned from exam: BA202 (33.3% absent)"
+              ]
+            },
+            {
+              "student_id": "2202010",
+              "full_name": "Phạm Văn Long",
+              "class_id": "BA01",
+              "semester_gpa": 2.21,
+              "conduct": 45,
+              "reasons": [
+                "conduct 45 < 50"
+              ]
+            },
+            {
+              "student_id": "2202020",
+              "full_name": "Bùi Quốc Phúc",
+              "class_id": "BA02",
+              "semester_gpa": 1.75,
+              "conduct": 57,
+              "reasons": [
+                "semester GPA 1.75 < 2"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": "at_risk_students · unknown class → isError",
+      "method": "callTool",
+      "params": {
+        "name": "at_risk_students",
+        "arguments": {
+          "scope": "class",
+          "value": "XX99",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": true,
+        "text": "No students for class \"XX99\". Known: BA01, BA02, IT01, IT02."
+      }
+    },
+    {
+      "step": "at_risk_students · scope not in the enum → rejected by inputSchema",
+      "method": "callTool",
+      "params": {
+        "name": "at_risk_students",
+        "arguments": {
+          "scope": "school",
+          "value": "all",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "isError": true,
+        "text": "Input validation error: Invalid arguments for tool at_risk_students: scope: Invalid option: expected one of \"class\"|\"faculty\""
+      }
+    },
+    {
+      "step": "advisor_meeting with both arguments",
+      "method": "getPrompt",
+      "params": {
+        "name": "advisor_meeting",
+        "arguments": {
+          "student_id": "2201010",
+          "semester": "2025-1"
+        }
+      },
+      "ok": true,
+      "ms": 2,
+      "result": {
+        "_meta": {
+          "io.modelcontextprotocol/serverInfo": {
+            "name": "academic",
+            "title": "Academic Records",
+            "version": "1.0.0"
+          }
+        },
+        "messages": [
+          {
+            "role": "user",
+            "content": {
+              "type": "text",
+              "text": "Prepare a one-page brief for an advisor meeting with student 2201010 about semester 2025-1.\nUse calculate_gpa, get_transcript, attendance_summary and at_risk_students. Include:\n1. Semester GPA and classification\n2. Courses with a D or F\n3. Attendance problems (exam bans)\n4. Conduct score\n5. Three questions the advisor should ask the student."
+            }
+          }
+        ]
+      }
+    },
+    {
+      "step": "advisor_meeting missing semester → ProtocolError",
+      "method": "getPrompt",
+      "params": {
+        "name": "advisor_meeting",
+        "arguments": {
+          "student_id": "2201010"
+        }
+      },
+      "ok": false,
+      "ms": 2,
+      "error": {
+        "name": "ProtocolError",
+        "code": -32602,
+        "message": "Invalid arguments for prompt advisor_meeting: semester: Invalid input: expected string, received undefined"
+      }
+    },
+    {
+      "step": "read academic://reports/data-quality",
+      "method": "readResource",
+      "params": {
+        "uri": "academic://reports/data-quality"
+      },
+      "ok": true,
+      "ms": 2,
+      "result": [
+        "students:42 duplicate student_id 2201001",
+        "grades:263 score outside 0–10",
+        "grades:264 missing score",
+        "grades:265 unknown student_id 2299999",
+        "grades:266 unknown course_id CS999",
+        "grades:267 score outside 0–10",
+        "grades:268 duplicate grade row (same student, course, semester)",
+        "sections:43 unknown class_id IT09; unknown teacher_id T99",
+        "attendance:3917 week 16 outside 1–15"
+      ]
+    }
+  ]
+}

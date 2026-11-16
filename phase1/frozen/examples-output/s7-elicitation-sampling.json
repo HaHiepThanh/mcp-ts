@@ -8,7 +8,7 @@
     "client.setRequestHandler('elicitation/create')",
     "client.setRequestHandler('sampling/createMessage')"
   ],
-  "ranAt": "2026-09-21T07:07:10.962Z",
+  "ranAt": "2026-10-19T09:35:16.559Z",
   "steps": [
     {
       "step": "update_grade · user answers \"accept + confirm=true\"",
@@ -24,7 +24,7 @@
         }
       },
       "ok": true,
-      "ms": 8,
+      "ms": 6,
       "result": {
         "questionShownToUser": "Update Computer Networks (CS202, 2030-1) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
         "isError": false,
@@ -142,7 +142,7 @@
         }
       },
       "ok": true,
-      "ms": 6,
+      "ms": 5,
       "result": {
         "questionShownToUser": "Update Computer Networks (CS202, 2030-5) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
         "isError": false,
@@ -163,7 +163,7 @@
         }
       },
       "ok": true,
-      "ms": 4,
+      "ms": 3,
       "result": {
         "questionShownToUser": "Update Computer Networks (CS202, 2030-6) for Trần Thị Lan (2201005)? New: process 8, final 7.5 → total 7.7 (B). Before: no existing grade.",
         "isError": false,
@@ -223,7 +223,7 @@
         }
       },
       "ok": true,
-      "ms": 6,
+      "ms": 5,
       "result": {
         "isError": false,
         "text": "Feedback for Trần Đức Phúc (written by mock-llm (replaced by Gemini in M3)):\n\n[mock] Received a 560-character prompt; system: \"You are a supportive academic advisor.\"."

@@ -8,27 +8,27 @@ SDK: serveStdio, createMcpHandler, StdioClientTransport, StreamableHTTPClientTra
 
 ▶ stdio, negotiation=legacy
   new StdioClientTransport({ command, args })({"command":"node","args":["--import","tsx","src/server/academic/main.ts"]})
-  ✔ 196ms → 
+  ✔ 209ms → 
     {
       "transport": "stdio",
       "negotiation": "legacy",
       "era": "legacy",
-      "tools": 10,
-      "connectMs": 181.2,
-      "firstCallMs": 2.9,
-      "avgOf20CallsMs": 0.2
+      "tools": 15,
+      "connectMs": 193.5,
+      "firstCallMs": 3.1,
+      "avgOf20CallsMs": 0.3
     }
 
 ▶ stdio, negotiation=auto
   new StdioClientTransport({ command, args })({"command":"node","args":["--import","tsx","src/server/academic/main.ts"]})
-  ✔ 376ms → 
+  ✔ 400ms → 
     {
       "transport": "stdio",
       "negotiation": "auto",
       "era": "modern",
-      "tools": 10,
-      "connectMs": 184.2,
-      "firstCallMs": 180.8,
+      "tools": 15,
+      "connectMs": 188.9,
+      "firstCallMs": 199.5,
       "avgOf20CallsMs": 0.3
     }
 
@@ -36,28 +36,28 @@ SDK: serveStdio, createMcpHandler, StdioClientTransport, StreamableHTTPClientTra
 
 ▶ HTTP, negotiation=legacy
   new StreamableHTTPClientTransport(url)({"url":"http://127.0.0.1:3911/mcp"})
-  ✔ 81ms → 
+  ✔ 82ms → 
     {
       "transport": "http",
       "negotiation": "legacy",
       "era": "legacy",
-      "tools": 10,
-      "connectMs": 32.2,
+      "tools": 15,
+      "connectMs": 28.8,
       "firstCallMs": 5.6,
-      "avgOf20CallsMs": 2
+      "avgOf20CallsMs": 2.2
     }
 
 ▶ HTTP, negotiation=auto
   new StreamableHTTPClientTransport(url)({"url":"http://127.0.0.1:3911/mcp"})
-  ✔ 45ms → 
+  ✔ 47ms → 
     {
       "transport": "http",
       "negotiation": "auto",
       "era": "modern",
-      "tools": 10,
-      "connectMs": 6.4,
+      "tools": 15,
+      "connectMs": 5.3,
       "firstCallMs": 2.4,
-      "avgOf20CallsMs": 1.7
+      "avgOf20CallsMs": 1.8
     }
 
 ── HTTP endpoint hardening (localhost Host/Origin validation) ────────────────
@@ -90,10 +90,10 @@ SDK: serveStdio, createMcpHandler, StdioClientTransport, StreamableHTTPClientTra
 ┌─────────┬───────────┬─────────────┬──────────┬───────┬───────────┬─────────────┬────────────────┐
 │ (index) │ transport │ negotiation │ era      │ tools │ connectMs │ firstCallMs │ avgOf20CallsMs │
 ├─────────┼───────────┼─────────────┼──────────┼───────┼───────────┼─────────────┼────────────────┤
-│ 0       │ 'stdio'   │ 'legacy'    │ 'legacy' │ 10    │ 181.2     │ 2.9         │ 0.2            │
-│ 1       │ 'stdio'   │ 'auto'      │ 'modern' │ 10    │ 184.2     │ 180.8       │ 0.3            │
-│ 2       │ 'http'    │ 'legacy'    │ 'legacy' │ 10    │ 32.2      │ 5.6         │ 2              │
-│ 3       │ 'http'    │ 'auto'      │ 'modern' │ 10    │ 6.4       │ 2.4         │ 1.7            │
+│ 0       │ 'stdio'   │ 'legacy'    │ 'legacy' │ 15    │ 193.5     │ 3.1         │ 0.3            │
+│ 1       │ 'stdio'   │ 'auto'      │ 'modern' │ 15    │ 188.9     │ 199.5       │ 0.3            │
+│ 2       │ 'http'    │ 'legacy'    │ 'legacy' │ 15    │ 28.8      │ 5.6         │ 2.2            │
+│ 3       │ 'http'    │ 'auto'      │ 'modern' │ 15    │ 5.3       │ 2.4         │ 1.8            │
 └─────────┴───────────┴─────────────┴──────────┴───────┴───────────┴─────────────┴────────────────┘
 
 ✔ 7 steps (0 expected/unexpected errors) — saved outputs/examples/s8-transports.json

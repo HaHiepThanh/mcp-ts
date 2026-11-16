@@ -1,0 +1,54 @@
+{
+    "id": "E4",
+    "title": "Tool description quality",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 1,
+    "question": "How much does the LLM rely on the tool descriptions written in the MCP server?",
+    "hypothesis": "Terse descriptions (names only) lower the pass rate; misleading descriptions make the model pick the wrong tool.",
+    "variants": [
+        {
+            "id": "full",
+            "label": "full descriptions (base)",
+            "set": {
+                "toolDescriptions": {
+                    "mode": "full"
+                }
+            }
+        },
+        {
+            "id": "terse",
+            "label": "terse: tool name only, no parameter descriptions",
+            "set": {
+                "toolDescriptions": {
+                    "mode": "terse"
+                }
+            }
+        },
+        {
+            "id": "misleading",
+            "label": "misleading: 3 pairs of descriptions swapped",
+            "set": {
+                "toolDescriptions": {
+                    "mode": "misleading",
+                    "swap": [
+                        [
+                            "academic.calculate_gpa",
+                            "academic.get_transcript"
+                        ],
+                        [
+                            "academic.teacher_workload",
+                            "academic.class_timetable"
+                        ],
+                        [
+                            "finance.tuition_status",
+                            "finance.check_scholarship_eligibility"
+                        ]
+                    ]
+                }
+            }
+        }
+    ],
+    "observation": "The strongest effect of all experiments. Removing the descriptions (tool name only) drops the pass rate from 91.3 % to 65.2 % and halves the prompt (3,797 → 2,117 tokens): the model no longer knows which tool or argument format to use (A3, B3, H1 pick the wrong or no tool). Swapping three pairs of descriptions (misleading) gives 73.9 %: the model follows the description, not the tool name — it calls get_transcript when asked for a GPA (A1, D1). The text the server writes is effectively part of the program."
+}
