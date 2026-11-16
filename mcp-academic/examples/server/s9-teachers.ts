@@ -1,55 +1,35 @@
 /**
- * S9 — Teachers, Sections & Timetable (Phú's Phase 2 additions)
- * Tests search_teachers, class_timetable, teacher_workload, and teacher_grade_report
- * with valid, edge-case, and invalid parameter sets.
+ * S9 — phase-2 tools on lecturers and sections (academic server):
+ * search_teachers, teacher_workload, class_timetable — valid, edge-case and invalid parameter sets.
  */
 import { createAcademicServer } from '../../src/server/academic/server';
-import { connectInProcess, Example, firstText } from '../_harness';
+import { callSets } from '../_calls';
+import { connectInProcess, Example } from '../_harness';
 
-const ex = new Example(
-    's9-teachers',
-    'S9 · Phú: Teachers, Timetable, Workload & Teacher Grade Reports',
-    ['search_teachers', 'class_timetable', 'teacher_workload', 'teacher_grade_report']
-);
-
+const ex = new Example('s9-teachers', 'S9 · Lecturers and sections: search_teachers, teacher_workload, class_timetable', ['registerTool', 'client.callTool']);
 const { client, close } = await connectInProcess(createAcademicServer);
 
-const call = (step: string, name: string, args: Record<string, unknown>) =>
-    ex.run(
-        step,
-        'callTool',
-        { name, arguments: args },
-        () => client.callTool({ name, arguments: args }),
-        r => (r.structuredContent ? { isError: r.isError ?? false, structuredContent: r.structuredContent } : { isError: r.isError ?? false, text: firstText(r) })
-    );
+ex.section('search_teachers');
+await callSets(ex, client, [
+    ['by faculty', 'search_teachers', { faculty: 'Business Administration' }],
+    ['by ID (case-insensitive)', 'search_teachers', { keyword: 't02' }],
+    ['no match → empty list (not an error)', 'search_teachers', { keyword: 'Einstein' }]
+]);
 
-// ── 1. search_teachers ──────────────────────────────────────────────
-ex.section('1 — Tool: search_teachers (keyword, faculty filter, title filter, no match)');
+ex.section('teacher_workload');
+await callSets(ex, client, [
+    ['over the quota (planted)', 'teacher_workload', { teacher_id: 'T02', semester: '2025-1' }],
+    ['normal load', 'teacher_workload', { teacher_id: 'T07', semester: '2025-1' }],
+    ['unknown lecturer → isError', 'teacher_workload', { teacher_id: 'T99', semester: '2025-1' }],
+    ['bad semester format → rejected by inputSchema', 'teacher_workload', { teacher_id: 'T02', semester: '2025' }]
+]);
 
-await call('Search teachers by keyword "Lan"', 'search_teachers', { keyword: 'Lan' });
-await call('Search teachers in Information Technology faculty', 'search_teachers', { faculty: 'Information Technology', limit: 5 });
-await call('Search teachers with non-existent keyword', 'search_teachers', { keyword: 'XYZNOTFOUND' });
+ex.section('class_timetable');
+await callSets(ex, client, [
+    ['IT01, first semester', 'class_timetable', { class_id: 'IT01', semester: '2024-1' }],
+    ['lower-case class ID is accepted', 'class_timetable', { class_id: 'ba02', semester: '2024-2' }],
+    ['semester without data → isError', 'class_timetable', { class_id: 'IT01', semester: '2030-1' }]
+]);
 
-// ── 2. class_timetable ──────────────────────────────────────────────
-ex.section('2 — Tool: class_timetable (valid class semester, edge-case semester, invalid class)');
-
-await call('Class IT01 timetable for semester 2024-1', 'class_timetable', { class_id: 'IT01', semester: '2024-1' });
-await call('Class BA01 timetable for semester 2024-2', 'class_timetable', { class_id: 'BA01', semester: '2024-2' });
-await call('Non-existent class timetable', 'class_timetable', { class_id: 'UNKNOWN_CLASS', semester: '2024-1' });
-
-// ── 3. teacher_workload ─────────────────────────────────────────────
-ex.section('3 — Tool: teacher_workload (valid teacher semester, semester with no teaching, invalid teacher)');
-
-await call('Teacher T001 workload in semester 2024-1', 'teacher_workload', { teacher_id: 'T001', semester: '2024-1' });
-await call('Teacher T002 workload in semester 2025-1', 'teacher_workload', { teacher_id: 'T002', semester: '2025-1' });
-await call('Invalid teacher ID workload query', 'teacher_workload', { teacher_id: 'T999', semester: '2024-1' });
-
-// ── 4. teacher_grade_report ─────────────────────────────────────────
-ex.section('4 — Tool: teacher_grade_report (all semesters, single semester, invalid teacher)');
-
-await call('Teacher T005 overall grade report across all semesters', 'teacher_grade_report', { teacher_id: 'T005' });
-await call('Teacher T005 grade report in semester 2024-1', 'teacher_grade_report', { teacher_id: 'T005', semester: '2024-1' });
-await call('Invalid teacher grade report query', 'teacher_grade_report', { teacher_id: 'T999' });
-
-await ex.save();
 await close();
+ex.save();

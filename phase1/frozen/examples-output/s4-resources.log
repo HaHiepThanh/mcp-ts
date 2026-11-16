@@ -8,7 +8,7 @@ SDK: registerResource, ResourceTemplate, client.listResources, client.listResour
 
 ▶ Static resources + instances listed by templates
   listResources()
-  ✔ 4ms → 
+  ✔ 5ms → 
     [
       {
         "uri": "academic://rules/grading",
@@ -21,6 +21,21 @@ SDK: registerResource, ResourceTemplate, client.listResources, client.listResour
         "mimeType": "application/json"
       },
       {
+        "uri": "academic://tables/advisor_notes",
+        "name": "advisor_notes.csv",
+        "mimeType": "text/csv"
+      },
+      {
+        "uri": "academic://tables/attendance",
+        "name": "attendance.csv",
+        "mimeType": "text/csv"
+      },
+      {
+        "uri": "academic://tables/conduct",
+        "name": "conduct.csv",
+        "mimeType": "text/csv"
+      },
+      {
         "uri": "academic://tables/courses",
         "name": "courses.csv",
         "mimeType": "text/csv"
@@ -31,8 +46,18 @@ SDK: registerResource, ResourceTemplate, client.listResources, client.listResour
         "mimeType": "text/csv"
       },
       {
+        "uri": "academic://tables/sections",
+        "name": "sections.csv",
+        "mimeType": "text/csv"
+      },
+      {
         "uri": "academic://tables/students",
         "name": "students.csv",
+        "mimeType": "text/csv"
+      },
+      {
+        "uri": "academic://tables/teachers",
+        "name": "teachers.csv",
         "mimeType": "text/csv"
       }
     ]
@@ -68,12 +93,12 @@ SDK: registerResource, ResourceTemplate, client.listResources, client.listResour
 
 ▶ Data-quality report (rows skipped while loading)
   readResource({"uri":"academic://reports/data-quality"})
-  ✔ 1ms → 
+  ✔ 2ms → 
     [
       {
         "uri": "academic://reports/data-quality",
         "mimeType": "application/json",
-        "text": "{\n  \"loaded\": {\n    \"students\": 40,\n    \"courses\": 10,\n    \"grades\": 261\n  },\n  \"skipped\": 7,\n  \"issues\": [\n    {\n      \"table\": \"students\",\n      \"line\": 42,\n      \"problem\": \"duplicate student_id 2201001\",\n... (85 more lines)"
+        "text": "{\n  \"loaded\": {\n    \"students\": 40,\n    \"courses\": 10,\n    \"grades\": 261\n  },\n  \"skipped\": 9,\n  \"issues\": [\n    {\n      \"table\": \"students\",\n      \"line\": 42,\n      \"problem\": \"duplicate student_id 2201001\",\n... (112 more lines)"
       }
     ]
 
@@ -81,7 +106,7 @@ SDK: registerResource, ResourceTemplate, client.listResources, client.listResour
 
 ▶ table = courses
   readResource({"uri":"academic://tables/courses"})
-  ✔ 1ms → 
+  ✔ 2ms → 
     [
       {
         "uri": "academic://tables/courses",
@@ -92,7 +117,7 @@ SDK: registerResource, ResourceTemplate, client.listResources, client.listResour
 
 ▶ table = nope → ResourceNotFoundError
   readResource({"uri":"academic://tables/nope"})
-  ✖ 1ms → ProtocolError (code -32602): Unknown table "nope"
+  ✖ 2ms → ProtocolError (code -32602): Unknown table "nope"
 
 ── Template without list callback: academic://students/{student_id} ──────────
 
@@ -109,7 +134,7 @@ SDK: registerResource, ResourceTemplate, client.listResources, client.listResour
 
 ▶ student_id = 9999999 → ResourceNotFoundError
   readResource({"uri":"academic://students/9999999"})
-  ✖ 1ms → ProtocolError (code -32602): Unknown student "9999999"
+  ✖ 2ms → ProtocolError (code -32602): Unknown student "9999999"
 
 ▶ URI matching no resource at all
   readResource({"uri":"academic://unknown/thing"})
@@ -158,7 +183,7 @@ SDK: registerResource, ResourceTemplate, client.listResources, client.listResour
 
 ▶ complete table="gr"
   complete({"ref":{"type":"ref/resource","uri":"academic://tables/{table}"},"argument":{"name":"table","value":"gr"}})
-  ✔ 1ms → 
+  ✔ 2ms → 
     {
       "values": [
         "grades"

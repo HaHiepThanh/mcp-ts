@@ -15,8 +15,25 @@ Each item came from a real run (log or benchmark), was fixed, and re-verified. T
 | 9 | Subscription example received a notification after `close()` | C3 run, in-process HTTP harness only | Moved the 2026 subscription test to a real HTTP server process | Correct behaviour confirmed (0 notifications after close) |
 | 10 | Chat latency: where does the time go? | `llmCalls` + tool `ms` per turn | Instrumented every LLM call (model, ms, attempts) and every tool call | LLM ≈ 99 %, MCP tool calls < 1 % — optimise the model choice, not the MCP layer |
 
-## Planned improvements (phase 2 work)
+## Phase 2 improvements (found by the experiments, measured before / after)
 
-- Richer dataset (teachers, sections, attendance, conduct, tuition, scholarships, payroll) and tools on top of it — see `README.md` in this folder.
-- Harder benchmark cases (ambiguous names, 3+ tool chains, aggregates across classes) and the team's `test_cases.csv`, so models are separated on accuracy, not only speed.
-- Configuration experiments: tool-description quality (clear vs terse), `maxToolRounds`, temperature, stdio vs HTTP end-to-end, protocol 2025 vs 2026 end-to-end.
+"Before" = E1 Qwen3 4B Instruct (23 scenarios × 2) and E5 academic-only; "after" = experiment I1, same configuration and scenarios (`phase2/runs/I1/`).
+
+| # | Observed problem | Evidence (log) | Change | Before → after |
+| --- | --- | --- | --- | --- |
+| 11 | Model asked for class `"it-01"`, got an error listing the known classes, and gave up instead of retrying (D3) | `phase2/runs/E1/qwen-instruct.jsonl`, scenario D3: 0/2 | Server normalises class IDs (`it-01`, `IT 01`, `it01` → IT01) in every class-based tool (`AcademicData.sameClass`) | D3 **0/2 → 2/2** |
+| 12 | Model searched lecturers by course code — `search_teachers("CS202")` — which only matched names, so it found nobody (B2) | E1, B2: tool check 0/2 | `search_teachers` also matches the courses a lecturer teaches (ID or name); description says so | B2 tool check **0/2 → 2/2** (answer still wrong: the small model reports overtime 165 instead of total 345 periods) |
+| 13 | With a server switched off, the model sometimes substituted another tool's data (a GPA ranking presented as scholarship winners; invented scholarship criteria) | E5 `academic.jsonl`: 3/6 correct refusals | System prompt rule: "answer only from tool results; if no tool provides it, say it is not available — never substitute data from a different tool" | correct refusals **50 % → 83.3 %** |
+| — | Overall | E1 qwen-instruct | #11–13 together | pass rate **91.3 % → 95.7 %** |
+
+### Fixes to our own test harness (found while analysing the logs)
+
+| Problem | Effect | Fix |
+| --- | --- | --- |
+| The accepted grade change of scenario E1 ran before G1 in the same server process | G1 graded against stale ground truth (27 runs marked wrong although the model was right) | Data-changing scenarios now run last; G1 re-run for every configuration (27/27 pass) |
+| Correct refusals worded "does not have any records" / "does not store" were not recognised | 4 correct answers marked wrong | Wider answer patterns; every logged answer re-graded with `--rejudge` (model answers never edited) |
+
+## Still open
+
+- B2: the 4B model mixes up "total periods" and "overtime periods" in the `teacher_workload` result — could be addressed by renaming the field (`total_periods_taught`) or by a larger model (Gemini and Qwen Thinking pass B2).
+- A3 with the utility server off: the model answers the letter grade from general knowledge instead of saying the converter is unavailable (correct value, wrong behaviour).

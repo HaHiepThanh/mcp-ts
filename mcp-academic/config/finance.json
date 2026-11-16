@@ -1,37 +1,22 @@
 {
-    "$comment": "Finance server rules. Edit here — no code change needed. dataDir is relative to mcp-academic/ and is DELIBERATELY not data/sample: the academic server loads every CSV of its own dataDir (query_table), so money data placed there would be readable through the academic server. Override with env FINANCE_DATA_DIR. Teachers, sections and conduct come from the academic data dir (teachers.csv, sections.csv, conduct.csv).",
-    "dataDir": "data/sample-finance",
+    "$comment": "Finance server config (FAKE amounts, VND). The finance server reads its own CSVs in dataDir; grades, conduct and sections come from the academic dataset.",
+    "dataDir": "data/sample/finance",
+    "tables": { "tuition": "tuition.csv", "scholarships": "scholarships.csv", "payroll": "payroll.csv" },
     "currency": "VND",
-    "tables": {
-        "tuition": "tuition.csv",
-        "scholarships": "scholarships.csv",
-        "awards": "scholarship_awards.csv",
-        "payroll": "payroll.csv"
+    "scholarshipRules": {
+        "requireNoFailedCourse": true,
+        "requireTuitionPaid": true
     },
-    "calendar": {
-        "$comment": "Same calendar as config/utility.json: month (1-12) -> semester number; the academic year starts in academicYearStartMonth. Used to turn a payroll month into a semester.",
-        "academicYearStartMonth": 9,
-        "semesterByMonth": { "9": 1, "10": 1, "11": 1, "12": 1, "1": 1, "2": 2, "3": 2, "4": 2, "5": 2, "6": 2, "7": 3, "8": 3 }
+    "teachingRatePerPeriod": {
+        "Lecturer": 100000,
+        "Senior Lecturer": 120000,
+        "Associate Professor": 150000,
+        "Professor": 180000
     },
-    "tuition": {
-        "$comment": "Data-quality check: amount_due must equal credits_registered x fee_per_credit x (1 - discount_pct/100) within this tolerance.",
-        "amountToleranceVnd": 1000
-    },
-    "scholarship": {
-        "$comment": "GPA and conduct thresholds live per scholarship in scholarships.csv (min_gpa, min_conduct). These switches add the two other conditions. 'No owed course' = after the best attempt per course up to the semester, no course is still failing.",
-        "requirePaidTuition": true,
-        "requireNoOwedCourses": true
-    },
-    "teaching": {
-        "$comment": "pay = base_salary (payroll.csv) + periods x rate(title) + overtime bonus + bonus - deductions. periods = sum of sections.periods of the teacher in the month's semester x weeksPerMonth. Overtime bonus = periods above standardPeriodsPerMonth x rate x overtimeBonusRatio.",
-        "ratePerPeriodByTitle": {
-            "Lecturer": 120000,
-            "Senior Lecturer": 150000,
-            "Associate Professor": 200000,
-            "Professor": 250000
-        },
-        "weeksPerMonth": 4,
-        "standardPeriodsPerMonth": 24,
-        "overtimeBonusRatio": 0.5
+    "overtimeRatePerPeriod": 150000,
+    "semesterMonths": {
+        "2024-1": ["2024-09", "2024-10", "2024-11", "2024-12"],
+        "2024-2": ["2025-02", "2025-03", "2025-04", "2025-05"],
+        "2025-1": ["2025-09", "2025-10", "2025-11", "2025-12"]
     }
 }

@@ -1,0 +1,10 @@
+{"experiment":"E7","variant":"stdio-2025","connection":1,"era":"legacy","connectMs":195.7,"connectRequests":2,"callMedianMs":0.26,"at":"2026-10-18T02:40:45.275Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":2,"era":"legacy","connectMs":189.3,"connectRequests":2,"callMedianMs":0.21,"at":"2026-10-18T02:40:45.475Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":3,"era":"legacy","connectMs":186.2,"connectRequests":2,"callMedianMs":0.2,"at":"2026-10-18T02:40:45.671Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":4,"era":"legacy","connectMs":210.8,"connectRequests":2,"callMedianMs":0.25,"at":"2026-10-18T02:40:45.893Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":5,"era":"legacy","connectMs":189.6,"connectRequests":2,"callMedianMs":0.22,"at":"2026-10-18T02:40:46.092Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":6,"era":"legacy","connectMs":189.4,"connectRequests":2,"callMedianMs":0.22,"at":"2026-10-18T02:40:46.291Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":7,"era":"legacy","connectMs":188.9,"connectRequests":2,"callMedianMs":0.19,"at":"2026-10-18T02:40:46.489Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":8,"era":"legacy","connectMs":186.3,"connectRequests":2,"callMedianMs":0.2,"at":"2026-10-18T02:40:46.685Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":9,"era":"legacy","connectMs":186.2,"connectRequests":2,"callMedianMs":0.18,"at":"2026-10-18T02:40:46.881Z"}
+{"experiment":"E7","variant":"stdio-2025","connection":10,"era":"legacy","connectMs":187.7,"connectRequests":2,"callMedianMs":0.2,"at":"2026-10-18T02:40:47.078Z"}

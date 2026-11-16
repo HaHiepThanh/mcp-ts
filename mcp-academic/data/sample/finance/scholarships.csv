@@ -1,0 +1,4 @@
+scholarship_id,name,type,amount,min_gpa,min_conduct,slots_per_faculty
+MERIT-A,Excellence Scholarship,merit,6000000,3.2,80,2
+MERIT-B,Good Student Scholarship,merit,3000000,2.8,70,4
+NEED,Support Grant,need,4000000,2,65,2

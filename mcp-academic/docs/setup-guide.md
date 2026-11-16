@@ -103,7 +103,7 @@ Kết quả đúng: dòng cuối `13/13 examples passed` (con số có thể tă
 | Chat với Gemini | `npm run chat` |
 | Chat với Qwen local | `npm run chat -- --config config/host.qwen.json` |
 | Một câu hỏi rồi thoát | `npm run chat -- --ask "câu hỏi"` |
-| Server qua HTTP (2 terminal) | `npm run academic:http` · `npm run utility:http` rồi `npm run chat -- --config config/host.http.json` |
+| Server qua HTTP (3 terminal) | `npm run academic:http` · `npm run utility:http` · `npm run finance:http`, kiểm tra bằng `npm run check:http`, rồi `npm run chat -- --config config/host.http.json` |
 | Dùng trong VS Code Copilot | xem `docs/vscode-guide.md` |
 | So sánh model | `npm run compare -- --only qwen3-4b-instruct` (hoặc `gemini-3.5-flash-lite`) |
 | Kiểm tra kiểu code (trước khi tạo PR) | `npm run typecheck` |

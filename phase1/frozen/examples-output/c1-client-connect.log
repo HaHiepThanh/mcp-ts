@@ -8,11 +8,11 @@ SDK: new Client(), client.connect(), client.getProtocolEra(), client.getDiscover
 
 ▶ A. default options → 2025 "initialize" handshake
   new Client(info, options) → connect(transport, connectOptions)({"options":{}})
-  ✔ 40ms → 
+  ✔ 35ms → 
     {
       "era": "legacy",
       "server": "academic",
-      "connectMs": 40,
+      "connectMs": 35,
       "requestsDuringConnect": {
         "initialize": 1,
         "notifications/initialized": 1
@@ -21,7 +21,7 @@ SDK: new Client(), client.connect(), client.getProtocolEra(), client.getDiscover
 
 ▶ B. versionNegotiation: { mode: "auto" } → probes server/discover
   new Client(info, options) → connect(transport, connectOptions)({"options":{"versionNegotiation":{"mode":"auto"}}})
-  ✔ 8ms → 
+  ✔ 7ms → 
     {
       "era": "modern",
       "server": "academic",
@@ -39,7 +39,7 @@ SDK: new Client(), client.connect(), client.getProtocolEra(), client.getDiscover
           "resultType"
         ]
       },
-      "connectMs": 8,
+      "connectMs": 7,
       "requestsDuringConnect": {
         "server/discover": 1
       }
@@ -111,11 +111,11 @@ SDK: new Client(), client.connect(), client.getProtocolEra(), client.getDiscover
 
 ▶ E. pin 2026-07-28 against a 2025-only server → no fallback
   connect({"versionNegotiation":{"mode":{"pin":"2026-07-28"},"probe":{"timeoutMs":1500}}})
-  ✖ 2ms → SdkError (code ERA_NEGOTIATION_FAILED): Version negotiation failed: the server did not offer pinned protocol version 2026-07-28 via server/discover (no fallback in pin mode)
+  ✖ 1ms → SdkError (code ERA_NEGOTIATION_FAILED): Version negotiation failed: the server did not offer pinned protocol version 2026-07-28 via server/discover (no fallback in pin mode)
 
 ▶ F. default (2025) client against a 2026-only endpoint (legacy: "reject")
   connect({"serverOptions":{"legacy":"reject"}})
-  ✖ 1ms → SdkHttpError (code CLIENT_HTTP_NOT_IMPLEMENTED): Error POSTing to endpoint: {"jsonrpc":"2.0","error":{"code":-32022,"message":"Unsupported protocol version: 2025-11-25","data":{"supported":["2026-07-28"],"requested":"2025-11-25"}},"id":0}
+  ✖ 0ms → SdkHttpError (code CLIENT_HTTP_NOT_IMPLEMENTED): Error POSTing to endpoint: {"jsonrpc":"2.0","error":{"code":-32022,"message":"Unsupported protocol version: 2025-11-25","data":{"supported":["2026-07-28"],"requested":"2025-11-25"}},"id":0}
 
 ── close() ───────────────────────────────────────────────────────────────────
 

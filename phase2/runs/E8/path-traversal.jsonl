@@ -1,0 +1,1 @@
+{"experiment":"E8","variant":"path-traversal","era":"modern","reply":"path-traversal","elicitationsAsked":0,"isError":true,"thrownOnClient":false,"dataChanged":null,"resultText":"Input validation error: Invalid arguments for tool save_report: filename: Use letters, digits, \"-\" or \"_\" only (no extension, no folders)","ms":0.7,"at":"2026-10-18T02:40:40.806Z"}

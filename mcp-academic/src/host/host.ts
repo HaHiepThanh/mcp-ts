@@ -28,7 +28,7 @@ export interface TurnLog {
     totalMs: number;
     usage: { inputTokens: number; outputTokens: number };
     /** Every LLM API request of the turn (chat rounds + sampling), with latency and retry count. */
-    llmCalls: (LlmCall & { purpose: 'chat' | 'sampling' })[];
+    llmCalls: (LlmCall & { purpose: 'chat' | 'sampling'; inputTokens?: number; outputTokens?: number })[];
     samplingCalls: number;
     elicitations: { server: string; message: string; action: string }[];
 }
@@ -82,7 +82,7 @@ export class ChatHost {
         const instructions = this.hub.instructions();
         this.session = this.provider.startChat({
             system: `${this.config.agent.systemPrompt}${instructions ? `\n\nMCP server instructions:\n${instructions}` : ''}`,
-            tools: this.hub.toolSpecs()
+            tools: this.hub.toolSpecs(this.config.toolDescriptions)
         });
         this.attachments = [];
     }
@@ -154,7 +154,7 @@ export class ChatHost {
         this.turnStats.usage.inputTokens += turn.usage?.inputTokens ?? 0;
         this.turnStats.usage.outputTokens += turn.usage?.outputTokens ?? 0;
         if (turn.call) {
-            this.turnStats.llmCalls.push({ ...turn.call, purpose: 'chat' });
+            this.turnStats.llmCalls.push({ ...turn.call, purpose: 'chat', inputTokens: turn.usage?.inputTokens, outputTokens: turn.usage?.outputTokens });
             this.say(c.dim(`  🧠 ${turn.call.model} ${(turn.call.ms / 1000).toFixed(1)}s${turn.call.attempts > 1 ? ` (${turn.call.attempts} attempts)` : ''}`));
         }
         return turn;
@@ -173,8 +173,15 @@ export class ChatHost {
             record('decline');
             return { action: 'decline' };
         }
-        console.log(c.magenta(`\n  ❓ [${server}] ${params.message}`));
         const fields = Object.entries(params.requestedSchema.properties ?? {}) as [string, { type?: string; title?: string; enum?: string[] }][];
+        const scripted = this.config.elicitation.auto;
+        if (scripted) {
+            this.say(c.magenta(`  ❓ [${server}] ${params.message} → scripted user: ${scripted}`));
+            record(scripted);
+            if (scripted !== 'accept') return { action: scripted };
+            return { action: 'accept', content: Object.fromEntries(fields.map(([k, s]) => [k, s.type === 'boolean' ? true : s.enum?.[0] ?? ''])) };
+        }
+        console.log(c.magenta(`\n  ❓ [${server}] ${params.message}`));
 
         const firstAnswer = await ask(c.magenta(`     ${fields.length === 1 && fields[0][1].type === 'boolean' ? 'Confirm? (y = yes, n = decline, c = cancel): ' : 'Answer? (enter = fill in the form, n = decline, c = cancel): '}`));
         if (firstAnswer === undefined) {

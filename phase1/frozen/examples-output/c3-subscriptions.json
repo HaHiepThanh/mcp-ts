@@ -10,7 +10,7 @@
     "handler.notify.resourceUpdated",
     "server.sendResourceUpdated"
   ],
-  "ranAt": "2026-09-21T07:07:16.676Z",
+  "ranAt": "2026-10-19T09:35:22.528Z",
   "steps": [
     {
       "step": "Open a subscription stream for one student profile",
@@ -21,7 +21,7 @@
         ]
       },
       "ok": true,
-      "ms": 6,
+      "ms": 5,
       "result": {
         "honoredFilter": {
           "resourceSubscriptions": [
@@ -37,7 +37,7 @@
         "student_id": "2201005"
       },
       "ok": true,
-      "ms": 212,
+      "ms": 213,
       "result": {
         "toolResult": "Grade inserted: CS202 2032-1 → total 9 (A). Cumulative GPA 1 → 1.67.",
         "notificationsReceived": [
@@ -52,7 +52,7 @@
       "step": "subscription.close(), then change again → no notification",
       "method": "close + callTool",
       "ok": true,
-      "ms": 237,
+      "ms": 250,
       "result": {
         "toolResult": "Grade inserted: CS202 2032-2 → total 9 (A). Cumulative GPA 1.67 → 1.67.",
         "closedReason": "local",
@@ -63,7 +63,7 @@
       "step": "Change a grade BEFORE subscribing → nothing arrives",
       "method": "callTool update_grade",
       "ok": true,
-      "ms": 209,
+      "ms": 211,
       "result": {
         "toolResult": "Grade inserted: CS202 2032-3 → total 9 (A). Cumulative GPA 1 → 1.67.",
         "notificationsReceived": 0
@@ -83,7 +83,7 @@
       "step": "Change a grade AFTER subscribing",
       "method": "callTool update_grade",
       "ok": true,
-      "ms": 214,
+      "ms": 233,
       "result": {
         "toolResult": "Grade inserted: CS202 2032-4 → total 9 (A). Cumulative GPA 1.67 → 1.67.",
         "notificationsReceived": [
@@ -101,14 +101,14 @@
         "uri": "academic://students/2201005"
       },
       "ok": true,
-      "ms": 1,
+      "ms": 2,
       "result": {}
     },
     {
       "step": "Change a grade after unsubscribing → nothing new",
       "method": "callTool update_grade",
       "ok": true,
-      "ms": 213,
+      "ms": 224,
       "result": {
         "newNotifications": 0
       }

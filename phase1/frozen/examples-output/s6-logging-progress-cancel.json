@@ -8,7 +8,7 @@
     "client.callTool({ onprogress, signal })",
     "client.setLoggingLevel"
   ],
-  "ranAt": "2026-09-21T07:07:09.474Z",
+  "ranAt": "2026-10-19T09:35:15.067Z",
   "steps": [
     {
       "step": "With onprogress → server sends notifications/progress",
@@ -24,7 +24,7 @@
         }
       },
       "ok": true,
-      "ms": 9,
+      "ms": 8,
       "result": {
         "progressUpdates": [
           {
@@ -90,7 +90,7 @@
         }
       },
       "ok": true,
-      "ms": 2,
+      "ms": 1,
       "result": {
         "logMessagesReceived": [
           "info: \"query_table students: 11 of 41 rows match\""
@@ -180,7 +180,7 @@
         }
       },
       "ok": false,
-      "ms": 352,
+      "ms": 351,
       "error": {
         "name": "SdkError",
         "code": "REQUEST_TIMEOUT",

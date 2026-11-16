@@ -14,7 +14,13 @@ export interface HostConfig {
     mcpServers: Record<string, ServerConfig>;
     agent: { maxToolRounds: number; systemPrompt: string };
     sampling: { approval: 'auto' | 'ask' | 'deny'; maxTokens: number };
-    elicitation: { nonInteractive: 'accept' | 'decline' };
+    elicitation: {
+        nonInteractive: 'accept' | 'decline';
+        /** Scripted user for experiments: answer every elicitation with this action, without asking. */
+        auto?: 'accept' | 'decline' | 'cancel';
+    };
+    /** How tool descriptions are shown to the LLM (experiment E4). Default "full". */
+    toolDescriptions?: { mode: 'full' | 'terse' | 'misleading'; swap?: [string, string][] };
     logDir: string;
 }
 

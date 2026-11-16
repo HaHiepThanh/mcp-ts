@@ -1,0 +1,43 @@
+{
+    "id": "E5",
+    "title": "Servers switched on (least privilege)",
+    "kind": "llm",
+    "base": "config/host.experiment.json",
+    "scenarios": "all",
+    "repeat": 1,
+    "question": "What does each extra server cost in prompt tokens, and does the LLM refuse cleanly when a needed server is off?",
+    "hypothesis": "Prompt tokens grow with the number of tools; without the finance server the finance questions are refused without invented numbers.",
+    "variants": [
+        {
+            "id": "academic",
+            "label": "academic only (15 tools)",
+            "set": {
+                "servers": [
+                    "academic"
+                ]
+            }
+        },
+        {
+            "id": "academic+utility",
+            "label": "academic + utility (18 tools)",
+            "set": {
+                "servers": [
+                    "academic",
+                    "utility"
+                ]
+            }
+        },
+        {
+            "id": "all",
+            "label": "academic + utility + finance (22 tools, base)",
+            "set": {
+                "servers": [
+                    "academic",
+                    "utility",
+                    "finance"
+                ]
+            }
+        }
+    ],
+    "observation": "Every extra server costs prompt tokens on every call: 15 tools ≈ 2,693, 18 tools ≈ 3,081, 22 tools ≈ 3,797 tokens. Least privilege works for data access — with finance off the model cannot read tuition or payroll — but it does not by itself stop the model from inventing an answer: with only the academic server, 3 of 6 questions that needed a switched-off server were answered anyway (e.g. scholarship criteria made up, a GPA ranking presented as scholarship winners). This led to improvement 13 (no-substitution rule): 50 % → 83.3 % correct refusals (I1)."
+}

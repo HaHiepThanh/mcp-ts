@@ -68,7 +68,7 @@ SDK: RegisteredTool.disable, RegisteredTool.enable, RegisteredTool.update, Regis
 
 ▶ 8. After gpaTool.remove()
   listTools()
-  ✔ 0ms → 
+  ✔ 1ms → 
     [
       "ping — Health check",
       "get_current_time — Current time"
